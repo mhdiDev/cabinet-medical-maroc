@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap');
+
+:root {
+  --foreground-rgb: 15, 23, 42;
+  --background-rgb: 248, 250, 252;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
+}
+
+[dir="rtl"] {
+  font-family: 'Noto Kufi Arabic', sans-serif;
+  text-align: right;
+}
+
+.rbc-calendar { font-family: inherit; }
+.rbc-toolbar button { border-radius: 0.375rem; }

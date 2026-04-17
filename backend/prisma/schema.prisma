@@ -1,0 +1,287 @@
+// Schéma Prisma - Cabinet Médical Maroc
+// Fuseau horaire: Africa/Casablanca
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MEDECIN
+  SECRETAIRE
+}
+
+enum Sexe {
+  MASCULIN
+  FEMININ
+}
+
+enum StatutRDV {
+  EN_ATTENTE
+  CONFIRME
+  ARRIVE
+  FACTURE
+  ANNULE
+}
+
+enum TypePaiement {
+  ESPECE
+  CARTE
+  CHEQUE
+  VIREMENT
+  ASSURANCE
+}
+
+enum TypeMouvement {
+  ENTREE
+  SORTIE
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  motDePasse   String
+  nom          String
+  prenom       String
+  role         Role     @default(SECRETAIRE)
+  telephone    String?
+  actif        Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  refreshTokens RefreshToken[]
+  rendezVous    RendezVous[]   @relation("MedecinRDV")
+  consultations Consultation[] @relation("MedecinConsultation")
+  auditLogs     AuditLog[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model Patient {
+  id            String    @id @default(uuid())
+  nom           String
+  prenom        String
+  dateNaissance DateTime
+  sexe          Sexe
+  cin           String?   @unique
+  telephone     String
+  email         String?
+  adresse       String?
+  ville         String?
+  codePostal    String?
+  groupeSanguin String?
+  allergies     String[]
+  antecedents   String?
+  numeroAssurance String?
+  actif         Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  rendezVous    RendezVous[]
+  consultations Consultation[]
+  ordonnances   Ordonnance[]
+  documents     Document[]
+
+  @@map("patients")
+}
+
+model RendezVous {
+  id          String    @id @default(uuid())
+  patientId   String
+  medecinId   String
+  dateHeure   DateTime
+  dureeMinutes Int      @default(30)
+  statut      StatutRDV @default(EN_ATTENTE)
+  motif       String?
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  patient     Patient   @relation(fields: [patientId], references: [id])
+  medecin     User      @relation("MedecinRDV", fields: [medecinId], references: [id])
+  paiements   Paiement[]
+  consultation Consultation?
+
+  @@map("rendez_vous")
+}
+
+model Consultation {
+  id              String   @id @default(uuid())
+  patientId       String
+  medecinId       String
+  rendezVousId    String?  @unique
+  dateConsultation DateTime @default(now())
+  motif           String?
+  anamnese        String?
+  examenClinique  String?
+  diagnostic      String?
+  traitement      String?
+  notes           String?
+  actes           String[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  patient     Patient      @relation(fields: [patientId], references: [id])
+  medecin     User         @relation("MedecinConsultation", fields: [medecinId], references: [id])
+  rendezVous  RendezVous?  @relation(fields: [rendezVousId], references: [id])
+  ordonnances Ordonnance[]
+  documents   Document[]
+
+  @@map("consultations")
+}
+
+model Ordonnance {
+  id             String   @id @default(uuid())
+  patientId      String
+  consultationId String?
+  medecinNom     String
+  medecinSpec    String?
+  medecinRPPM    String?
+  contenu        Json
+  notes          String?
+  fichierUrl     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  patient      Patient       @relation(fields: [patientId], references: [id])
+  consultation Consultation? @relation(fields: [consultationId], references: [id])
+  medicaments  OrdonnanceMedicament[]
+
+  @@map("ordonnances")
+}
+
+model Medicament {
+  id          String @id @default(uuid())
+  nom         String
+  denomination String?
+  forme       String?
+  dosage      String?
+  actif       Boolean @default(true)
+
+  prescriptions OrdonnanceMedicament[]
+
+  @@map("medicaments")
+}
+
+model OrdonnanceMedicament {
+  id           String @id @default(uuid())
+  ordonnanceId String
+  medicamentId String?
+  nomLibre     String?
+  posologie    String
+  duree        String?
+  quantite     Int    @default(1)
+
+  ordonnance Ordonnance  @relation(fields: [ordonnanceId], references: [id], onDelete: Cascade)
+  medicament Medicament? @relation(fields: [medicamentId], references: [id])
+
+  @@map("ordonnance_medicaments")
+}
+
+model Paiement {
+  id           String       @id @default(uuid())
+  rendezVousId String?
+  patientId    String?
+  montant      Float
+  montantRemise Float       @default(0)
+  typePaiement TypePaiement @default(ESPECE)
+  referenceAssurance String?
+  description  String?
+  dateHeure    DateTime     @default(now())
+  createdById  String?
+  createdAt    DateTime     @default(now())
+
+  rendezVous RendezVous? @relation(fields: [rendezVousId], references: [id])
+
+  @@map("paiements")
+}
+
+model StockArticle {
+  id             String @id @default(uuid())
+  nom            String
+  reference      String? @unique
+  description    String?
+  quantite       Int    @default(0)
+  seuilAlerte    Int    @default(5)
+  fournisseur    String?
+  prixUnitaire   Float?
+  unite          String @default("unité")
+  actif          Boolean @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  mouvements StockMouvement[]
+
+  @@map("stock_articles")
+}
+
+model StockMouvement {
+  id           String        @id @default(uuid())
+  articleId    String
+  type         TypeMouvement
+  quantite     Int
+  motif        String?
+  consultationId String?
+  createdById  String?
+  createdAt    DateTime      @default(now())
+
+  article StockArticle @relation(fields: [articleId], references: [id])
+
+  @@map("stock_mouvements")
+}
+
+model Document {
+  id             String   @id @default(uuid())
+  patientId      String?
+  consultationId String?
+  nom            String
+  type           String
+  taille         Int?
+  url            String
+  createdAt      DateTime @default(now())
+
+  patient      Patient?      @relation(fields: [patientId], references: [id])
+  consultation Consultation? @relation(fields: [consultationId], references: [id])
+
+  @@map("documents")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  action     String
+  entite     String
+  entiteId   String?
+  details    Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model Parametre {
+  id    String @id @default(uuid())
+  cle   String @unique
+  valeur String
+
+  @@map("parametres")
+}
