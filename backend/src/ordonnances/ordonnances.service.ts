@@ -8,6 +8,35 @@ import { CreateOrdonnanceDto } from './dto/create-ordonnance.dto';
 export class OrdonnancesService {
   constructor(private prisma: PrismaService, private audit: AuditService) {}
 
+  async findAll(page = 1, limit = 20, q?: string) {
+    const skip = (page - 1) * limit;
+    const where = q
+      ? {
+          OR: [
+            { patient: { nom: { contains: q, mode: 'insensitive' as const } } },
+            { patient: { prenom: { contains: q, mode: 'insensitive' as const } } },
+            { medecinNom: { contains: q, mode: 'insensitive' as const } },
+          ],
+        }
+      : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.ordonnance.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          patient: { select: { id: true, nom: true, prenom: true } },
+          medicaments: { include: { medicament: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.ordonnance.count({ where }),
+    ]);
+
+    return { data, meta: { total, page, limit, pages: Math.ceil(total / limit) } };
+  }
+
   async create(dto: CreateOrdonnanceDto, userId: string) {
     const { medicaments, ...rest } = dto;
 

@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Body, Param, Res, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Param, Query, Res, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { Response } from 'express';
 import { OrdonnancesService } from './ordonnances.service';
 import { CreateOrdonnanceDto } from './dto/create-ordonnance.dto';
@@ -12,6 +12,19 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 @Controller('ordonnances')
 export class OrdonnancesController {
   constructor(private service: OrdonnancesService) {}
+
+  @Get()
+  @ApiOperation({ summary: 'Lister toutes les ordonnances' })
+  @ApiQuery({ name: 'q', required: false })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  findAll(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('q') q?: string,
+  ) {
+    return this.service.findAll(page ? +page : 1, limit ? +limit : 20, q);
+  }
 
   @Post()
   @ApiOperation({ summary: 'Créer une ordonnance' })

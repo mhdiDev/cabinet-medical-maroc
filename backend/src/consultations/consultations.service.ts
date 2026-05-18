@@ -7,6 +7,36 @@ import { CreateConsultationDto } from './dto/create-consultation.dto';
 export class ConsultationsService {
   constructor(private prisma: PrismaService, private audit: AuditService) {}
 
+  async findAll(page = 1, limit = 20, q?: string) {
+    const skip = (page - 1) * limit;
+    const where = q
+      ? {
+          OR: [
+            { patient: { nom: { contains: q, mode: 'insensitive' as const } } },
+            { patient: { prenom: { contains: q, mode: 'insensitive' as const } } },
+            { diagnostic: { contains: q, mode: 'insensitive' as const } },
+            { motif: { contains: q, mode: 'insensitive' as const } },
+          ],
+        }
+      : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.consultation.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          patient: { select: { id: true, nom: true, prenom: true } },
+          medecin: { select: { nom: true, prenom: true } },
+        },
+        orderBy: { dateConsultation: 'desc' },
+      }),
+      this.prisma.consultation.count({ where }),
+    ]);
+
+    return { data, meta: { total, page, limit, pages: Math.ceil(total / limit) } };
+  }
+
   async create(dto: CreateConsultationDto, userId: string) {
     const consultation = await this.prisma.consultation.create({
       data: dto,

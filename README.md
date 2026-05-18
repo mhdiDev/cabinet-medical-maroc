@@ -21,77 +21,84 @@ Application web complète pour la gestion d'un cabinet médical au Maroc. Inspir
 
 - **Patients** — CRUD complet, dossier médical, export CSV, recherche par CIN/nom/téléphone
 - **Agenda** — Vue calendrier (jour/semaine/mois), gestion des créneaux, détection de collisions
-- **Consultations** — Notes médicales structurées, actes, diagnostic, traitement
-- **Ordonnances** — Génération ordonnances PDF, historique, base médicaments
+- **Consultations** — Notes médicales structurées, actes, diagnostic, traitement, liste paginée avec recherche
+- **Ordonnances** — Génération ordonnances PDF, historique, liste globale et par patient
 - **Caisse** — Encaissements (espèces/carte/assurance), rapport journalier
 - **Stock** — Articles consommables, entrées/sorties, alertes de seuil
 - **Sécurité** — Argon2, RBAC (médecin/secrétaire/admin), audit trail complet
 
+---
+
 ## Prérequis
 
-- Docker + Docker Compose v2
-- Node.js 20+ (pour développement local)
-- npm 10+
+- **Docker + Docker Compose v2**
+- **Node.js 20** (obligatoire — les versions inférieures ne sont pas supportées)
+- **nvm** recommandé pour gérer les versions Node
 
-## Démarrage rapide (Docker)
+> Si tu as plusieurs versions Node via nvm, exécute `nvm use 20` avant de lancer le frontend ou le backend.
+
+---
+
+## Démarrage rapide — Mode développement (recommandé)
+
+C'est la méthode la plus pratique : l'infra tourne dans Docker, backend et frontend en local avec rechargement automatique.
+
+### 1. Infrastructure (PostgreSQL, MinIO, MailHog)
 
 ```bash
-# 1. Cloner le projet
-git clone <repo-url>
 cd cabinet-medical-maroc
-
-# 2. Copier les variables d'environnement
-cp backend/.env.example backend/.env
-
-# 3. Démarrer tous les services
-docker compose up -d
-
-# 4. Appliquer les migrations et seed
-docker compose exec backend npx prisma migrate deploy
-docker compose exec backend npm run prisma:seed
-
-# 5. Accéder à l'application
-# Frontend:  http://localhost:3000
-# Backend:   http://localhost:3001/api/docs (Swagger)
-# MailHog:   http://localhost:8025
-# MinIO:     http://localhost:9001
-```
-
-## Développement local
-
-### Infrastructure uniquement (recommandé)
-
-```bash
-# Démarrer PostgreSQL, MinIO, MailHog
 docker compose -f docker-compose.dev.yml up -d
 ```
 
-### Backend
+### 2. Backend
 
 ```bash
 cd backend
 cp .env.example .env
-# Modifier DATABASE_URL si nécessaire
-
 npm install
 npx prisma generate
 npx prisma migrate dev --name init
 npm run prisma:seed
 npm run start:dev
-# → http://localhost:3001
-# → http://localhost:3001/api/docs (Swagger)
 ```
 
-### Frontend
+Le backend est accessible sur :
+- API : http://localhost:3001
+- Swagger : http://localhost:3001/api/docs
+
+### 3. Frontend
 
 ```bash
+# Si tu utilises nvm, assure-toi d'être sur Node 20
+nvm use 20
+
 cd frontend
 cp .env.local.example .env.local
-
 npm install
 npm run dev
-# → http://localhost:3000
 ```
+
+Le frontend est accessible sur http://localhost:3000.
+
+---
+
+## Démarrage rapide — Tout Docker (sans Node local)
+
+```bash
+cd cabinet-medical-maroc
+cp backend/.env.example backend/.env
+docker compose up -d
+docker compose exec backend npx prisma migrate deploy
+docker compose exec backend npm run prisma:seed
+```
+
+URLs disponibles :
+- Frontend : http://localhost:3000
+- Swagger : http://localhost:3001/api/docs
+- MailHog : http://localhost:8025
+- MinIO console : http://localhost:9001
+
+---
 
 ## Comptes de démo
 
@@ -101,46 +108,40 @@ npm run dev
 | Médecin | dr.benali@cabinet.ma | Medecin123! |
 | Secrétaire | secretaire@cabinet.ma | Secretaire123! |
 
-## Tests
-
-### Backend
-```bash
-cd backend
-npm test                    # Tests unitaires
-npm run test:cov            # Avec couverture
-npm run test:watch          # Mode watch
-```
-
-### Frontend
-```bash
-cd frontend
-npm test
-```
+---
 
 ## Variables d'environnement
 
 ### Backend (`backend/.env`)
 
+Copier depuis `backend/.env.example`. Les valeurs par défaut fonctionnent en développement.
+
 | Variable | Description | Défaut |
 |----------|-------------|--------|
-| `DATABASE_URL` | URL PostgreSQL | `postgresql://...` |
+| `DATABASE_URL` | URL PostgreSQL | `postgresql://postgres:password@localhost:5432/cabinet_medical` |
 | `JWT_SECRET` | Clé secrète JWT | — (obligatoire) |
 | `JWT_REFRESH_SECRET` | Clé refresh token | — (obligatoire) |
 | `JWT_EXPIRES_IN` | Expiration access token | `15m` |
 | `JWT_REFRESH_EXPIRES_IN` | Expiration refresh | `7d` |
+| `PORT` | Port backend | `3001` |
+| `CORS_ORIGIN` | Origine autorisée | `http://localhost:3000` |
 | `MINIO_ENDPOINT` | Hôte MinIO | `localhost` |
 | `MINIO_ACCESS_KEY` | Clé accès MinIO | `minioadmin` |
 | `MINIO_SECRET_KEY` | Secret MinIO | `minioadmin` |
 | `MINIO_BUCKET` | Bucket fichiers | `cabinet-medical` |
-| `SMTP_HOST` | Serveur SMTP | `localhost` |
+| `SMTP_HOST` | Serveur SMTP (MailHog en dev) | `localhost` |
 
 ### Frontend (`frontend/.env.local`)
 
-| Variable | Description |
-|----------|-------------|
-| `NEXT_PUBLIC_API_URL` | URL de l'API backend |
+Copier depuis `frontend/.env.local.example`.
 
-## Architecture API (exemples)
+| Variable | Description | Défaut |
+|----------|-------------|--------|
+| `NEXT_PUBLIC_API_URL` | URL de l'API backend | `http://localhost:3001/api` |
+
+---
+
+## Architecture API
 
 ### Authentification
 ```
@@ -171,11 +172,22 @@ PATCH  /api/rendez-vous/:id/statut  Changer statut
 DELETE /api/rendez-vous/:id         Annuler
 ```
 
+### Consultations
+```
+POST   /api/consultations                    Créer consultation
+GET    /api/consultations?q=&page=&limit=    Lister/rechercher
+GET    /api/consultations/patient/:id        Consultations d'un patient
+GET    /api/consultations/:id                Détail consultation
+PATCH  /api/consultations/:id                Modifier consultation
+```
+
 ### Ordonnances
 ```
-POST   /api/ordonnances             Créer ordonnance
-GET    /api/ordonnances/patient/:id Ordonnances patient
-GET    /api/ordonnances/:id/pdf     Télécharger PDF
+POST   /api/ordonnances                      Créer ordonnance
+GET    /api/ordonnances?q=&page=&limit=      Lister/rechercher
+GET    /api/ordonnances/patient/:id          Ordonnances d'un patient
+GET    /api/ordonnances/:id                  Détail ordonnance
+GET    /api/ordonnances/:id/pdf              Télécharger PDF
 ```
 
 ### Paiements / Caisse
@@ -192,6 +204,8 @@ GET    /api/stock/articles          Lister articles
 GET    /api/stock/articles/alertes  Articles sous seuil
 POST   /api/stock/mouvements        Entrée/sortie stock
 ```
+
+---
 
 ## Schéma de base de données
 
@@ -210,9 +224,28 @@ documents ─────── patients / consultations
 parametres
 ```
 
-## Sauvegardes
+---
 
-### Backup PostgreSQL
+## Tests
+
+### Backend
+```bash
+cd backend
+npm test                 # Tests unitaires
+npm run test:cov         # Avec couverture
+npm run test:watch       # Mode watch
+```
+
+### Frontend
+```bash
+cd frontend
+npm test
+```
+
+---
+
+## Sauvegardes PostgreSQL
+
 ```bash
 # Créer une sauvegarde
 docker compose exec postgres pg_dump -U postgres cabinet_medical > backup_$(date +%Y%m%d).sql
@@ -221,38 +254,30 @@ docker compose exec postgres pg_dump -U postgres cabinet_medical > backup_$(date
 cat backup_20241231.sql | docker compose exec -T postgres psql -U postgres cabinet_medical
 ```
 
-### Automatiser avec cron (Linux/Mac)
+Automatiser avec cron :
 ```bash
-# Ajouter dans crontab -e
-0 2 * * * cd /path/to/cabinet && docker compose exec postgres pg_dump -U postgres cabinet_medical > backups/backup_$(date +%Y%m%d).sql
+# crontab -e
+0 2 * * * cd /path/to/cabinet-medical-maroc && docker compose exec postgres pg_dump -U postgres cabinet_medical > backups/backup_$(date +%Y%m%d).sql
 ```
+
+---
 
 ## Déploiement production
 
-1. Modifier toutes les variables sensibles (`JWT_SECRET`, mots de passe DB, etc.)
-2. Configurer un reverse proxy (Nginx) devant les ports 3000 et 3001
-3. Activer HTTPS (Let's Encrypt / Certbot)
+1. Générer des secrets forts (`JWT_SECRET`, mot de passe DB, etc.)
+2. Configurer un reverse proxy Nginx devant les ports 3000 et 3001
+3. Activer HTTPS via Let's Encrypt / Certbot
 4. Configurer les backups automatiques
-5. Utiliser des secrets Docker ou un vault pour les credentials
+5. Utiliser Docker secrets ou un vault pour les credentials
 
 ```bash
-# Construire les images de production
 docker compose build
-
-# Démarrer en production
 docker compose up -d
-
-# Appliquer migrations
 docker compose exec backend npx prisma migrate deploy
 docker compose exec backend npm run prisma:seed
 ```
 
-## Internationalisation (FR/AR)
-
-L'application est préparée pour le bilinguisme:
-- Français par défaut (`lang="fr"`)
-- Support RTL pour l'arabe (classe CSS `[dir="rtl"]` + police Noto Kufi Arabic)
-- TODO: intégrer next-i18next avec fichiers de traduction `locales/fr/` et `locales/ar/`
+---
 
 ## Sécurité
 
@@ -264,6 +289,8 @@ L'application est préparée pour le bilinguisme:
 - **Helmet** : headers de sécurité HTTP
 - **Validation** : DTOs côté backend + Zod côté frontend
 - Suppression **logique** des données médicales (jamais supprimées physiquement)
+
+---
 
 ## Licence
 
