@@ -168,12 +168,18 @@ model Ordonnance {
 }
 
 model Medicament {
-  id          String @id @default(uuid())
-  nom         String
-  denomination String?
-  forme       String?
-  dosage      String?
-  actif       Boolean @default(true)
+  id                String  @id @default(uuid())
+  code              String? @unique  // code-barres CNOPS
+  nom               String
+  denomination      String?          // DCI (Dénomination Commune Internationale)
+  dosage            String?          // ex: "500 MG"
+  forme             String?          // COMPRIME, SOLUTION, etc.
+  presentation      String?          // conditionnement
+  ppv               Float?           // prix public de vente (MAD)
+  princepsGenerique String?          // "P" princeps | "G" générique
+  tauxRemboursement String?          // "0%", "70%", "100%"
+  actif             Boolean @default(true)
+  createdAt         DateTime @default(now())
 
   prescriptions OrdonnanceMedicament[]
 
