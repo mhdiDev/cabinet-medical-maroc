@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
+import { MedicamentAutocomplete } from '@/components/ordonnances/MedicamentAutocomplete';
 import toast from 'react-hot-toast';
 
 export default function ConsultationDetailPage({ params }: { params: { id: string } }) {
@@ -113,12 +114,17 @@ export default function ConsultationDetailPage({ params }: { params: { id: strin
 }
 
 function OrdonnanceModal({ patientId, consultationId, medecinNom, onClose, onSuccess }: any) {
-  const { data: medicaments = [] } = useQuery({
-    queryKey: ['medicaments'],
-    queryFn: () => apiClient.get('/stock/articles').then(() => []), // placeholder
-  });
+  interface Ligne {
+    nomLibre: string;
+    medicamentId?: string;
+    posologie: string;
+    duree: string;
+    quantite: number;
+  }
 
-  const [lignes, setLignes] = useState([{ nomLibre: '', posologie: '', duree: '', quantite: 1 }]);
+  const [lignes, setLignes] = useState<Ligne[]>([
+    { nomLibre: '', posologie: '', duree: '', quantite: 1 },
+  ]);
   const [notes, setNotes] = useState('');
 
   const mutation = useMutation({
@@ -127,19 +133,26 @@ function OrdonnanceModal({ patientId, consultationId, medecinNom, onClose, onSuc
     onError: () => toast.error('Erreur création ordonnance'),
   });
 
-  const addLigne = () => setLignes(l => [...l, { nomLibre: '', posologie: '', duree: '', quantite: 1 }]);
+  const addLigne = () =>
+    setLignes(l => [...l, { nomLibre: '', posologie: '', duree: '', quantite: 1 }]);
   const removeLigne = (i: number) => setLignes(l => l.filter((_, idx) => idx !== i));
   const updateLigne = (i: number, field: string, value: any) =>
     setLignes(l => l.map((ligne, idx) => (idx === i ? { ...ligne, [field]: value } : ligne)));
 
   const submit = () => {
-    const valides = lignes.filter(l => l.nomLibre && l.posologie);
-    if (!valides.length) return toast.error('Au moins un médicament requis');
+    const valides = lignes.filter(l => l.nomLibre.trim() && l.posologie.trim());
+    if (!valides.length) return toast.error('Au moins un médicament avec posologie requis');
     mutation.mutate({
       patientId,
       consultationId,
       medecinNom,
-      medicaments: valides.map(l => ({ ...l, quantite: l.quantite || 1 })),
+      medicaments: valides.map(l => ({
+        nomLibre: l.nomLibre,
+        medicamentId: l.medicamentId || undefined,
+        posologie: l.posologie,
+        duree: l.duree || undefined,
+        quantite: l.quantite || 1,
+      })),
       notes: notes || undefined,
     });
   };
@@ -147,7 +160,10 @@ function OrdonnanceModal({ patientId, consultationId, medecinNom, onClose, onSuc
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl p-6 w-full max-w-xl shadow-xl max-h-[90vh] overflow-y-auto">
-        <h2 className="font-bold text-lg mb-4">Nouvelle ordonnance</h2>
+        <h2 className="font-bold text-lg mb-1">Nouvelle ordonnance</h2>
+        <p className="text-xs text-gray-400 mb-4">
+          Tapez le nom ou la DCI — les médicaments du référentiel CNOPS apparaîtront en suggestion.
+        </p>
 
         <div className="space-y-3 mb-4">
           {lignes.map((l, i) => (
@@ -155,21 +171,29 @@ function OrdonnanceModal({ patientId, consultationId, medecinNom, onClose, onSuc
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-gray-700">Médicament {i + 1}</p>
                 {lignes.length > 1 && (
-                  <button onClick={() => removeLigne(i)} className="text-red-500 text-xs hover:underline">
-                    Supprimer
+                  <button
+                    type="button"
+                    onClick={() => removeLigne(i)}
+                    className="text-red-400 text-xs hover:text-red-600"
+                  >
+                    ✕ Retirer
                   </button>
                 )}
               </div>
-              <input
+
+              {/* Autocomplete branché sur le référentiel CNOPS */}
+              <MedicamentAutocomplete
                 value={l.nomLibre}
-                onChange={e => updateLigne(i, 'nomLibre', e.target.value)}
-                placeholder="Nom du médicament *"
-                className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm"
+                onChange={(val, med) => {
+                  updateLigne(i, 'nomLibre', val);
+                  if (med) updateLigne(i, 'medicamentId', med.id);
+                }}
               />
+
               <input
                 value={l.posologie}
                 onChange={e => updateLigne(i, 'posologie', e.target.value)}
-                placeholder="Posologie * (ex: 1 cp matin et soir)"
+                placeholder="Posologie * (ex: 1 cp matin et soir pendant 7 jours)"
                 className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm"
               />
               <div className="grid grid-cols-2 gap-2">

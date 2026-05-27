@@ -6,12 +6,25 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, token } = useAuthStore();
+  const { token, _hasHydrated } = useAuthStore();
   const router = useRouter();
 
   useEffect(() => {
-    if (!token) router.push('/login');
-  }, [token, router]);
+    // Attendre la fin de la réhydratation avant de juger l'état d'auth
+    if (_hasHydrated && !token) router.push('/login');
+  }, [_hasHydrated, token, router]);
+
+  // Pendant la réhydratation : écran de chargement neutre (évite le flash de redirection)
+  if (!_hasHydrated) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-3 text-gray-400">
+          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm">Chargement...</span>
+        </div>
+      </div>
+    );
+  }
 
   if (!token) return null;
 

@@ -19,12 +19,13 @@ Application web complète pour la gestion d'un cabinet médical au Maroc. Inspir
 
 ## Fonctionnalités
 
-- **Patients** — CRUD complet, dossier médical, export CSV, recherche par CIN/nom/téléphone
-- **Agenda** — Vue calendrier (jour/semaine/mois), gestion des créneaux, détection de collisions
-- **Consultations** — Notes médicales structurées, actes, diagnostic, traitement, liste paginée avec recherche
-- **Ordonnances** — Génération ordonnances PDF, historique, liste globale et par patient
-- **Caisse** — Encaissements (espèces/carte/assurance), rapport journalier
-- **Stock** — Articles consommables, entrées/sorties, alertes de seuil
+- **Patients** — CRUD complet, dossier médical (5 onglets), export CSV, recherche par CIN/nom/téléphone
+- **Agenda** — Vue calendrier (jour/semaine/mois), gestion des créneaux, détection de collisions, workflow statuts
+- **Consultations** — Sélecteur patient intégré avec recherche, notes médicales structurées, actes, diagnostic, traitement, liste paginée
+- **Ordonnances** — Autocomplete sur le référentiel CNOPS (5 918 médicaments), génération PDF, historique
+- **Médicaments** — Référentiel CNOPS 2014 importé (nom, DCI, dosage, forme, PPV, taux remboursement CNOPS, générique/princeps), création à la volée si absent
+- **Caisse** — Encaissements (espèces/carte/chèque/assurance), rapport journalier et périodique
+- **Stock** — Articles consommables, entrées/sorties transactionnelles, alertes de seuil
 - **Sécurité** — Argon2, RBAC (médecin/secrétaire/admin), audit trail complet
 
 ---
@@ -36,6 +37,7 @@ Application web complète pour la gestion d'un cabinet médical au Maroc. Inspir
 - **nvm** recommandé pour gérer les versions Node
 
 > Si tu as plusieurs versions Node via nvm, exécute `nvm use 20` avant de lancer le frontend ou le backend.
+> Un fichier `.nvmrc` est présent à la racine du projet : `nvm use` suffit dans le répertoire.
 
 ---
 
@@ -53,8 +55,10 @@ docker compose -f docker-compose.dev.yml up -d
 ### 2. Backend
 
 ```bash
+nvm use 20
 cd backend
 cp .env.example .env
+
 npm install
 npx prisma generate
 npx prisma migrate dev --name init
@@ -66,12 +70,23 @@ Le backend est accessible sur :
 - API : http://localhost:3001
 - Swagger : http://localhost:3001/api/docs
 
-### 3. Frontend
+### 3. Importer le référentiel médicaments CNOPS
+
+À effectuer une seule fois après la migration initiale (le script est idempotent, on peut le relancer sans risque).
 
 ```bash
-# Si tu utilises nvm, assure-toi d'être sur Node 20
-nvm use 20
+# Depuis le répertoire backend/
+npm run prisma:import-medicaments
+```
 
+Le fichier source attendu : `backend/prisma/ref-des-medicaments-cnops-2014.xlsx`
+
+La progression s'affiche dans le terminal (lots de 100, rapport final créés/mis à jour/erreurs).
+
+### 4. Frontend
+
+```bash
+nvm use 20
 cd frontend
 cp .env.local.example .env.local
 npm install
@@ -90,6 +105,7 @@ cp backend/.env.example backend/.env
 docker compose up -d
 docker compose exec backend npx prisma migrate deploy
 docker compose exec backend npm run prisma:seed
+docker compose exec backend npm run prisma:import-medicaments
 ```
 
 URLs disponibles :
@@ -107,6 +123,39 @@ URLs disponibles :
 | Admin | admin@cabinet.ma | Admin123! |
 | Médecin | dr.benali@cabinet.ma | Medecin123! |
 | Secrétaire | secretaire@cabinet.ma | Secretaire123! |
+
+---
+
+## Référentiel médicaments CNOPS
+
+Le fichier `backend/prisma/ref-des-medicaments-cnops-2014.xlsx` contient la liste officielle des médicaments agréés au Maroc (source CNOPS 2014).
+
+### Structure des données importées
+
+| Colonne Excel | Champ DB | Description |
+|---------------|----------|-------------|
+| `CODE` | `code` | Code-barres unique (identifiant upsert) |
+| `NOM` | `nom` | Nom commercial |
+| `DCI1` | `denomination` | Dénomination Commune Internationale |
+| `DOSAGE1` + `UNITE_DOSAGE1` | `dosage` | Ex : `500 MG`, `200 ML` |
+| `FORME` | `forme` | COMPRIME, SOLUTION, GELULE… |
+| `PRESENTATION` | `presentation` | Conditionnement complet |
+| `PPV` | `ppv` | Prix Public de Vente (MAD) |
+| `PRINCEPS_GENERIQUE` | `princepsGenerique` | `P` = princeps / `G` = générique |
+| `TAUX_REMBOURSEMENT` | `tauxRemboursement` | `0%`, `70%`, `100%` |
+
+### Relancer l'import
+
+Le script utilise un `upsert` par code-barres : relancer n'introduit pas de doublons.
+
+```bash
+cd backend
+npm run prisma:import-medicaments
+```
+
+### Mettre à jour le référentiel
+
+Remplacer le fichier `.xlsx` par une version plus récente (même format de colonnes) et relancer le script.
 
 ---
 
@@ -150,59 +199,75 @@ POST   /api/auth/refresh            Rafraîchir token
 POST   /api/auth/logout             Déconnexion
 GET    /api/auth/me                 Profil connecté
 POST   /api/auth/users              Créer utilisateur (admin)
+POST   /api/auth/change-password    Changer le mot de passe
 ```
 
 ### Patients
 ```
 POST   /api/patients                Créer patient
-GET    /api/patients?q=&page=&limit= Lister/rechercher
-GET    /api/patients/:id            Fiche patient complète
+GET    /api/patients?q=&page=&limit= Lister/rechercher (nom, CIN, téléphone)
+GET    /api/patients/:id            Fiche patient complète (avec RDV, consultations, ordonnances)
 PATCH  /api/patients/:id            Modifier patient
 DELETE /api/patients/:id            Supprimer (soft delete)
 GET    /api/patients/cin/:cin       Recherche par CIN
-GET    /api/patients/export/csv     Export CSV
+GET    /api/patients/export/csv     Export CSV (UTF-8 BOM pour Excel)
+GET    /api/patients/stats          Statistiques (total, par sexe, par ville)
 ```
 
 ### Rendez-vous
 ```
-POST   /api/rendez-vous             Créer RDV (vérifie collisions)
-GET    /api/rendez-vous/agenda      Agenda médecin (date range)
-GET    /api/rendez-vous/today       RDV du jour
-PATCH  /api/rendez-vous/:id/statut  Changer statut
-DELETE /api/rendez-vous/:id         Annuler
+POST   /api/rendez-vous             Créer RDV (vérifie les collisions)
+GET    /api/rendez-vous/agenda      Agenda médecin sur une période
+GET    /api/rendez-vous/today       RDV du jour par médecin
+PATCH  /api/rendez-vous/:id         Modifier RDV
+PATCH  /api/rendez-vous/:id/statut  Changer statut (EN_ATTENTE → CONFIRME → ARRIVE → FACTURE)
+DELETE /api/rendez-vous/:id         Annuler (passe le statut à ANNULE)
 ```
 
 ### Consultations
 ```
-POST   /api/consultations                    Créer consultation
-GET    /api/consultations?q=&page=&limit=    Lister/rechercher
-GET    /api/consultations/patient/:id        Consultations d'un patient
-GET    /api/consultations/:id                Détail consultation
-PATCH  /api/consultations/:id                Modifier consultation
+POST   /api/consultations                 Créer consultation
+GET    /api/consultations?q=&page=&limit= Lister/rechercher (patient, motif, diagnostic)
+GET    /api/consultations/patient/:id     Consultations d'un patient
+GET    /api/consultations/:id             Détail avec ordonnances et documents
+PATCH  /api/consultations/:id             Modifier consultation
+```
+
+### Médicaments (référentiel CNOPS)
+```
+GET    /api/medicaments/search?q=&limit=  Recherche autocomplete (nom, DCI, forme)
+POST   /api/medicaments/find-or-create    Retourner l'existant ou créer si absent
+GET    /api/medicaments/:id               Détail d'un médicament
+POST   /api/medicaments                   Créer manuellement
 ```
 
 ### Ordonnances
 ```
-POST   /api/ordonnances                      Créer ordonnance
-GET    /api/ordonnances?q=&page=&limit=      Lister/rechercher
+POST   /api/ordonnances                      Créer ordonnance (avec médicaments liés ou libres)
 GET    /api/ordonnances/patient/:id          Ordonnances d'un patient
-GET    /api/ordonnances/:id                  Détail ordonnance
-GET    /api/ordonnances/:id/pdf              Télécharger PDF
+GET    /api/ordonnances/:id                  Détail
+GET    /api/ordonnances/:id/pdf              Télécharger PDF (généré à la volée avec PDFKit)
 ```
 
 ### Paiements / Caisse
 ```
 POST   /api/paiements               Enregistrer paiement
-GET    /api/paiements/caisse        Caisse journalière
-GET    /api/paiements/rapport       Rapport période
+GET    /api/paiements/caisse        Caisse journalière (total, détail par mode)
+GET    /api/paiements/rapport       Rapport sur une période (début/fin)
 ```
 
 ### Stock
 ```
 POST   /api/stock/articles          Créer article
-GET    /api/stock/articles          Lister articles
-GET    /api/stock/articles/alertes  Articles sous seuil
-POST   /api/stock/mouvements        Entrée/sortie stock
+GET    /api/stock/articles          Lister articles (avec flag alerteStock)
+GET    /api/stock/articles/alertes  Articles sous seuil d'alerte uniquement
+GET    /api/stock/articles/:id      Détail avec historique des mouvements
+POST   /api/stock/mouvements        Entrée ou sortie (transactionnel, vérifie stock suffisant)
+```
+
+### Rapports
+```
+GET    /api/rapports/dashboard      Tableau de bord (patients, RDV jour/semaine, recette, alertes stock)
 ```
 
 ---
@@ -210,19 +275,22 @@ POST   /api/stock/mouvements        Entrée/sortie stock
 ## Schéma de base de données
 
 ```
-users ──────────── rendez_vous ──────── patients
-  │                    │                   │
-  │              consultations ────────────┤
-  │                    │                   │
-  └── audit_logs  ordonnances ────────────┘
-                        │
-                 ordonnance_medicaments ── medicaments
+users ──────────────── rendez_vous ──────────── patients
+  │                         │                      │
+  │                   consultations ───────────────┤
+  │                         │                      │
+  └────── audit_logs   ordonnances ───────────────┘
+                             │
+                  ordonnance_medicaments ─── medicaments (CNOPS)
 
-paiements ────── rendez_vous
-stock_articles ── stock_mouvements
-documents ─────── patients / consultations
+paiements ────────── rendez_vous
+stock_articles ───── stock_mouvements
+documents ────────── patients / consultations
+refresh_tokens ────── users
 parametres
 ```
+
+**13 modèles Prisma** — migrations versionnées dans `backend/prisma/migrations/`.
 
 ---
 
@@ -231,16 +299,27 @@ parametres
 ### Backend
 ```bash
 cd backend
-npm test                 # Tests unitaires
-npm run test:cov         # Avec couverture
+npm test                 # Tests unitaires (auth, patients)
+npm run test:cov         # Avec rapport de couverture
 npm run test:watch       # Mode watch
 ```
+
+Les tests unitaires utilisent des mocks Prisma (pas de DB réelle nécessaire).
 
 ### Frontend
 ```bash
 cd frontend
 npm test
 ```
+
+### CI/CD
+
+Un pipeline GitHub Actions (`.github/workflows/ci.yml`) s'exécute à chaque push sur `main` et `develop` :
+1. Tests backend (avec PostgreSQL de service)
+2. Linter backend + frontend
+3. Build backend
+4. Build frontend
+5. Build Docker (sur `main` uniquement)
 
 ---
 
@@ -275,6 +354,7 @@ docker compose build
 docker compose up -d
 docker compose exec backend npx prisma migrate deploy
 docker compose exec backend npm run prisma:seed
+docker compose exec backend npm run prisma:import-medicaments
 ```
 
 ---
@@ -282,13 +362,14 @@ docker compose exec backend npm run prisma:seed
 ## Sécurité
 
 - Mots de passe hashés avec **Argon2** (résistant GPU/ASIC)
-- **JWT** avec expiration courte (15min) + refresh token rotatif
-- **RBAC** : médecin, secrétaire, admin avec permissions granulaires
-- **Audit trail** : toutes les opérations sensibles journalisées
-- **Rate limiting** : 100 req/min par défaut (ThrottlerModule)
+- **JWT** avec expiration courte (15min) + refresh token rotatif stocké en base
+- **RBAC** : médecin, secrétaire, admin avec permissions granulaires par route
+- **Audit trail** : toutes les opérations sensibles journalisées dans `audit_logs`
+- **Rate limiting** : 100 req/min par défaut (ThrottlerModule NestJS)
 - **Helmet** : headers de sécurité HTTP
-- **Validation** : DTOs côté backend + Zod côté frontend
-- Suppression **logique** des données médicales (jamais supprimées physiquement)
+- **Validation** : DTOs class-validator côté backend + Zod côté frontend
+- Suppression **logique** des patients (champ `actif`, données jamais effacées physiquement)
+- Réhydratation auth **côté client** via Zustand persist — pas de flash de redirection
 
 ---
 
