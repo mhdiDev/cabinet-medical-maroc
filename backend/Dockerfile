@@ -6,7 +6,7 @@ RUN npm ci
 
 COPY . .
 RUN npx prisma generate
-RUN npm run build && find /app/dist -name "main.js" | head -5
+RUN npm run build
 
 FROM node:20-alpine AS production
 
@@ -21,4 +21,4 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY prisma ./prisma
 
 EXPOSE 3001
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main"]
