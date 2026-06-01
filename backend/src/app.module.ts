@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
@@ -13,6 +14,7 @@ import { AuditModule } from './audit/audit.module';
 import { MedicamentsModule } from './medicaments/medicaments.module';
 
 @Module({
+  controllers: [AppController],
   imports: [
     // Limitation du taux de requêtes (anti-bruteforce)
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
