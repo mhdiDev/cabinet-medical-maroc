@@ -8,7 +8,7 @@ RUN npm ci
 
 COPY . .
 RUN npx prisma generate
-RUN npm run build && echo "=== DIST CONTENTS ===" && find /app/dist -type f -name "*.js" | head -20
+RUN npx tsc -p tsconfig.json && echo "=== DIST ===" && find /app/dist -name "*.js" | head -10
 
 FROM node:20-alpine AS production
 
