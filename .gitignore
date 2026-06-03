@@ -37,3 +37,4 @@ coverage/
 # Docker volumes locaux
 postgres_data/
 minio_data/
+.vercel
