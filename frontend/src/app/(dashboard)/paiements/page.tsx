@@ -1,5 +1,6 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { apiClient } from '@/lib/api';
@@ -14,8 +15,11 @@ interface PaiementForm {
   consultationId: string;
 }
 
-export default function PaiementsPage() {
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+function PaiementsPageInner() {
+  const searchParams = useSearchParams();
+  const preselectedConsultationId = searchParams.get('consultationId');
+  const urlDate = searchParams.get('date');
+  const [date, setDate] = useState(urlDate || new Date().toISOString().split('T')[0]);
   const [showForm, setShowForm] = useState(false);
   const [activeTab, setActiveTab] = useState<'caisse' | 'rapport'>('caisse');
   const [rapportDebut, setRapportDebut] = useState(
@@ -36,7 +40,7 @@ export default function PaiementsPage() {
       apiClient
         .get('/consultations', { params: { date, nonEncaissees: true } })
         .then(r => r.data),
-    enabled: showForm,
+    enabled: showForm || !!preselectedConsultationId,
   });
 
   const { data: rapport } = useQuery({
@@ -65,6 +69,20 @@ export default function PaiementsPage() {
   });
 
   const typePaiement = watch('typePaiement');
+
+  useEffect(() => {
+    if (preselectedConsultationId && consultationsDuJour?.consultations?.length) {
+      const consultation = consultationsDuJour.consultations.find(
+        (c: any) => c.id === preselectedConsultationId,
+      );
+      if (consultation) {
+        setValue('consultationId', preselectedConsultationId);
+        setValue('montant', consultation.montantSuggere?.toString() || '');
+        setValue('description', consultation.motif || '');
+        setShowForm(true);
+      }
+    }
+  }, [preselectedConsultationId, consultationsDuJour]);
 
   const handleExport = async () => {
     try {
@@ -380,5 +398,13 @@ export default function PaiementsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function PaiementsPage() {
+  return (
+    <Suspense>
+      <PaiementsPageInner />
+    </Suspense>
   );
 }

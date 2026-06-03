@@ -17,12 +17,14 @@ export class ConsultationsController {
   @ApiQuery({ name: 'q', required: false })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'date', required: false })
   findAll(
     @Query('page') page?: number,
     @Query('limit') limit?: number,
     @Query('q') q?: string,
+    @Query('date') date?: string,
   ) {
-    return this.service.findAll(page ? +page : 1, limit ? +limit : 20, q);
+    return this.service.findAll(page ? +page : 1, limit ? +limit : 20, q, date);
   }
 
   @Post()
