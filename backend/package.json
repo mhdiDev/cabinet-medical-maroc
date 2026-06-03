@@ -2,6 +2,9 @@
   "name": "cabinet-medical-backend",
   "version": "1.0.0",
   "description": "Backend NestJS pour gestion de cabinet médical au Maroc",
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
   "scripts": {
     "build": "nest build",
     "start": "nest start",
