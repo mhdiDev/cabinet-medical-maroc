@@ -21,6 +21,7 @@ const schema = z.object({
   groupeSanguin: z.string().optional(),
   allergies: z.string().optional(),
   antecedents: z.string().optional(),
+  estAssure: z.boolean().optional().default(false),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -133,6 +134,17 @@ export default function NouveauPatientPage() {
             <div className="col-span-2">
               <label className="text-sm font-medium text-gray-700">Antécédents médicaux</label>
               <textarea {...register('antecedents')} rows={3} className={inputClass} />
+            </div>
+            <div className="col-span-2 flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="estAssure"
+                {...register('estAssure')}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded"
+              />
+              <label htmlFor="estAssure" className="text-sm font-medium text-gray-700">
+                Patient assuré
+              </label>
             </div>
           </div>
         </section>

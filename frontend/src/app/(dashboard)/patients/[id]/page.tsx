@@ -62,6 +62,7 @@ export default function PatientDetailPage({ params }: { params: { id: string } }
           { label: 'Sexe', value: patient.sexe === 'MASCULIN' ? 'Masculin' : 'Féminin' },
           { label: 'Groupe sanguin', value: patient.groupeSanguin || 'N/A' },
           { label: 'N° Assurance', value: patient.numeroAssurance || 'N/A' },
+          { label: 'Assuré', value: patient.estAssure ? 'Oui' : 'Non' },
         ].map(info => (
           <div key={info.label} className="bg-white rounded-xl border border-gray-100 p-4">
             <p className="text-xs text-gray-500">{info.label}</p>
