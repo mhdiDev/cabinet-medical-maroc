@@ -55,14 +55,14 @@ export default function ConsultationsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {data?.data?.length === 0 && (
+                {data?.consultations?.length === 0 && (
                   <tr>
                     <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
                       Aucune consultation trouvée
                     </td>
                   </tr>
                 )}
-                {data?.data?.map((c: any) => (
+                {data?.consultations?.map((c: any) => (
                   <tr key={c.id} className="hover:bg-gray-50 transition">
                     <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
                       {new Date(c.dateConsultation).toLocaleDateString('fr-MA')}

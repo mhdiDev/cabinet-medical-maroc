@@ -73,8 +73,15 @@ export default function ModifierPatientPage() {
   const onSubmit = (data: FormData) => {
     mutation.mutate({
       ...data,
+      // Convertir les chaînes vides en undefined pour les champs optionnels
+      // (évite les violations de contrainte UNIQUE sur cin en DB)
+      cin: data.cin?.trim() || undefined,
+      email: data.email?.trim() || undefined,
+      adresse: data.adresse?.trim() || undefined,
+      ville: data.ville?.trim() || undefined,
+      groupeSanguin: data.groupeSanguin?.trim() || undefined,
+      antecedents: data.antecedents?.trim() || undefined,
       allergies: data.allergies ? data.allergies.split(',').map(s => s.trim()).filter(Boolean) : [],
-      email: data.email || undefined,
     });
   };
 

@@ -117,6 +117,9 @@ export class PatientsService {
   async update(id: string, dto: UpdatePatientDto, userId: string) {
     await this.findOne(id);
 
+    // Normaliser les champs optionnels : chaîne vide → null (évite violation UNIQUE sur cin)
+    if (dto.cin !== undefined && dto.cin?.trim() === '') dto.cin = undefined;
+
     // Vérification CIN unique si modification
     if (dto.cin) {
       const existing = await this.prisma.patient.findFirst({
