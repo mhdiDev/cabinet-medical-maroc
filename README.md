@@ -19,12 +19,13 @@ Application web complète pour la gestion d'un cabinet médical au Maroc. Inspir
 
 ## Fonctionnalités
 
-- **Patients** — CRUD complet, dossier médical (5 onglets), export CSV, recherche par CIN/nom/téléphone
+- **Patients** — CRUD complet, dossier médical (5 onglets), statut assuré/non assuré (`estAssure`), export CSV, recherche par CIN/nom/téléphone
 - **Agenda** — Vue calendrier (jour/semaine/mois), gestion des créneaux, détection de collisions, workflow statuts
-- **Consultations** — Sélecteur patient intégré avec recherche, notes médicales structurées, actes, diagnostic, traitement, liste paginée
+- **Consultations** — Sélecteur patient intégré avec recherche, notes médicales structurées, actes, diagnostic, traitement, liste paginée ; à la création, redirige automatiquement vers la caisse pour encaisser
 - **Ordonnances** — Autocomplete sur le référentiel CNOPS (5 918 médicaments), génération PDF, historique
 - **Médicaments** — Référentiel CNOPS 2014 importé (nom, DCI, dosage, forme, PPV, taux remboursement CNOPS, générique/princeps), création à la volée si absent
-- **Caisse** — Encaissements (espèces/carte/chèque/assurance), rapport journalier et périodique
+- **Caisse** — Encaissements liés à une consultation, pré-remplissage automatique depuis la consultation (montant, motif, patient), rapport journalier et périodique
+- **Export Excel** — Export mensuel des consultations/paiements filtré par statut d'assurance (tous / assurés / non assurés)
 - **Stock** — Articles consommables, entrées/sorties transactionnelles, alertes de seuil
 - **Sécurité** — Argon2, RBAC (médecin/secrétaire/admin), audit trail complet
 
@@ -226,11 +227,11 @@ DELETE /api/rendez-vous/:id         Annuler (passe le statut à ANNULE)
 
 ### Consultations
 ```
-POST   /api/consultations                 Créer consultation
-GET    /api/consultations?q=&page=&limit= Lister/rechercher (patient, motif, diagnostic)
-GET    /api/consultations/patient/:id     Consultations d'un patient
-GET    /api/consultations/:id             Détail avec ordonnances et documents
-PATCH  /api/consultations/:id             Modifier consultation
+POST   /api/consultations                        Créer consultation
+GET    /api/consultations?q=&page=&limit=&date=  Lister/rechercher (patient, motif, diagnostic) — date filtre par jour
+GET    /api/consultations/patient/:id            Consultations d'un patient
+GET    /api/consultations/:id                    Détail avec ordonnances et documents
+PATCH  /api/consultations/:id                    Modifier consultation
 ```
 
 ### Médicaments (référentiel CNOPS)
@@ -251,9 +252,10 @@ GET    /api/ordonnances/:id/pdf              Télécharger PDF (généré à la 
 
 ### Paiements / Caisse
 ```
-POST   /api/paiements               Enregistrer paiement
-GET    /api/paiements/caisse        Caisse journalière (total, détail par mode)
-GET    /api/paiements/rapport       Rapport sur une période (début/fin)
+POST   /api/paiements                                   Enregistrer paiement (lié à une consultation et/ou un patient)
+GET    /api/paiements/caisse?date=                      Caisse journalière (total, détail par mode, avec patient et consultation)
+GET    /api/paiements/rapport?debut=&fin=               Rapport sur une période
+GET    /api/paiements/export?debut=&fin=&assurance=     Export Excel (.xlsx) — assurance: tous | assures | non_assures
 ```
 
 ### Stock
@@ -275,7 +277,7 @@ GET    /api/rapports/dashboard      Tableau de bord (patients, RDV jour/semaine,
 ## Schéma de base de données
 
 ```
-users ──────────────── rendez_vous ──────────── patients
+users ──────────────── rendez_vous ──────────── patients (estAssure)
   │                         │                      │
   │                   consultations ───────────────┤
   │                         │                      │
@@ -284,6 +286,8 @@ users ──────────────── rendez_vous ────�
                   ordonnance_medicaments ─── medicaments (CNOPS)
 
 paiements ────────── rendez_vous
+paiements ────────── consultations   ← (nouveau : lien encaissement↔consultation)
+paiements ────────── patients        ← (nouveau : lien direct patient)
 stock_articles ───── stock_mouvements
 documents ────────── patients / consultations
 refresh_tokens ────── users
@@ -341,13 +345,76 @@ Automatiser avec cron :
 
 ---
 
-## Déploiement production
+## Déploiement production (actuel)
 
-1. Générer des secrets forts (`JWT_SECRET`, mot de passe DB, etc.)
-2. Configurer un reverse proxy Nginx devant les ports 3000 et 3001
-3. Activer HTTPS via Let's Encrypt / Certbot
-4. Configurer les backups automatiques
-5. Utiliser Docker secrets ou un vault pour les credentials
+L'application est déployée sur l'infrastructure suivante :
+
+| Composant | Plateforme | URL |
+|-----------|------------|-----|
+| Frontend | Vercel (free tier) | https://cabinet-medical-maroc.vercel.app |
+| Backend | Render (free tier, Docker) | https://cabinet-medical-maroc.onrender.com |
+| Base de données | Render PostgreSQL | Interne Render |
+
+### Architecture de déploiement
+
+```
+GitHub master ──push──► Render (auto-deploy Docker) ──migrate deploy + seed──► PostgreSQL Render
+                   └───► Vercel (auto-deploy) ──► cabinet-medical-maroc.vercel.app
+```
+
+### Redéployer le frontend (Vercel)
+
+Le frontend se redéploie automatiquement à chaque push sur `master` via l'intégration GitHub de Vercel.  
+Pour forcer un déploiement manuel :
+
+```bash
+nvm use 20
+npx vercel --prod   # depuis la racine du repo
+```
+
+### Redéployer le backend (Render)
+
+Render reconstruit automatiquement l'image Docker à chaque push sur `master`.  
+La migration de base de données s'exécute automatiquement au démarrage du conteneur :
+```
+npx prisma migrate deploy && node prisma/seed.js && node prisma/import-medicaments.js && node dist/main
+```
+
+Pour forcer un redéploiement manuel : Render Dashboard → service backend → **Manual Deploy** → **Deploy latest commit**.
+
+### Appliquer une migration en urgence sur la DB de production
+
+```bash
+cd backend
+DATABASE_URL="<url_render_postgres>" npx prisma migrate deploy
+```
+
+### Maintien en activité (free tier)
+
+Le free tier Render met le service en veille après 15 min d'inactivité.  
+**UptimeRobot** est configuré pour pinguer `https://cabinet-medical-maroc.onrender.com/api/health` toutes les 5 minutes et maintenir le service éveillé.
+
+### Variables d'environnement en production
+
+**Render (backend)** — à configurer dans Environment :
+
+| Variable | Valeur |
+|----------|--------|
+| `DATABASE_URL` | URL interne PostgreSQL Render |
+| `JWT_SECRET` | Secret fort généré |
+| `JWT_REFRESH_SECRET` | Secret fort généré |
+| `CORS_ORIGIN` | `https://cabinet-medical-maroc.vercel.app` |
+| `PORT` | `3001` (géré automatiquement par Render) |
+
+**Vercel (frontend)** — à configurer dans Project Settings → Environment Variables :
+
+| Variable | Valeur |
+|----------|--------|
+| `NEXT_PUBLIC_API_URL` | `https://cabinet-medical-maroc.onrender.com/api` |
+
+### Auto-hébergement (Docker Compose)
+
+Pour déployer sur un VPS :
 
 ```bash
 docker compose build
@@ -356,6 +423,8 @@ docker compose exec backend npx prisma migrate deploy
 docker compose exec backend npm run prisma:seed
 docker compose exec backend npm run prisma:import-medicaments
 ```
+
+Configurer ensuite un reverse proxy Nginx + HTTPS via Let's Encrypt.
 
 ---
 
