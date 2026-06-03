@@ -90,6 +90,7 @@ model Patient {
   allergies     String[]
   antecedents   String?
   numeroAssurance String?
+  estAssure     Boolean   @default(false)
   actif         Boolean   @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -98,6 +99,7 @@ model Patient {
   consultations Consultation[]
   ordonnances   Ordonnance[]
   documents     Document[]
+  paiements     Paiement[]
 
   @@map("patients")
 }
@@ -143,6 +145,7 @@ model Consultation {
   rendezVous  RendezVous?  @relation(fields: [rendezVousId], references: [id])
   ordonnances Ordonnance[]
   documents   Document[]
+  paiements   Paiement[]
 
   @@map("consultations")
 }
@@ -205,6 +208,7 @@ model Paiement {
   id           String       @id @default(uuid())
   rendezVousId String?
   patientId    String?
+  consultationId String?
   montant      Float
   montantRemise Float       @default(0)
   typePaiement TypePaiement @default(ESPECE)
@@ -214,7 +218,9 @@ model Paiement {
   createdById  String?
   createdAt    DateTime     @default(now())
 
-  rendezVous RendezVous? @relation(fields: [rendezVousId], references: [id])
+  rendezVous   RendezVous?   @relation(fields: [rendezVousId], references: [id])
+  patient      Patient?      @relation(fields: [patientId], references: [id])
+  consultation Consultation? @relation(fields: [consultationId], references: [id])
 
   @@map("paiements")
 }
