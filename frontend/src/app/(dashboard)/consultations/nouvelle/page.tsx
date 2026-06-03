@@ -114,7 +114,7 @@ export default function NouvelleConsultationPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         <Link
           href={selectedPatient ? `/patients/${selectedPatient.id}` : '/patients'}
           className="text-gray-400 hover:text-gray-600 text-sm"
@@ -230,7 +230,7 @@ export default function NouvelleConsultationPage() {
       {/* Formulaire médical */}
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-6"
+        className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 space-y-6"
       >
         <section>
           <h2 className="font-semibold text-gray-700 mb-4 pb-2 border-b">Motif & Anamnèse</h2>
@@ -310,17 +310,17 @@ export default function NouvelleConsultationPage() {
           />
         </section>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-100">
           <Link
             href={selectedPatient ? `/patients/${selectedPatient.id}` : '/patients'}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
+            className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 text-center"
           >
             Annuler
           </Link>
           <button
             type="submit"
             disabled={mutation.isPending || !selectedPatient}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
             title={!selectedPatient ? 'Sélectionnez un patient pour continuer' : ''}
           >
             {mutation.isPending ? 'Enregistrement...' : 'Enregistrer la consultation'}

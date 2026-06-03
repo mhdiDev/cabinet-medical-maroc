@@ -54,15 +54,15 @@ export default function NouveauPatientPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         <Link href="/patients" className="text-gray-400 hover:text-gray-600">← Retour</Link>
         <h1 className="text-2xl font-bold text-gray-900">Nouveau patient</h1>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 space-y-6">
         <section>
           <h2 className="font-semibold text-gray-700 mb-4 pb-2 border-b">Identité</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-gray-700">Nom *</label>
               <input {...register('nom')} className={inputClass} />
@@ -99,7 +99,7 @@ export default function NouveauPatientPage() {
 
         <section>
           <h2 className="font-semibold text-gray-700 mb-4 pb-2 border-b">Coordonnées</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="col-span-2">
               <label className="text-sm font-medium text-gray-700">Email</label>
               <input {...register('email')} type="email" className={inputClass} />
@@ -117,7 +117,7 @@ export default function NouveauPatientPage() {
 
         <section>
           <h2 className="font-semibold text-gray-700 mb-4 pb-2 border-b">Informations médicales</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-gray-700">Groupe sanguin</label>
               <select {...register('groupeSanguin')} className={inputClass}>
@@ -149,12 +149,12 @@ export default function NouveauPatientPage() {
           </div>
         </section>
 
-        <div className="flex justify-end gap-3 pt-4 border-t">
-          <Link href="/patients" className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t">
+          <Link href="/patients" className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 text-center">
             Annuler
           </Link>
           <button type="submit" disabled={mutation.isPending}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50">
+            className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50">
             {mutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
           </button>
         </div>
