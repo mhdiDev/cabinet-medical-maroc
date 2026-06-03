@@ -3,7 +3,11 @@ import { useAuthStore } from '@/store/auth';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 
-export function Header() {
+interface HeaderProps {
+  onMenuClick: () => void;
+}
+
+export function Header({ onMenuClick }: HeaderProps) {
   const { user, clearAuth } = useAuthStore();
   const router = useRouter();
 
@@ -14,9 +18,19 @@ export function Header() {
   };
 
   return (
-    <header className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between shadow-sm">
+    <header className="bg-white border-b border-gray-100 px-4 lg:px-6 py-4 flex items-center justify-between shadow-sm">
       <div className="flex items-center gap-3">
-        <h2 className="text-gray-500 text-sm">
+        {/* Hamburger — mobile only */}
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition"
+          aria-label="Menu"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <h2 className="text-gray-500 text-sm hidden sm:block">
           {new Date().toLocaleDateString('fr-MA', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
         </h2>
       </div>
