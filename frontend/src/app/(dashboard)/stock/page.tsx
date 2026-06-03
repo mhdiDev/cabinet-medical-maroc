@@ -41,7 +41,7 @@ export default function StockPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900">Stock consommables</h1>
         <button
           onClick={() => setShowNouvelArticle(true)}
@@ -83,14 +83,17 @@ export default function StockPage() {
             </button>
           </div>
         ) : (
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[600px]">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
-                {['Article', 'Référence', 'Quantité', 'Seuil', 'Fournisseur', 'Prix unit.', 'Actions'].map(h => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
-                    {h}
-                  </th>
-                ))}
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Article</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">Référence</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Quantité</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">Seuil</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">Fournisseur</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">Prix unit.</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -103,7 +106,7 @@ export default function StockPage() {
                       <span className="text-xs text-orange-600 font-medium">⚠️ Stock faible</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-sm font-mono text-gray-500">{a.reference || '—'}</td>
+                  <td className="px-4 py-3 text-sm font-mono text-gray-500 hidden sm:table-cell">{a.reference || '—'}</td>
                   <td className="px-4 py-3">
                     <span
                       className={`text-lg font-bold ${
@@ -114,11 +117,11 @@ export default function StockPage() {
                     </span>
                     <span className="text-xs text-gray-400 ml-1">{a.unite}</span>
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">
+                  <td className="px-4 py-3 text-sm text-gray-500 hidden sm:table-cell">
                     {a.seuilAlerte} {a.unite}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">{a.fournisseur || '—'}</td>
-                  <td className="px-4 py-3 text-sm text-gray-500">
+                  <td className="px-4 py-3 text-sm text-gray-500 hidden sm:table-cell">{a.fournisseur || '—'}</td>
+                  <td className="px-4 py-3 text-sm text-gray-500 hidden sm:table-cell">
                     {a.prixUnitaire ? `${a.prixUnitaire} MAD` : '—'}
                   </td>
                   <td className="px-4 py-3">
@@ -133,6 +136,7 @@ export default function StockPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 

@@ -60,7 +60,7 @@ export default function OrdonnancesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900">Ordonnances</h1>
         <button
           onClick={() => setShowModal(true)}
@@ -81,17 +81,15 @@ export default function OrdonnancesPage() {
           <div className="p-8 text-center text-gray-400">Chargement...</div>
         ) : (
           <>
-            <table className="w-full">
+            <div className="overflow-x-auto">
+            <table className="w-full min-w-[600px]">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>
-                  {['Date', 'Patient', 'Médicaments', 'Médecin', ''].map((h) => (
-                    <th
-                      key={h}
-                      className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
-                    >
-                      {h}
-                    </th>
-                  ))}
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Date</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Patient</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Médicaments</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">Médecin</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -137,7 +135,7 @@ export default function OrdonnancesPage() {
                           <span className="text-gray-400">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-500">{o.medecinNom}</td>
+                      <td className="px-4 py-3 text-sm text-gray-500 hidden sm:table-cell">{o.medecinNom}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-3">
                           <Link
@@ -159,6 +157,7 @@ export default function OrdonnancesPage() {
                 )}
               </tbody>
             </table>
+            </div>
 
             {data?.meta && data.meta.pages > 1 && (
               <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">

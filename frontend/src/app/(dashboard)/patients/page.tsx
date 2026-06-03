@@ -32,7 +32,7 @@ export default function PatientsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900">Patients</h1>
         <div className="flex gap-3">
           <button onClick={handleExport} className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition">
@@ -55,12 +55,17 @@ export default function PatientsPage() {
           <div className="p-8 text-center text-gray-500">Chargement...</div>
         ) : (
           <>
-            <table className="w-full">
+            <div className="overflow-x-auto">
+            <table className="w-full min-w-[600px]">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>
-                  {['Nom', 'Date naiss.', 'CIN', 'Téléphone', 'Ville', 'Groupe sg.', ''].map(h => (
-                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{h}</th>
-                  ))}
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Nom</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">Date naiss.</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">CIN</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Téléphone</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">Ville</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">Groupe sg.</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -70,13 +75,13 @@ export default function PatientsPage() {
                       <p className="font-medium text-gray-900">{p.prenom} {p.nom}</p>
                       <p className="text-xs text-gray-500">{p.sexe === 'MASCULIN' ? 'M' : 'F'}</p>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
+                    <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell">
                       {new Date(p.dateNaissance).toLocaleDateString('fr-MA')}
                     </td>
-                    <td className="px-4 py-3 text-sm font-mono text-gray-600">{p.cin || '—'}</td>
+                    <td className="px-4 py-3 text-sm font-mono text-gray-600 hidden sm:table-cell">{p.cin || '—'}</td>
                     <td className="px-4 py-3 text-sm text-gray-600">{p.telephone}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{p.ville || '—'}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell">{p.ville || '—'}</td>
+                    <td className="px-4 py-3 hidden sm:table-cell">
                       {p.groupeSanguin && (
                         <span className="px-2 py-0.5 bg-red-50 text-red-700 text-xs rounded font-medium">{p.groupeSanguin}</span>
                       )}
@@ -90,6 +95,7 @@ export default function PatientsPage() {
                 ))}
               </tbody>
             </table>
+            </div>
 
             {data?.meta && (
               <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">

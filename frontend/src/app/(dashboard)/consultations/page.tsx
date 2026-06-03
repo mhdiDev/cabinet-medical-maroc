@@ -20,7 +20,7 @@ export default function ConsultationsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900">Consultations</h1>
         <Link
           href="/consultations/nouvelle"
@@ -41,17 +41,16 @@ export default function ConsultationsPage() {
           <div className="p-8 text-center text-gray-500">Chargement...</div>
         ) : (
           <>
-            <table className="w-full">
+            <div className="overflow-x-auto">
+            <table className="w-full min-w-[600px]">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>
-                  {['Date', 'Patient', 'Motif', 'Diagnostic', 'Médecin', ''].map((h) => (
-                    <th
-                      key={h}
-                      className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase"
-                    >
-                      {h}
-                    </th>
-                  ))}
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Date</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Patient</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Motif</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">Diagnostic</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">Médecin</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -78,10 +77,10 @@ export default function ConsultationsPage() {
                     <td className="px-4 py-3 text-sm text-gray-600 max-w-[200px] truncate">
                       {c.motif || <span className="text-gray-400">—</span>}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 max-w-[200px] truncate">
+                    <td className="px-4 py-3 text-sm text-gray-600 max-w-[200px] truncate hidden sm:table-cell">
                       {c.diagnostic || <span className="text-gray-400">—</span>}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-500">
+                    <td className="px-4 py-3 text-sm text-gray-500 hidden sm:table-cell">
                       Dr {c.medecin?.prenom} {c.medecin?.nom}
                     </td>
                     <td className="px-4 py-3 text-right">
@@ -96,6 +95,7 @@ export default function ConsultationsPage() {
                 ))}
               </tbody>
             </table>
+            </div>
 
             {data?.meta && (
               <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
