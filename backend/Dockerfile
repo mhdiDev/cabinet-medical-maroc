@@ -25,8 +25,8 @@ COPY package*.json ./
 RUN npm ci --only=production
 
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/prisma-compiled/prisma/seed.js ./prisma/seed.js
-COPY --from=builder /app/prisma-compiled/prisma/import-medicaments.js ./prisma/import-medicaments.js
+COPY --from=builder /app/prisma-compiled/seed.js ./prisma/seed.js
+COPY --from=builder /app/prisma-compiled/import-medicaments.js ./prisma/import-medicaments.js
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY prisma/schema.prisma ./prisma/schema.prisma
 COPY prisma/migrations ./prisma/migrations
