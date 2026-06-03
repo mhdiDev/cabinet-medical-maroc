@@ -76,7 +76,8 @@ export default function NouvelleConsultationPage() {
     mutationFn: (data: any) => apiClient.post('/consultations', data),
     onSuccess: (res) => {
       toast.success('Consultation enregistrée — vous pouvez ajouter une ordonnance');
-      router.push(`/consultations/${res.data.id}`);
+      const today = new Date().toISOString().split('T')[0];
+      router.push(`/paiements?consultationId=${res.data.id}&date=${today}`);
     },
     onError: () => toast.error("Erreur lors de l'enregistrement"),
   });
