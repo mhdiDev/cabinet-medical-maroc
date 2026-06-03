@@ -19,15 +19,17 @@ export default function PatientDetailPage({ params }: { params: { id: string } }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4 flex-wrap">
-        <Link href="/patients" className="text-gray-400 hover:text-gray-600 text-sm">← Retour</Link>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900">{patient.prenom} {patient.nom}</h1>
-          <p className="text-gray-500 text-sm">
-            CIN: {patient.cin || 'N/A'} · {patient.telephone} · {patient.ville || '—'}
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-4">
+          <Link href="/patients" className="text-gray-400 hover:text-gray-600 text-sm">← Retour</Link>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-gray-900">{patient.prenom} {patient.nom}</h1>
+            <p className="text-gray-500 text-sm">
+              CIN: {patient.cin || 'N/A'} · {patient.telephone} · {patient.ville || '—'}
+            </p>
+          </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <Link href={`/patients/${params.id}/modifier`}
             className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition">
             Modifier
@@ -56,7 +58,7 @@ export default function PatientDetailPage({ params }: { params: { id: string } }
       )}
 
       {/* Résumé infos */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {[
           { label: 'Date de naissance', value: new Date(patient.dateNaissance).toLocaleDateString('fr-MA') },
           { label: 'Sexe', value: patient.sexe === 'MASCULIN' ? 'Masculin' : 'Féminin' },
@@ -83,7 +85,7 @@ export default function PatientDetailPage({ params }: { params: { id: string } }
             </button>
           ))}
         </div>
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {tab === 0 && <ProfileTab patient={patient} />}
           {tab === 1 && <ConsultationsTab consultations={patient.consultations} patientId={params.id} />}
           {tab === 2 && <OrdonnancesTab ordonnances={patient.ordonnances} />}

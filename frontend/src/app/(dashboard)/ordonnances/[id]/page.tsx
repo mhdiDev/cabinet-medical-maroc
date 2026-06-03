@@ -22,27 +22,29 @@ export default function OrdonnanceDetailPage({ params }: { params: { id: string 
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center gap-4">
-        <Link href="/ordonnances" className="text-gray-400 hover:text-gray-600 text-sm">
-          ← Ordonnances
-        </Link>
-        <div className="flex-1">
-          <h1 className="text-xl font-bold text-gray-900">
-            Ordonnance du {new Date(ordonnance.createdAt).toLocaleDateString('fr-MA')}
-          </h1>
-          <p className="text-sm text-gray-500">
-            {patient?.prenom} {patient?.nom} · {ordonnance.medecinNom}
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-4">
+          <Link href="/ordonnances" className="text-gray-400 hover:text-gray-600 text-sm">
+            ← Ordonnances
+          </Link>
+          <div className="flex-1">
+            <h1 className="text-xl font-bold text-gray-900">
+              Ordonnance du {new Date(ordonnance.createdAt).toLocaleDateString('fr-MA')}
+            </h1>
+            <p className="text-sm text-gray-500">
+              {patient?.prenom} {patient?.nom} · {ordonnance.medecinNom}
+            </p>
+          </div>
         </div>
         <button
           onClick={handlePdf}
-          className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700"
+          className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 w-full sm:w-auto"
         >
           Télécharger PDF
         </button>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 space-y-4">
         <div>
           <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Médecin</p>
           <p className="text-gray-900 font-medium">{ordonnance.medecinNom}</p>

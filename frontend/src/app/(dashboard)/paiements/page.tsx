@@ -120,11 +120,11 @@ function PaiementsPageInner() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900">Caisse & Recettes</h1>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition"
+          className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition w-full sm:w-auto"
         >
           + Encaissement
         </button>
@@ -238,12 +238,12 @@ function PaiementsPageInner() {
       )}
 
       {/* Onglets */}
-      <div className="flex gap-2 border-b border-gray-200">
+      <div className="flex gap-2 border-b border-gray-200 overflow-x-auto">
         {(['caisse', 'rapport'] as const).map(t => (
           <button
             key={t}
             onClick={() => setActiveTab(t)}
-            className={`px-5 py-3 text-sm font-medium transition ${
+            className={`px-5 py-3 text-sm font-medium transition whitespace-nowrap ${
               activeTab === t
                 ? 'border-b-2 border-blue-600 text-blue-600'
                 : 'text-gray-500 hover:text-gray-700'
@@ -270,7 +270,7 @@ function PaiementsPageInner() {
             <div className="bg-white rounded-xl border p-8 text-center text-gray-400">Chargement...</div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-white rounded-xl border border-gray-100 p-6 text-center md:col-span-1">
                   <p className="text-3xl font-bold text-green-600">{(caisse?.total || 0).toFixed(2)}</p>
                   <p className="text-sm text-gray-500 mt-1">Total MAD</p>
@@ -296,6 +296,7 @@ function PaiementsPageInner() {
                 {!caisse?.paiements?.length ? (
                   <p className="text-center text-gray-400 py-8">Aucune transaction ce jour</p>
                 ) : (
+                  <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-gray-50">
                       <tr>
@@ -328,6 +329,7 @@ function PaiementsPageInner() {
                       ))}
                     </tbody>
                   </table>
+                  </div>
                 )}
               </div>
             </>
@@ -358,7 +360,7 @@ function PaiementsPageInner() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 mt-4 p-4 bg-gray-50 rounded-lg">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-4 p-4 bg-gray-50 rounded-lg">
             <span className="text-sm font-medium text-gray-700">Patients :</span>
             <select
               value={exportAssurance}

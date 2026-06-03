@@ -52,7 +52,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
         <h2 className="font-semibold text-gray-900 mb-4">Rendez-vous du jour</h2>
         {!rdvToday || rdvToday.length === 0 ? (
           <p className="text-gray-500 text-center py-8">Aucun rendez-vous aujourd&apos;hui</p>

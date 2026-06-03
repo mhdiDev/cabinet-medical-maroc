@@ -22,21 +22,23 @@ export default function ConsultationDetailPage({ params }: { params: { id: strin
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <div className="flex items-center gap-4">
-        <Link href={`/patients/${consultation.patientId}`} className="text-gray-400 hover:text-gray-600 text-sm">
-          ← Fiche patient
-        </Link>
-        <div className="flex-1">
-          <h1 className="text-xl font-bold text-gray-900">
-            Consultation du {new Date(consultation.dateConsultation).toLocaleDateString('fr-MA')}
-          </h1>
-          <p className="text-sm text-gray-500">
-            {consultation.patient?.prenom} {consultation.patient?.nom} · Dr {consultation.medecin?.prenom} {consultation.medecin?.nom}
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-4">
+          <Link href={`/patients/${consultation.patientId}`} className="text-gray-400 hover:text-gray-600 text-sm">
+            ← Fiche patient
+          </Link>
+          <div className="flex-1">
+            <h1 className="text-xl font-bold text-gray-900">
+              Consultation du {new Date(consultation.dateConsultation).toLocaleDateString('fr-MA')}
+            </h1>
+            <p className="text-sm text-gray-500">
+              {consultation.patient?.prenom} {consultation.patient?.nom} · Dr {consultation.medecin?.prenom} {consultation.medecin?.nom}
+            </p>
+          </div>
         </div>
         <button
           onClick={() => setShowOrdonnance(true)}
-          className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
+          className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 w-full sm:w-auto"
         >
           + Ordonnance
         </button>
@@ -74,7 +76,7 @@ export default function ConsultationDetailPage({ params }: { params: { id: strin
       </div>
 
       {consultation.ordonnances?.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
           <h2 className="font-semibold text-gray-900 mb-3">Ordonnances</h2>
           <div className="space-y-2">
             {consultation.ordonnances.map((o: any) => (
