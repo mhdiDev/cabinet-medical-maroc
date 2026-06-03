@@ -26,6 +26,9 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Claude Code (local settings, not for versioning)
+.claude/settings.local.json
+
 # Tests
 coverage/
 
