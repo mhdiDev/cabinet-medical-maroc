@@ -11,6 +11,7 @@ interface PaiementForm {
   typePaiement: string;
   description: string;
   referenceAssurance: string;
+  consultationId: string;
 }
 
 export default function PaiementsPage() {
@@ -26,6 +27,15 @@ export default function PaiementsPage() {
   const { data: caisse, isLoading } = useQuery({
     queryKey: ['caisse', date],
     queryFn: () => apiClient.get('/paiements/caisse', { params: { date } }).then(r => r.data),
+  });
+
+  const { data: consultationsDuJour } = useQuery({
+    queryKey: ['consultations-du-jour', date],
+    queryFn: () =>
+      apiClient
+        .get('/consultations', { params: { date, nonEncaissees: true } })
+        .then(r => r.data),
+    enabled: showForm,
   });
 
   const { data: rapport } = useQuery({
@@ -49,19 +59,24 @@ export default function PaiementsPage() {
     onError: () => toast.error('Erreur lors de l\'enregistrement'),
   });
 
-  const { register, handleSubmit, reset, watch } = useForm<PaiementForm>({
-    defaultValues: { typePaiement: 'ESPECE', montantRemise: '0' },
+  const { register, handleSubmit, reset, watch, setValue } = useForm<PaiementForm>({
+    defaultValues: { typePaiement: 'ESPECE', montantRemise: '0', consultationId: '' },
   });
 
   const typePaiement = watch('typePaiement');
 
   const onSubmit = (data: PaiementForm) => {
+    const linkedConsultation = consultationsDuJour?.consultations?.find(
+      (c: any) => c.id === data.consultationId,
+    );
     mutation.mutate({
       montant: parseFloat(data.montant),
       montantRemise: parseFloat(data.montantRemise || '0'),
       typePaiement: data.typePaiement,
       description: data.description || undefined,
       referenceAssurance: data.referenceAssurance || undefined,
+      consultationId: data.consultationId || undefined,
+      patientId: linkedConsultation?.patientId || undefined,
     });
   };
 
@@ -84,6 +99,33 @@ export default function PaiementsPage() {
           className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm"
         >
           <h2 className="font-semibold text-gray-900 mb-4">Nouvel encaissement</h2>
+          <div className="mb-4">
+            <label className="text-sm font-medium text-gray-700">Consultation</label>
+            <select
+              {...register('consultationId')}
+              onChange={(e) => {
+                const consultation = consultationsDuJour?.consultations?.find(
+                  (c: any) => c.id === e.target.value,
+                );
+                setValue('consultationId', e.target.value);
+                if (consultation?.montantSuggere) {
+                  setValue('montant', consultation.montantSuggere.toString());
+                }
+                if (consultation?.motif) {
+                  setValue('description', consultation.motif);
+                }
+              }}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mt-1"
+            >
+              <option value="">— Sélectionner une consultation (optionnel) —</option>
+              {consultationsDuJour?.consultations?.map((c: any) => (
+                <option key={c.id} value={c.id}>
+                  {c.patient?.nom} {c.patient?.prenom} — {c.motif || 'Consultation'}
+                  {c.patient?.estAssure ? ' 🔵 Assuré' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="text-sm font-medium text-gray-700">Montant (MAD) *</label>
