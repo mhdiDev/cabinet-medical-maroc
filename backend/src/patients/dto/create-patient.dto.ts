@@ -1,6 +1,6 @@
 import {
   IsString, IsEmail, IsOptional, IsEnum, IsDateString,
-  IsArray, Matches, MaxLength,
+  IsArray, Matches, MaxLength, IsBoolean,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Sexe } from '@prisma/client';
@@ -77,4 +77,9 @@ export class CreatePatientDto {
   @IsOptional()
   @IsString()
   numeroAssurance?: string;
+
+  @ApiProperty({ required: false, default: false })
+  @IsOptional()
+  @IsBoolean()
+  estAssure?: boolean;
 }

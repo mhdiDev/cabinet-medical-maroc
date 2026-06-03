@@ -3,6 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { TypePaiement } from '@prisma/client';
 
 export class CreatePaiementDto {
+  @ApiProperty({ required: false }) @IsOptional() @IsString() consultationId?: string;
   @ApiProperty({ required: false }) @IsOptional() @IsString() rendezVousId?: string;
   @ApiProperty({ required: false }) @IsOptional() @IsString() patientId?: string;
 
@@ -12,7 +13,7 @@ export class CreatePaiementDto {
 
   @ApiProperty({ default: 0 })
   @IsOptional() @IsNumber() @Min(0)
-  montantRemise?: number = 0;
+  montantRemise?: number;
 
   @ApiProperty({ enum: TypePaiement, default: TypePaiement.ESPECE })
   @IsEnum(TypePaiement)
