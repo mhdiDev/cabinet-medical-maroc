@@ -8,7 +8,6 @@ const nav = [
   { href: '/agenda', icon: '📅', label: 'Agenda', roles: ['ADMIN', 'MEDECIN', 'SECRETAIRE'] },
   { href: '/patients', icon: '👥', label: 'Patients', roles: ['ADMIN', 'MEDECIN', 'SECRETAIRE'] },
   { href: '/consultations', icon: '🩺', label: 'Consultations', roles: ['ADMIN', 'MEDECIN'] },
-  { href: '/ordonnances', icon: '💊', label: 'Ordonnances', roles: ['ADMIN', 'MEDECIN'] },
   { href: '/paiements', icon: '💰', label: 'Caisse', roles: ['ADMIN', 'SECRETAIRE'] },
   { href: '/stock', icon: '📦', label: 'Stock', roles: ['ADMIN', 'SECRETAIRE'] },
 ];

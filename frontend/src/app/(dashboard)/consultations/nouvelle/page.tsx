@@ -74,9 +74,9 @@ export default function NouvelleConsultationPage() {
 
   const mutation = useMutation({
     mutationFn: (data: any) => apiClient.post('/consultations', data),
-    onSuccess: () => {
-      toast.success('Consultation enregistrée');
-      router.push('/consultations');
+    onSuccess: (res) => {
+      toast.success('Consultation enregistrée — vous pouvez ajouter une ordonnance');
+      router.push(`/consultations/${res.data.id}`);
     },
     onError: () => toast.error("Erreur lors de l'enregistrement"),
   });
