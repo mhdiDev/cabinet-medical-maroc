@@ -22,6 +22,7 @@ export default function PaiementsPage() {
     new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
   );
   const [rapportFin, setRapportFin] = useState(new Date().toISOString().split('T')[0]);
+  const [exportAssurance, setExportAssurance] = useState<'tous' | 'assures' | 'non_assures'>('tous');
   const queryClient = useQueryClient();
 
   const { data: caisse, isLoading } = useQuery({
@@ -64,6 +65,25 @@ export default function PaiementsPage() {
   });
 
   const typePaiement = watch('typePaiement');
+
+  const handleExport = async () => {
+    try {
+      const response = await apiClient.get('/paiements/export', {
+        params: { debut: rapportDebut, fin: rapportFin, assurance: exportAssurance },
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `consultations-${rapportDebut}-${rapportFin}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      toast.error('Erreur lors de l\'export');
+    }
+  };
 
   const onSubmit = (data: PaiementForm) => {
     const linkedConsultation = consultationsDuJour?.consultations?.find(
@@ -318,6 +338,25 @@ export default function PaiementsPage() {
                 className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
               />
             </div>
+          </div>
+
+          <div className="flex items-center gap-3 mt-4 p-4 bg-gray-50 rounded-lg">
+            <span className="text-sm font-medium text-gray-700">Patients :</span>
+            <select
+              value={exportAssurance}
+              onChange={(e) => setExportAssurance(e.target.value as 'tous' | 'assures' | 'non_assures')}
+              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm"
+            >
+              <option value="tous">Tous</option>
+              <option value="assures">Assurés uniquement</option>
+              <option value="non_assures">Non assurés uniquement</option>
+            </select>
+            <button
+              onClick={handleExport}
+              className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition flex items-center gap-2"
+            >
+              ⬇ Export Excel
+            </button>
           </div>
 
           {rapport && (
