@@ -1,17 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { PatientsService } from './patients.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { Sexe } from '@prisma/client';
 
-// Mock Prisma
 const mockPrisma = {
   patient: {
     create: jest.fn(),
     findMany: jest.fn(),
     findUnique: jest.fn(),
-    findFirst: jest.fn(),
     update: jest.fn(),
     count: jest.fn(),
     groupBy: jest.fn(),
@@ -38,34 +36,36 @@ describe('PatientsService', () => {
 
   describe('create', () => {
     const dto = {
-      nom: 'Tazi', prenom: 'Ahmed',
+      nom: 'Tazi',
+      prenom: 'Ahmed',
       dateNaissance: '1985-03-15',
-      sexe: Sexe.MASCULIN, cin: 'AB123456', telephone: '0671234567',
+      sexe: Sexe.MASCULIN,
+      telephone: '0671234567',
     };
 
-    it('crée un patient avec succès', async () => {
-      mockPrisma.patient.findUnique.mockResolvedValue(null);
+    it('crée un patient et log l\'audit', async () => {
       mockPrisma.patient.create.mockResolvedValue({ id: 'uuid-1', ...dto });
 
       const result = await service.create(dto as any, 'user-1');
 
       expect(mockPrisma.patient.create).toHaveBeenCalledWith({ data: dto });
-      expect(mockAudit.log).toHaveBeenCalledWith('user-1', 'CREATE', 'Patient', 'uuid-1', expect.any(Object));
+      expect(mockAudit.log).toHaveBeenCalledWith(
+        'user-1', 'CREATE', 'Patient', 'uuid-1',
+        { nom: 'Tazi', prenom: 'Ahmed' },
+      );
       expect(result).toMatchObject({ nom: 'Tazi' });
-    });
-
-    it('lève ConflictException si CIN déjà existant', async () => {
-      mockPrisma.patient.findUnique.mockResolvedValue({ id: 'existing' });
-
-      await expect(service.create(dto as any, 'user-1')).rejects.toThrow(ConflictException);
-      expect(mockPrisma.patient.create).not.toHaveBeenCalled();
     });
   });
 
   describe('findOne', () => {
     it('retourne le patient avec ses données liées', async () => {
       mockPrisma.patient.findUnique.mockResolvedValue({
-        id: 'uuid-1', nom: 'Tazi', rendezVous: [], consultations: [], ordonnances: [], documents: [],
+        id: 'uuid-1',
+        nom: 'Tazi',
+        rendezVous: [],
+        consultations: [],
+        ordonnances: [],
+        documents: [],
       });
 
       const result = await service.findOne('uuid-1');
@@ -79,20 +79,25 @@ describe('PatientsService', () => {
   });
 
   describe('exportCsv', () => {
-    it('génère un CSV valide', async () => {
+    it('génère un CSV avec les bons en-têtes sans CIN', async () => {
       mockPrisma.patient.findMany.mockResolvedValue([
         {
-          id: '1', nom: 'Tazi', prenom: 'Ahmed',
+          id: '1',
+          nom: 'Tazi',
+          prenom: 'Ahmed',
           dateNaissance: new Date('1985-03-15'),
-          sexe: 'MASCULIN', cin: 'AB123456',
-          telephone: '0671234567', email: '', ville: 'Casablanca',
+          sexe: 'MASCULIN',
+          telephone: '0671234567',
+          email: '',
+          ville: 'Casablanca',
         },
       ]);
 
       const csv = await service.exportCsv();
+
       expect(csv).toContain('Nom');
+      expect(csv).not.toContain('CIN');
       expect(csv).toContain('Tazi');
-      expect(csv).toContain('AB123456');
     });
   });
 });
