@@ -69,7 +69,6 @@ export class PaiementsService {
     const rows = paiements.map(p => ({
       'Date': p.dateHeure.toLocaleDateString('fr-MA'),
       'Patient': p.patient ? `${p.patient.nom} ${p.patient.prenom}` : '-',
-      'CIN': p.patient?.cin || '-',
       'Assuré': p.patient?.estAssure ? 'Oui' : 'Non',
       'N° Assurance': p.patient?.numeroAssurance || '-',
       'Motif': p.consultation?.motif || p.description || '-',
@@ -86,7 +85,7 @@ export class PaiementsService {
     XLSX.utils.book_append_sheet(wb, ws, 'Consultations');
 
     ws['!cols'] = [
-      { wch: 12 }, { wch: 25 }, { wch: 12 }, { wch: 8 },
+      { wch: 12 }, { wch: 25 }, { wch: 8 },
       { wch: 15 }, { wch: 25 }, { wch: 20 }, { wch: 14 },
       { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 16 },
     ];
