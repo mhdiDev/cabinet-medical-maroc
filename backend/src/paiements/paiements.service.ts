@@ -61,8 +61,8 @@ export class PaiementsService {
       },
       orderBy: { dateHeure: 'asc' },
       include: {
-        patient: { select: { nom: true, prenom: true, cin: true, estAssure: true, numeroAssurance: true } },
-        consultation: { select: { motif: true, actes: true, dateConsultation: true } },
+        patient: true,
+        consultation: true,
       },
     });
 
