@@ -13,7 +13,6 @@ const schema = z.object({
   prenom: z.string().min(1, 'Requis'),
   dateNaissance: z.string().min(1, 'Requis'),
   sexe: z.enum(['MASCULIN', 'FEMININ']),
-  cin: z.string().optional(),
   telephone: z.string().regex(/^0[5-7][0-9]{8}$/, 'Téléphone marocain invalide'),
   email: z.string().email().optional().or(z.literal('')),
   adresse: z.string().optional(),
@@ -84,10 +83,6 @@ export default function NouveauPatientPage() {
                 <option value="MASCULIN">Masculin</option>
                 <option value="FEMININ">Féminin</option>
               </select>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700">CIN</label>
-              <input {...register('cin')} placeholder="AB123456" className={inputClass} />
             </div>
             <div>
               <label className="text-sm font-medium text-gray-700">Téléphone *</label>

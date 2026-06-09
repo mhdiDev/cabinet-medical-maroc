@@ -21,12 +21,6 @@ export class PatientsService {
   ) {}
 
   async create(dto: CreatePatientDto, userId: string) {
-    // Vérification CIN unique si fourni
-    if (dto.cin) {
-      const existing = await this.prisma.patient.findUnique({ where: { cin: dto.cin } });
-      if (existing) throw new ConflictException(`CIN ${dto.cin} déjà enregistré`);
-    }
-
     const patient = await this.prisma.patient.create({ data: dto });
 
     await this.audit.log(userId, 'CREATE', 'Patient', patient.id, {
@@ -48,7 +42,6 @@ export class PatientsService {
         OR: [
           { nom: { contains: q, mode: 'insensitive' } },
           { prenom: { contains: q, mode: 'insensitive' } },
-          { cin: { contains: q, mode: 'insensitive' } },
           { telephone: { contains: q } },
         ],
       }),
@@ -66,7 +59,6 @@ export class PatientsService {
           prenom: true,
           dateNaissance: true,
           sexe: true,
-          cin: true,
           telephone: true,
           email: true,
           ville: true,
@@ -106,27 +98,8 @@ export class PatientsService {
     return patient;
   }
 
-  async findByCin(cin: string) {
-    const patient = await this.prisma.patient.findUnique({
-      where: { cin, actif: true },
-    });
-    if (!patient) throw new NotFoundException(`Aucun patient avec CIN: ${cin}`);
-    return patient;
-  }
-
   async update(id: string, dto: UpdatePatientDto, userId: string) {
     await this.findOne(id);
-
-    // Normaliser les champs optionnels : chaîne vide → null (évite violation UNIQUE sur cin)
-    if (dto.cin !== undefined && dto.cin?.trim() === '') dto.cin = undefined;
-
-    // Vérification CIN unique si modification
-    if (dto.cin) {
-      const existing = await this.prisma.patient.findFirst({
-        where: { cin: dto.cin, id: { not: id } },
-      });
-      if (existing) throw new ConflictException(`CIN ${dto.cin} déjà utilisé`);
-    }
 
     const patient = await this.prisma.patient.update({ where: { id }, data: dto });
 
@@ -137,7 +110,6 @@ export class PatientsService {
   async remove(id: string, userId: string) {
     await this.findOne(id);
 
-    // Suppression logique — les données médicales sont conservées
     await this.prisma.patient.update({ where: { id }, data: { actif: false } });
 
     await this.audit.log(userId, 'DELETE', 'Patient', id);
@@ -149,14 +121,13 @@ export class PatientsService {
       orderBy: { nom: 'asc' },
     });
 
-    const headers = ['ID', 'Nom', 'Prénom', 'Date Naissance', 'Sexe', 'CIN', 'Téléphone', 'Email', 'Ville'];
+    const headers = ['ID', 'Nom', 'Prénom', 'Date Naissance', 'Sexe', 'Téléphone', 'Email', 'Ville'];
     const rows = patients.map((p) => [
       p.id,
       p.nom,
       p.prenom,
       p.dateNaissance.toISOString().split('T')[0],
       p.sexe,
-      p.cin || '',
       p.telephone,
       p.email || '',
       p.ville || '',

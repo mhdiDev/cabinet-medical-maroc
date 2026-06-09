@@ -47,7 +47,7 @@ export default function PatientsPage() {
       <SearchInput
         value={search}
         onChange={(v) => { setSearch(v); setPage(1); }}
-        placeholder="Rechercher par nom, CIN, téléphone..."
+        placeholder="Rechercher par nom, téléphone..."
       />
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -61,7 +61,6 @@ export default function PatientsPage() {
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Nom</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">Date naiss.</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">CIN</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Téléphone</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">Ville</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">Groupe sg.</th>
@@ -78,7 +77,6 @@ export default function PatientsPage() {
                     <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell">
                       {new Date(p.dateNaissance).toLocaleDateString('fr-MA')}
                     </td>
-                    <td className="px-4 py-3 text-sm font-mono text-gray-600 hidden sm:table-cell">{p.cin || '—'}</td>
                     <td className="px-4 py-3 text-sm text-gray-600">{p.telephone}</td>
                     <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell">{p.ville || '—'}</td>
                     <td className="px-4 py-3 hidden sm:table-cell">

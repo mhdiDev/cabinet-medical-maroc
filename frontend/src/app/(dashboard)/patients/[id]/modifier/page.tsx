@@ -14,7 +14,6 @@ const schema = z.object({
   prenom: z.string().min(1, 'Requis'),
   dateNaissance: z.string().min(1, 'Requis'),
   sexe: z.enum(['MASCULIN', 'FEMININ']),
-  cin: z.string().optional(),
   telephone: z.string().regex(/^0[5-7][0-9]{8}$/, 'Téléphone marocain invalide'),
   email: z.string().email().optional().or(z.literal('')),
   adresse: z.string().optional(),
@@ -48,7 +47,6 @@ export default function ModifierPatientPage() {
         prenom: patient.prenom ?? '',
         dateNaissance: patient.dateNaissance ? patient.dateNaissance.slice(0, 10) : '',
         sexe: patient.sexe,
-        cin: patient.cin ?? '',
         telephone: patient.telephone ?? '',
         email: patient.email ?? '',
         adresse: patient.adresse ?? '',
@@ -73,9 +71,6 @@ export default function ModifierPatientPage() {
   const onSubmit = (data: FormData) => {
     mutation.mutate({
       ...data,
-      // Convertir les chaînes vides en undefined pour les champs optionnels
-      // (évite les violations de contrainte UNIQUE sur cin en DB)
-      cin: data.cin?.trim() || undefined,
       email: data.email?.trim() || undefined,
       adresse: data.adresse?.trim() || undefined,
       ville: data.ville?.trim() || undefined,
@@ -123,10 +118,6 @@ export default function ModifierPatientPage() {
                 <option value="MASCULIN">Masculin</option>
                 <option value="FEMININ">Féminin</option>
               </select>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700">CIN</label>
-              <input {...register('cin')} placeholder="AB123456" className={inputClass} />
             </div>
             <div>
               <label className="text-sm font-medium text-gray-700">Téléphone *</label>

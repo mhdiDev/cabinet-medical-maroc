@@ -43,7 +43,7 @@ export function NouveauRdvModal({ defaultDate, onClose, onSuccess }: Props) {
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mt-1">
               <option value="">Sélectionner un patient...</option>
               {patients.map((p: any) => (
-                <option key={p.id} value={p.id}>{p.prenom} {p.nom} — {p.cin || p.telephone}</option>
+                <option key={p.id} value={p.id}>{p.prenom} {p.nom} — {p.telephone}</option>
               ))}
             </select>
           </div>

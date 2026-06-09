@@ -81,7 +81,6 @@ model Patient {
   prenom        String
   dateNaissance DateTime
   sexe          Sexe
-  cin           String?   @unique
   telephone     String
   email         String?
   adresse       String?

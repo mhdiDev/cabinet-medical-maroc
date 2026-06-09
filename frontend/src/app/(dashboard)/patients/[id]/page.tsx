@@ -30,7 +30,7 @@ export default function PatientDetailPage({ params }: { params: { id: string } }
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-gray-900">{patient.prenom} {patient.nom}</h1>
             <p className="text-gray-500 text-sm">
-              CIN: {patient.cin || 'N/A'} · {patient.telephone} · {patient.ville || '—'}
+              {patient.telephone} · {patient.ville || '—'}
             </p>
           </div>
         </div>

@@ -51,12 +51,6 @@ export class PatientsController {
     res.send('\uFEFF' + csv); // BOM pour Excel
   }
 
-  @Get('cin/:cin')
-  @ApiOperation({ summary: 'Rechercher un patient par CIN' })
-  findByCin(@Param('cin') cin: string) {
-    return this.patientsService.findByCin(cin);
-  }
-
   @Get(':id')
   @ApiOperation({ summary: 'Fiche patient complète' })
   findOne(@Param('id') id: string) {

@@ -24,12 +24,6 @@ export class CreatePatientDto {
   @IsEnum(Sexe)
   sexe: Sexe;
 
-  @ApiProperty({ example: 'AB123456', required: false })
-  @IsOptional()
-  @IsString()
-  @Matches(/^[A-Z]{1,2}[0-9]{6,}$/, { message: 'Format CIN invalide (ex: AB123456)' })
-  cin?: string;
-
   @ApiProperty({ example: '0671234567' })
   @IsString()
   @Matches(/^(0[5-7][0-9]{8}|05[0-9]{8})$/, {

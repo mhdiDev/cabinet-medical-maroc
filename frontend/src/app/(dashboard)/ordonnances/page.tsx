@@ -329,7 +329,6 @@ function NouvelleOrdonnanceModal({
                   </p>
                   <p className="text-xs text-blue-600">
                     {new Date(selectedPatient.dateNaissance).toLocaleDateString('fr-MA')}
-                    {selectedPatient.cin && ` · CIN: ${selectedPatient.cin}`}
                     {selectedPatient.groupeSanguin && ` · ${selectedPatient.groupeSanguin}`}
                   </p>
                   {selectedPatient.allergies?.length > 0 && (
@@ -391,9 +390,7 @@ function NouvelleOrdonnanceModal({
                             <p className="text-sm font-medium text-gray-900">
                               {p.prenom} {p.nom}
                             </p>
-                            <p className="text-xs text-gray-400">
-                              {p.cin ? `CIN: ${p.cin} · ` : ''}{p.telephone}
-                            </p>
+                            <p className="text-xs text-gray-400">{p.telephone}</p>
                           </div>
                           {p.allergies?.length > 0 && (
                             <span className="ml-auto text-xs text-red-500">⚠️</span>

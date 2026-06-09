@@ -147,7 +147,6 @@ export default function NouvelleConsultationPage() {
               </p>
               <p className="text-sm text-blue-600">
                 {new Date(selectedPatient.dateNaissance).toLocaleDateString('fr-MA')}
-                {selectedPatient.cin && ` · CIN: ${selectedPatient.cin}`}
                 {selectedPatient.groupeSanguin && ` · ${selectedPatient.groupeSanguin}`}
               </p>
               {selectedPatient.allergies?.length > 0 && (
@@ -217,9 +216,7 @@ export default function NouvelleConsultationPage() {
                         <p className="font-medium text-gray-900 text-sm">
                           {p.prenom} {p.nom}
                         </p>
-                        <p className="text-xs text-gray-400 truncate">
-                          {p.cin ? `CIN: ${p.cin} · ` : ''}{p.telephone}
-                        </p>
+                        <p className="text-xs text-gray-400 truncate">{p.telephone}</p>
                       </div>
                       {p.allergies?.length > 0 && (
                         <span className="text-xs text-red-500 shrink-0">⚠️</span>
