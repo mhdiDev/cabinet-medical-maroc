@@ -53,14 +53,14 @@ async function main() {
   // Patients démo
   const patients = await Promise.all([
     prisma.patient.upsert({
-      where: { cin: 'AB123456' },
+      where: { id: 'seed-patient-001-tazi-ahmed-000000000' },
       update: {},
       create: {
+        id: 'seed-patient-001-tazi-ahmed-000000000',
         nom: 'Tazi',
         prenom: 'Ahmed',
         dateNaissance: new Date('1985-03-15'),
         sexe: Sexe.MASCULIN,
-        cin: 'AB123456',
         telephone: '0671234567',
         email: 'ahmed.tazi@email.ma',
         adresse: '12 Rue Mohammed V',
@@ -71,14 +71,14 @@ async function main() {
       },
     }),
     prisma.patient.upsert({
-      where: { cin: 'CD789012' },
+      where: { id: 'seed-patient-002-bennani-khadija-0000' },
       update: {},
       create: {
+        id: 'seed-patient-002-bennani-khadija-0000',
         nom: 'Bennani',
         prenom: 'Khadija',
         dateNaissance: new Date('1992-07-22'),
         sexe: Sexe.FEMININ,
-        cin: 'CD789012',
         telephone: '0662345678',
         adresse: '45 Avenue Hassan II',
         ville: 'Rabat',
@@ -88,14 +88,14 @@ async function main() {
       },
     }),
     prisma.patient.upsert({
-      where: { cin: 'EF345678' },
+      where: { id: 'seed-patient-003-idrissi-omar-000000' },
       update: {},
       create: {
+        id: 'seed-patient-003-idrissi-omar-000000',
         nom: 'Idrissi',
         prenom: 'Omar',
         dateNaissance: new Date('1978-11-30'),
         sexe: Sexe.MASCULIN,
-        cin: 'EF345678',
         telephone: '0653456789',
         adresse: '8 Bd Zerktouni',
         ville: 'Casablanca',
