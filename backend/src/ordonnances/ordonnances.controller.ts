@@ -1,9 +1,12 @@
 import { Controller, Get, Post, Body, Param, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { Response } from 'express';
+import { Role } from '@prisma/client';
 import { OrdonnancesService } from './ordonnances.service';
 import { CreateOrdonnanceDto } from './dto/create-ordonnance.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @ApiTags('ordonnances')
@@ -27,7 +30,9 @@ export class OrdonnancesController {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Créer une ordonnance' })
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN, Role.MEDECIN)
+  @ApiOperation({ summary: 'Créer une ordonnance (ADMIN, MEDECIN uniquement)' })
   create(@Body() dto: CreateOrdonnanceDto, @CurrentUser('id') userId: string) {
     return this.service.create(dto, userId);
   }

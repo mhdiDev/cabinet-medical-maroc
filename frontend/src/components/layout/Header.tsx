@@ -2,6 +2,7 @@
 import { useAuthStore } from '@/store/auth';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
+import { NotificationBell } from './NotificationBell';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -20,7 +21,6 @@ export function Header({ onMenuClick }: HeaderProps) {
   return (
     <header className="bg-white border-b border-gray-100 px-4 lg:px-6 py-4 flex items-center justify-between shadow-sm">
       <div className="flex items-center gap-3">
-        {/* Hamburger — mobile only */}
         <button
           onClick={onMenuClick}
           className="lg:hidden p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition"
@@ -34,7 +34,8 @@ export function Header({ onMenuClick }: HeaderProps) {
           {new Date().toLocaleDateString('fr-MA', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
         </h2>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
+        <NotificationBell />
         <span className="text-sm text-gray-600">
           {user?.prenom} {user?.nom} — <span className="text-blue-600">{user?.role}</span>
         </span>

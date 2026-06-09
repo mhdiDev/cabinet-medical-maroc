@@ -4,10 +4,12 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api';
 import { SearchInput } from '@/components/ui/SearchInput';
+import { useAuthStore } from '@/store/auth';
 
 export default function ConsultationsPage() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const { user } = useAuthStore();
 
   const { data, isLoading } = useQuery({
     queryKey: ['consultations', search, page],
@@ -22,12 +24,14 @@ export default function ConsultationsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900">Consultations</h1>
-        <Link
-          href="/consultations/nouvelle"
-          className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
-        >
-          + Nouvelle consultation
-        </Link>
+        {user?.role !== 'SECRETAIRE' && (
+          <Link
+            href="/consultations/nouvelle"
+            className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
+          >
+            + Nouvelle consultation
+          </Link>
+        )}
       </div>
 
       <SearchInput

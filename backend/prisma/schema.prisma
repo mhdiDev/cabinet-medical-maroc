@@ -58,6 +58,7 @@ model User {
   rendezVous    RendezVous[]   @relation("MedecinRDV")
   consultations Consultation[] @relation("MedecinConsultation")
   auditLogs     AuditLog[]
+  notifications Notification[]
 
   @@map("users")
 }
@@ -100,6 +101,7 @@ model Patient {
   ordonnances   Ordonnance[]
   documents     Document[]
   paiements     Paiement[]
+  notifications Notification[]
 
   @@map("patients")
 }
@@ -296,4 +298,20 @@ model Parametre {
   valeur String
 
   @@map("parametres")
+}
+
+model Notification {
+  id             String   @id @default(uuid())
+  userId         String
+  message        String
+  type           String   @default("INFO")
+  patientId      String?
+  consultationId String?
+  lu             Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  patient Patient? @relation(fields: [patientId], references: [id], onDelete: SetNull)
+
+  @@map("notifications")
 }

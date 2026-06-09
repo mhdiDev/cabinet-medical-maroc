@@ -34,6 +34,12 @@ export default function NouvelleConsultationPage() {
   const searchParams = useSearchParams();
   const { user } = useAuthStore();
 
+  useEffect(() => {
+    if (user?.role === 'SECRETAIRE') {
+      router.replace('/patients');
+    }
+  }, [user, router]);
+
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [search, setSearch] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
