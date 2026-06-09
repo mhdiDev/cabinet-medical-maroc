@@ -1,11 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateConsultationDto } from './dto/create-consultation.dto';
 
 @Injectable()
 export class ConsultationsService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(
+    private prisma: PrismaService,
+    private audit: AuditService,
+    private notifications: NotificationsService,
+  ) {}
 
   async findAll(page = 1, limit = 20, q?: string, date?: string) {
     const skip = (page - 1) * limit;
@@ -53,7 +58,14 @@ export class ConsultationsService {
         medecin: { select: { nom: true, prenom: true } },
       },
     });
+
     await this.audit.log(userId, 'CREATE', 'Consultation', consultation.id);
+
+    const patientNom = `${consultation.patient.prenom} ${consultation.patient.nom}`;
+    this.notifications
+      .notifySecretaires(consultation.patientId, patientNom, consultation.id)
+      .catch(() => {});
+
     return consultation;
   }
 

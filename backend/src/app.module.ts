@@ -12,11 +12,12 @@ import { StockModule } from './stock/stock.module';
 import { RapportsModule } from './rapports/rapports.module';
 import { AuditModule } from './audit/audit.module';
 import { MedicamentsModule } from './medicaments/medicaments.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { DocumentsModule } from './documents/documents.module';
 
 @Module({
   controllers: [AppController],
   imports: [
-    // Limitation du taux de requêtes (anti-bruteforce)
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
     PrismaModule,
     AuthModule,
@@ -29,6 +30,8 @@ import { MedicamentsModule } from './medicaments/medicaments.module';
     RapportsModule,
     AuditModule,
     MedicamentsModule,
+    NotificationsModule,
+    DocumentsModule,
   ],
 })
 export class AppModule {}

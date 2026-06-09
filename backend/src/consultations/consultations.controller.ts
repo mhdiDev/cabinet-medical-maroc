@@ -1,8 +1,11 @@
 import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { Role } from '@prisma/client';
 import { ConsultationsService } from './consultations.service';
 import { CreateConsultationDto } from './dto/create-consultation.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @ApiTags('consultations')
@@ -28,7 +31,9 @@ export class ConsultationsController {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Créer une consultation' })
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN, Role.MEDECIN)
+  @ApiOperation({ summary: 'Créer une consultation (ADMIN, MEDECIN uniquement)' })
   create(@Body() dto: CreateConsultationDto, @CurrentUser('id') userId: string) {
     return this.service.create(dto, userId);
   }
@@ -44,6 +49,9 @@ export class ConsultationsController {
   }
 
   @Patch(':id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN, Role.MEDECIN)
+  @ApiOperation({ summary: 'Modifier une consultation (ADMIN, MEDECIN uniquement)' })
   update(@Param('id') id: string, @Body() dto: Partial<CreateConsultationDto>, @CurrentUser('id') userId: string) {
     return this.service.update(id, dto, userId);
   }

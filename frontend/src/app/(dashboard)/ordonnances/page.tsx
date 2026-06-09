@@ -36,6 +36,7 @@ export default function OrdonnancesPage() {
   const [page, setPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
 
   const { data, isLoading } = useQuery({
     queryKey: ['ordonnances', search, page],
@@ -62,12 +63,14 @@ export default function OrdonnancesPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900">Ordonnances</h1>
-        <button
-          onClick={() => setShowModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
-        >
-          + Nouvelle ordonnance
-        </button>
+        {user?.role !== 'SECRETAIRE' && (
+          <button
+            onClick={() => setShowModal(true)}
+            className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
+          >
+            + Nouvelle ordonnance
+          </button>
+        )}
       </div>
 
       <SearchInput
