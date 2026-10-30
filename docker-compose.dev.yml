@@ -22,7 +22,9 @@ services:
       retries: 10
 
   minio:
-    image: minio/minio:latest
+    build:
+      context: ./minio
+    image: cabinet-minio:local
     container_name: cabinet_minio_dev
     command: server /data --console-address ":9001"
     environment:
