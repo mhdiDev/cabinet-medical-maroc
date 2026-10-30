@@ -96,13 +96,15 @@ export class AuthService {
     }
 
     const hash = await argon2.hash(nouveauMdp);
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { motDePasse: hash, doitChangerMdp: false },
-    });
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { motDePasse: hash, doitChangerMdp: false },
+      }),
+      // Révoque toutes les sessions (une nouvelle est ouverte pour l'appelant ci-dessous)
+      this.prisma.refreshToken.deleteMany({ where: { userId } }),
+    ]);
 
-    // Révoque toutes les sessions, puis en ouvre une nouvelle pour l'appelant
-    await this.prisma.refreshToken.deleteMany({ where: { userId } });
     await this.audit.log(userId, 'CHANGE_PASSWORD', 'User', userId);
 
     return this.generateTokens(user.id, user.email, user.role);
@@ -127,11 +129,14 @@ export class AuthService {
     if (!user) throw new NotFoundException('Utilisateur non trouvé');
 
     const hash = await argon2.hash(nouveauMdp);
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { motDePasse: hash, doitChangerMdp: true },
-    });
-    await this.prisma.refreshToken.deleteMany({ where: { userId } });
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { motDePasse: hash, doitChangerMdp: true },
+      }),
+      // Révoque toutes les sessions
+      this.prisma.refreshToken.deleteMany({ where: { userId } }),
+    ]);
     await this.audit.log(adminId, 'RESET_PASSWORD', 'User', userId);
 
     return { success: true };

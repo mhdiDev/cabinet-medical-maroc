@@ -10,6 +10,7 @@ import { Role } from '@prisma/client';
 const mockPrisma = {
   user: { findUnique: jest.fn(), findMany: jest.fn(), create: jest.fn(), update: jest.fn() },
   refreshToken: { create: jest.fn(), findUnique: jest.fn(), delete: jest.fn(), deleteMany: jest.fn() },
+  $transaction: jest.fn((ops: Promise<unknown>[]) => Promise.all(ops)),
 };
 
 const mockAudit = { log: jest.fn() };
@@ -106,6 +107,7 @@ describe('AuthService', () => {
       expect(updateArg.where).toEqual({ id: 'u1' });
       expect(updateArg.data.doitChangerMdp).toBe(false);
       expect(await argon2.verify(updateArg.data.motDePasse, 'Nouveau123!')).toBe(true);
+      expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1);
       expect(mockPrisma.refreshToken.deleteMany).toHaveBeenCalledWith({ where: { userId: 'u1' } });
       expect(mockAudit.log).toHaveBeenCalledWith('u1', 'CHANGE_PASSWORD', 'User', 'u1');
       expect(res.accessToken).toBe('mock-token');
@@ -150,6 +152,7 @@ describe('AuthService', () => {
       expect(updateArg.where).toEqual({ id: 'u1' });
       expect(updateArg.data.doitChangerMdp).toBe(true);
       expect(await argon2.verify(updateArg.data.motDePasse, 'Temp1234!')).toBe(true);
+      expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1);
       expect(mockPrisma.refreshToken.deleteMany).toHaveBeenCalledWith({ where: { userId: 'u1' } });
       expect(mockAudit.log).toHaveBeenCalledWith('admin1', 'RESET_PASSWORD', 'User', 'u1');
       expect(res).toEqual({ success: true });
