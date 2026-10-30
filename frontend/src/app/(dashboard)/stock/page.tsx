@@ -54,7 +54,7 @@ export default function StockPage() {
       {alertes.length > 0 && (
         <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
           <p className="font-semibold text-orange-800 mb-2">
-            ⚠️ {alertes.length} article(s) sous le seuil d'alerte
+            ⚠️ {alertes.length} article(s) sous le seuil d&apos;alerte
           </p>
           <div className="flex flex-wrap gap-2">
             {alertes.map((a: any) => (
@@ -206,7 +206,7 @@ function NouvelArticleModal({ onClose, onSubmit, loading }: any) {
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700">Seuil d'alerte</label>
+              <label className="text-sm font-medium text-gray-700">Seuil d&apos;alerte</label>
               <input
                 {...register('seuilAlerte')}
                 type="number"

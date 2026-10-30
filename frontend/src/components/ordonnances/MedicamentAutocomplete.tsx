@@ -81,7 +81,7 @@ export function MedicamentAutocomplete({ value, onChange, placeholder }: Props) 
                 Aucun médicament trouvé pour «&nbsp;{input}&nbsp;»
               </p>
               <p className="text-xs text-blue-600 mt-1">
-                Ce nom sera utilisé tel quel dans l'ordonnance.
+                Ce nom sera utilisé tel quel dans l&apos;ordonnance.
               </p>
             </div>
           ) : (
