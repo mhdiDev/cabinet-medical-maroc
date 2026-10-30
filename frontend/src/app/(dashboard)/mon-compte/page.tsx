@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -36,6 +36,20 @@ export default function MonComptePage() {
   const { register, handleSubmit, reset, setError, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
+
+  // Le mot de passe a pu être changé depuis un autre appareil
+  useEffect(() => {
+    if (!force) return;
+    apiClient
+      .get('/auth/me')
+      .then((res) => {
+        if (res.data?.doitChangerMdp === false) {
+          setDoitChangerMdp(false);
+          router.replace('/dashboard');
+        }
+      })
+      .catch(() => {});
+  }, [force, setDoitChangerMdp, router]);
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);

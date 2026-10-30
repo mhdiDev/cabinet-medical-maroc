@@ -26,8 +26,8 @@ export default function UtilisateursPage() {
   const estAdmin = user?.role === 'ADMIN';
 
   useEffect(() => {
-    if (user && !estAdmin) router.replace('/dashboard');
-  }, [user, estAdmin, router]);
+    if (!estAdmin) router.replace('/dashboard');
+  }, [estAdmin, router]);
 
   const { data: utilisateurs = [], isLoading } = useQuery<Utilisateur[]>({
     queryKey: ['users'],
