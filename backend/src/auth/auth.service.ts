@@ -108,6 +108,35 @@ export class AuthService {
     return this.generateTokens(user.id, user.email, user.role);
   }
 
+  async listUsers() {
+    return this.prisma.user.findMany({
+      select: {
+        id: true, nom: true, prenom: true, email: true, role: true,
+        actif: true, doitChangerMdp: true, createdAt: true,
+      },
+      orderBy: [{ nom: 'asc' }, { prenom: 'asc' }],
+    });
+  }
+
+  async resetPassword(adminId: string, userId: string, nouveauMdp: string) {
+    if (adminId === userId) {
+      throw new BadRequestException('Utilisez « Mon compte » pour changer votre propre mot de passe');
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('Utilisateur non trouvé');
+
+    const hash = await argon2.hash(nouveauMdp);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { motDePasse: hash, doitChangerMdp: true },
+    });
+    await this.prisma.refreshToken.deleteMany({ where: { userId } });
+    await this.audit.log(adminId, 'RESET_PASSWORD', 'User', userId);
+
+    return { success: true };
+  }
+
   private async generateTokens(userId: string, email: string, role: string) {
     const payload = { sub: userId, email, role };
 

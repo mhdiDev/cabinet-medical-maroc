@@ -112,4 +112,47 @@ describe('AuthService', () => {
       expect(res.refreshToken).toBeDefined();
     });
   });
+
+  describe('listUsers', () => {
+    it('liste les utilisateurs sans le mot de passe, triés par nom puis prénom', async () => {
+      mockPrisma.user.findMany.mockResolvedValue([]);
+      await service.listUsers();
+
+      const arg = mockPrisma.user.findMany.mock.calls[0][0];
+      expect(arg.orderBy).toEqual([{ nom: 'asc' }, { prenom: 'asc' }]);
+      expect(arg.select.motDePasse).toBeUndefined();
+      expect(arg.select).toMatchObject({
+        id: true, nom: true, prenom: true, email: true, role: true,
+        actif: true, doitChangerMdp: true, createdAt: true,
+      });
+    });
+  });
+
+  describe('resetPassword', () => {
+    it('lève BadRequestException si l\'admin cible son propre compte', async () => {
+      await expect(service.resetPassword('admin1', 'admin1', 'Temp1234!'))
+        .rejects.toThrow(BadRequestException);
+      expect(mockPrisma.user.update).not.toHaveBeenCalled();
+    });
+
+    it('lève NotFoundException si utilisateur inexistant', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      await expect(service.resetPassword('admin1', 'u1', 'Temp1234!'))
+        .rejects.toThrow(NotFoundException);
+    });
+
+    it('définit le mot de passe, force le changement, révoque les sessions et audite', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({ id: 'u1' });
+
+      const res = await service.resetPassword('admin1', 'u1', 'Temp1234!');
+
+      const updateArg = mockPrisma.user.update.mock.calls[0][0];
+      expect(updateArg.where).toEqual({ id: 'u1' });
+      expect(updateArg.data.doitChangerMdp).toBe(true);
+      expect(await argon2.verify(updateArg.data.motDePasse, 'Temp1234!')).toBe(true);
+      expect(mockPrisma.refreshToken.deleteMany).toHaveBeenCalledWith({ where: { userId: 'u1' } });
+      expect(mockAudit.log).toHaveBeenCalledWith('admin1', 'RESET_PASSWORD', 'User', 'u1');
+      expect(res).toEqual({ success: true });
+    });
+  });
 });
