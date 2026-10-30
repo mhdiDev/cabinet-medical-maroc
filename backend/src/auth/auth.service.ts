@@ -2,6 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
+  BadRequestException,
   NotFoundException,
   Logger,
 } from '@nestjs/common';
@@ -9,6 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../audit/audit.service';
 import { LoginDto } from './dto/login.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 
@@ -19,6 +21,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
+    private audit: AuditService,
   ) {}
 
   async validateUser(email: string, motDePasse: string) {
@@ -84,11 +87,25 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('Utilisateur non trouvé');
 
+    // 400 et non 401 : un 401 déclencherait le refresh/déconnexion côté frontend
     const valid = await argon2.verify(user.motDePasse, ancienMdp);
-    if (!valid) throw new UnauthorizedException('Ancien mot de passe incorrect');
+    if (!valid) throw new BadRequestException('Ancien mot de passe incorrect');
+
+    if (ancienMdp === nouveauMdp) {
+      throw new BadRequestException('Le nouveau mot de passe doit être différent de l\'ancien');
+    }
 
     const hash = await argon2.hash(nouveauMdp);
-    await this.prisma.user.update({ where: { id: userId }, data: { motDePasse: hash } });
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { motDePasse: hash, doitChangerMdp: false },
+    });
+
+    // Révoque toutes les sessions, puis en ouvre une nouvelle pour l'appelant
+    await this.prisma.refreshToken.deleteMany({ where: { userId } });
+    await this.audit.log(userId, 'CHANGE_PASSWORD', 'User', userId);
+
+    return this.generateTokens(user.id, user.email, user.role);
   }
 
   private async generateTokens(userId: string, email: string, role: string) {
