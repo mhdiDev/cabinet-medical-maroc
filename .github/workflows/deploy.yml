@@ -1,0 +1,40 @@
+name: Deploy to OVH
+
+# Déploie uniquement quand la CI (tests) est verte sur master
+on:
+  workflow_run:
+    workflows: ["CI — Cabinet Médical"]
+    types: [completed]
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-ovh
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    env:
+      OVH_HOST: ${{ secrets.OVH_HOST }}
+    steps:
+      - name: Vérifier la configuration
+        if: env.OVH_HOST == ''
+        run: echo "::warning::Secret OVH_HOST absent, déploiement ignoré (VPS pas encore configuré)."
+
+      - name: Deploy via SSH
+        if: env.OVH_HOST != ''
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.OVH_HOST }}
+          username: ${{ secrets.OVH_USER }}
+          key: ${{ secrets.OVH_SSH_KEY }}
+          script_stop: true
+          script: |
+            cd /opt/cabinet-medical-maroc
+            git pull --ff-only origin master
+            # Les migrations Prisma et le seed sont appliqués au démarrage du backend (CMD du Dockerfile)
+            docker compose up -d --build --remove-orphans
+            docker image prune -f
+            echo "Déploiement terminé : $(date)"
