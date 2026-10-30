@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Req, Get } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -9,6 +9,8 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { AutoriseSiMdpAChanger } from '../common/decorators/autorise-si-mdp-a-changer.decorator';
 import { Role } from '@prisma/client';
 
 @ApiTags('auth')
@@ -30,6 +32,7 @@ export class AuthController {
 
   @Post('logout')
   @UseGuards(JwtAuthGuard)
+  @AutoriseSiMdpAChanger()
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Déconnexion' })
   logout(@CurrentUser('sub') userId: string) {
@@ -38,6 +41,7 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
+  @AutoriseSiMdpAChanger()
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Profil utilisateur connecté' })
   me(@CurrentUser() user: any) {
@@ -53,8 +57,31 @@ export class AuthController {
     return this.authService.createUser(dto);
   }
 
+  @Get('users')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Lister les utilisateurs (admin)' })
+  listUsers() {
+    return this.authService.listUsers();
+  }
+
+  @Post('users/:id/reset-password')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Réinitialiser le mot de passe d\'un utilisateur (admin)' })
+  resetPassword(
+    @CurrentUser('sub') adminId: string,
+    @Param('id') userId: string,
+    @Body() dto: ResetPasswordDto,
+  ) {
+    return this.authService.resetPassword(adminId, userId, dto.nouveauMdp);
+  }
+
   @Post('change-password')
   @UseGuards(JwtAuthGuard)
+  @AutoriseSiMdpAChanger()
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Changer le mot de passe' })
   changePassword(@CurrentUser('sub') userId: string, @Body() dto: ChangePasswordDto) {
