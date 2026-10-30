@@ -10,6 +10,8 @@ const nav = [
   { href: '/consultations', icon: '🩺', label: 'Consultations', roles: ['ADMIN', 'MEDECIN'] },
   { href: '/paiements', icon: '💰', label: 'Caisse', roles: ['ADMIN', 'SECRETAIRE'] },
   { href: '/stock', icon: '📦', label: 'Stock', roles: ['ADMIN', 'SECRETAIRE'] },
+  { href: '/utilisateurs', icon: '👤', label: 'Utilisateurs', roles: ['ADMIN'] },
+  { href: '/mon-compte', icon: '🔑', label: 'Mon compte', roles: ['ADMIN', 'MEDECIN', 'SECRETAIRE'] },
 ];
 
 interface SidebarProps {
@@ -21,7 +23,9 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { user } = useAuthStore();
 
-  const items = nav.filter(n => !user?.role || n.roles.includes(user.role));
+  const items = user?.doitChangerMdp
+    ? nav.filter(n => n.href === '/mon-compte')
+    : nav.filter(n => !user?.role || n.roles.includes(user.role));
 
   return (
     <aside className={`
@@ -64,7 +68,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       </nav>
 
       <div className="p-4 border-t border-gray-100">
-        <div className="flex items-center gap-3 px-3 py-2">
+        <Link href="/mon-compte" onClick={onClose}
+          className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition">
           <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold text-gray-600">
             {user?.prenom?.[0]}{user?.nom?.[0]}
           </div>
@@ -72,7 +77,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             <p className="text-sm font-medium text-gray-900 truncate">{user?.prenom} {user?.nom}</p>
             <p className="text-xs text-gray-400">{user?.role}</p>
           </div>
-        </div>
+        </Link>
       </div>
     </aside>
   );

@@ -1,19 +1,26 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { token, _hasHydrated } = useAuthStore();
+  const { token, user, _hasHydrated } = useAuthStore();
   const router = useRouter();
+  const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const mdpAChanger = !!user?.doitChangerMdp && pathname !== '/mon-compte';
 
   useEffect(() => {
     // Attendre la fin de la réhydratation avant de juger l'état d'auth
     if (_hasHydrated && !token) router.push('/login');
   }, [_hasHydrated, token, router]);
+
+  useEffect(() => {
+    // Mot de passe réinitialisé par l'admin : seule la page Mon compte est accessible
+    if (_hasHydrated && token && mdpAChanger) router.replace('/mon-compte');
+  }, [_hasHydrated, token, mdpAChanger, router]);
 
   // Pendant la réhydratation : écran de chargement neutre (évite le flash de redirection)
   if (!_hasHydrated) {
@@ -27,7 +34,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   }
 
-  if (!token) return null;
+  if (!token || mdpAChanger) return null;
 
   return (
     <div className="flex h-screen bg-gray-50">
