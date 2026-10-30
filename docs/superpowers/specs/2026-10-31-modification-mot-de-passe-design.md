@@ -51,7 +51,7 @@ Migration : `add_doit_changer_mdp`. Les comptes existants ont `false`.
 Body inchangé : `{ ancienMdp, nouveauMdp }` (`nouveauMdp` min 8).
 
 1. Utilisateur introuvable → 404.
-2. `ancienMdp` incorrect → 401 `Ancien mot de passe incorrect`.
+2. `ancienMdp` incorrect → **400** `Ancien mot de passe incorrect` (et non 401 comme aujourd'hui : un 401 déclencherait le refresh/déconnexion de l'intercepteur axios).
 3. `nouveauMdp === ancienMdp` → 400 `Le nouveau mot de passe doit être différent de l'ancien`.
 4. Succès : hash argon2, `doitChangerMdp = false`, suppression de **tous** les refresh tokens de l'utilisateur, audit `CHANGE_PASSWORD` (entité `User`), puis génération et retour d'une nouvelle paire `{ accessToken, refreshToken }`.
 
@@ -62,7 +62,7 @@ Retourne la liste des utilisateurs triée par nom puis prénom :
 
 ### `POST /auth/users/:id/reset-password` (nouveau, `@Roles(ADMIN)`)
 
-Body : `ResetPasswordDto { nouveauMdp }` (`@IsString() @MinLength(8)`). `:id` validé par `ParseUUIDPipe`.
+Body : `ResetPasswordDto { nouveauMdp }` (`@IsString() @MinLength(8)`). Pas de `ParseUUIDPipe` (les ids de test ne sont pas des UUID) : un id inconnu donne 404.
 
 1. `:id` égal à l'id de l'admin connecté → 400 `Utilisez « Mon compte » pour changer votre propre mot de passe`.
 2. Utilisateur introuvable → 404.
@@ -84,7 +84,6 @@ Un access token déjà émis reste valide jusqu'à 15 min après une réinitiali
 ### Intercepteur axios (`lib/api.ts`)
 
 - 403 avec `response.data.code === 'MUST_CHANGE_PASSWORD'` → `setDoitChangerMdp(true)` + redirection `/mon-compte`.
-- Les 401 de `/auth/change-password` (ancien mot de passe incorrect) **ne déclenchent pas** le refresh/déconnexion : l'erreur est rejetée telle quelle vers le formulaire.
 
 ### Layout `(dashboard)`
 
@@ -101,15 +100,16 @@ Un access token déjà émis reste valide jusqu'à 15 min après une réinitiali
 
 - Infos en lecture seule : prénom nom, email, rôle.
 - Bandeau orange si `doitChangerMdp` : « Votre mot de passe a été réinitialisé par l'administrateur. Choisissez un nouveau mot de passe pour continuer. »
+- Si changement forcé, le premier champ est libellé « Mot de passe temporaire (communiqué par l'administrateur) ».
 - Formulaire React Hook Form + Zod : `ancienMdp`, `nouveauMdp` (min 8), `confirmation` (= `nouveauMdp`), `nouveauMdp !== ancienMdp`.
 - Succès : `setTokens(...)`, `setDoitChangerMdp(false)`, toast « Mot de passe modifié », reset du formulaire ; si le changement était forcé → `router.replace('/dashboard')`.
-- Erreur 401 → message sous le champ « Ancien mot de passe incorrect ». Autres erreurs → toast avec le message API.
+- Erreur 400 `Ancien mot de passe incorrect` → message sous le champ « Ancien mot de passe incorrect ». Autres erreurs → toast avec le message API.
 
 ### Page `/utilisateurs` (ADMIN)
 
 - Accès non-admin → redirection `/dashboard`.
 - React Query `['users']` sur `GET /auth/users`.
-- Tableau (`sm:` et plus) / cartes (mobile) : nom, email, rôle, actif/inactif, badge « Changement requis » si `doitChangerMdp`.
+- Tableau (même modèle que la page Stock : colonnes secondaires `hidden sm:table-cell`, email et rôle repliés sous le nom en mobile) : nom, email, rôle, actif/inactif, badge « Changement requis » si `doitChangerMdp`.
 - Bouton « Réinitialiser le mot de passe » sur chaque ligne sauf celle de l'admin connecté → modale : `nouveauMdp` (min 8) + `confirmation` (Zod).
 - Succès : fermeture de la modale, toast « Mot de passe réinitialisé. Communiquez-le à l'utilisateur : il devra le changer à sa prochaine connexion. », invalidation de `['users']`.
 
@@ -120,7 +120,7 @@ Un access token déjà émis reste valide jusqu'à 15 min après une réinitiali
 ### Unitaires (`backend/src/auth/auth.service.spec.ts`, Prisma mocké)
 
 `changePassword` :
-- ancien mot de passe incorrect → `UnauthorizedException`
+- ancien mot de passe incorrect → `BadRequestException`
 - nouveau identique à l'ancien → `BadRequestException`
 - succès → `doitChangerMdp: false` dans l'update, `refreshToken.deleteMany` appelé, tokens retournés
 
