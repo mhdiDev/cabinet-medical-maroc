@@ -543,7 +543,7 @@ git push origin master
 
 ```bash
 cd backend
-DATABASE_URL="postgresql://cabinet_medical_db_rtqm_user:teIeFYR58t36JySyjkYPAAnrXv6x6k5p@dpg-d8f0hk4m0tmc73eec5jg-a.frankfurt-postgres.render.com/cabinet_medical_db_rtqm" npx prisma migrate deploy
+DATABASE_URL="<url_postgres_production>" npx prisma migrate deploy
 ```
 
 Attendu :

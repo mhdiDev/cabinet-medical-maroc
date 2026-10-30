@@ -70,7 +70,7 @@ cd backend && npx prisma migrate dev --name <nom>
 
 # Appliquer migrations en production
 cd backend
-DATABASE_URL="postgresql://cabinet_medical_db_rtqm_user:teIeFYR58t36JySyjkYPAAnrXv6x6k5p@dpg-d8f0hk4m0tmc73eec5jg-a.frankfurt-postgres.render.com/cabinet_medical_db_rtqm" \
+DATABASE_URL="<url_postgres_production>" \
   npx prisma migrate deploy
 
 # Prisma Studio (UI base de données locale)
