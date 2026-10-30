@@ -27,22 +27,44 @@ cabinet-medical-maroc/
 │   └── superpowers/
 │       ├── specs/    Design docs
 │       └── plans/    Plans d'implémentation
-└── docker-compose.yml
+├── minio/        Dockerfile MinIO (compilé depuis les sources) + policy du bucket
+├── nginx/        cabinet.conf (reverse proxy du VPS)
+├── scripts/      backup.sh (sauvegarde nocturne)
+├── docker-compose.yml      production (VPS OVH, secrets via .env)
+└── docker-compose.dev.yml  infra locale (Postgres, MinIO, MailHog)
 ```
 
-## URLs production
+## Production (VPS OVH)
 
-| Service | URL |
-|---------|-----|
-| Frontend (Vercel) | https://cabinet-medical-maroc.vercel.app |
-| Backend (Render) | https://cabinet-medical-maroc.onrender.com |
-| Swagger | https://cabinet-medical-maroc.onrender.com/api/docs |
-| Health check | https://cabinet-medical-maroc.onrender.com/api/health |
+Tout tourne en Docker Compose sur un VPS OVH, derrière Nginx (installé sur le host).
+Vercel et Render ne sont plus utilisés (la base Render a été supprimée).
+
+| Élément | Valeur |
+|---------|--------|
+| Application | http://149.56.209.147 |
+| API | http://149.56.209.147/api |
+| Swagger | http://149.56.209.147/api/docs |
+| Documents patients | http://149.56.209.147/files/ (MinIO, lecture seule) |
+| Serveur | VPS-1 OVH, Canada (Beauharnois), Ubuntu 24.04, 2 vCPU / 4 Go + 2 Go swap |
+| SSH | `ssh ubuntu@149.56.209.147` |
+| Dossier de l'appli | `/opt/cabinet-medical-maroc` (secrets dans `.env`, jamais commité) |
+
+```
+Internet ─▶ Nginx :80 (host)
+             ├─ /        ▶ frontend  (127.0.0.1:3000)
+             ├─ /api     ▶ backend   (127.0.0.1:3001) ─▶ postgres (réseau Docker interne)
+             └─ /files/  ▶ minio     (127.0.0.1:9000, bucket cabinet-medical)
+```
+
+Serveur temporaire : à déplacer vers un VPS en Europe dès qu'il y en a en stock.
+Pas de vraies données patients d'ici là (données de santé, loi 09-08 / CNDP).
 
 ## Comptes de démo
 
-| Rôle | Email | Mot de passe |
-|------|-------|--------------|
+Le seed crée ces comptes s'ils n'existent pas. Mots de passe valables en local uniquement : en production, ils doivent être changés après le premier déploiement (pas d'écran pour ça, passer par `POST /api/auth/change-password`).
+
+| Rôle | Email | Mot de passe (local) |
+|------|-------|----------------------|
 | Admin | admin@cabinet.ma | Admin123! |
 | Médecin | dr.benali@cabinet.ma | Medecin123! |
 | Secrétaire | secretaire@cabinet.ma | Secretaire123! |
@@ -68,27 +90,31 @@ cd frontend && npm run dev
 # Nouvelle migration locale
 cd backend && npx prisma migrate dev --name <nom>
 
-# Appliquer migrations en production
-cd backend
-DATABASE_URL="<url_postgres_production>" \
-  npx prisma migrate deploy
-
 # Prisma Studio (UI base de données locale)
 cd backend && npx prisma studio
 ```
 
-### Déploiement
+En production, les migrations sont appliquées automatiquement au démarrage du backend.
+
+### Déploiement (VPS OVH)
 
 ```bash
-# Frontend → Vercel (depuis la racine du repo)
-npx vercel --prod
-
-# Backend → Render : push sur master déclenche l'auto-deploy Docker
-git push origin master
+# Manuel, sur le serveur
+ssh ubuntu@149.56.209.147
+cd /opt/cabinet-medical-maroc && git pull && docker compose up -d --build
 ```
 
-> Le backend Render exécute automatiquement au démarrage :
+Automatique : `.github/workflows/deploy.yml` se lance après une CI verte sur master et fait la même chose
+en SSH. Il est ignoré tant que les secrets GitHub `OVH_HOST`, `OVH_USER` (`ubuntu`) et `OVH_SSH_KEY`
+ne sont pas configurés.
+
+> Au démarrage, le backend exécute :
 > `npx prisma migrate deploy && node prisma/seed.js && node prisma/import-medicaments.js && node dist/main`
+
+Le premier build prend environ 10 minutes (MinIO est compilé depuis les sources, voir `minio/Dockerfile` :
+MinIO ne publie plus d'image Docker).
+
+Sauvegardes : `scripts/backup.sh` (dump Postgres + archive MinIO vers OVH Object Storage via rclone, cron à 02h00).
 
 ## Modèles Prisma (14 modèles)
 
@@ -132,22 +158,18 @@ Relations clés :
 | `cin: ""` → 500 PATCH patient | Convertir en `undefined` avant envoi (`cin: data.cin?.trim() \|\| undefined`) |
 | `consultations` vs `data` dans la réponse API | Le service retourne `{ consultations, meta }` (pas `{ data, meta }`) |
 | Node 10 actif par défaut | `nvm use 20` ou `PATH="/Users/Mehdi/.nvm/versions/node/v20.19.5/bin:$PATH"` |
-| Render free tier en veille | UptimeRobot pinge `/api/health` toutes les 5 min |
-| Vercel déploie depuis la racine | Root Directory configuré sur `frontend` dans Vercel Settings |
+| `NEXT_PUBLIC_API_URL` | Intégrée au build Next.js : la changer impose `docker compose up -d --build` |
+| `/api/health` | Répond « ok » sans interroger la base : ne prouve pas que la base fonctionne |
 
 ## Variables d'environnement production
 
-### Render (backend)
-- `DATABASE_URL` — PostgreSQL Render interne
-- `JWT_SECRET` / `JWT_REFRESH_SECRET`
-- `CORS_ORIGIN=https://cabinet-medical-maroc.vercel.app`
-
-### Vercel (frontend)
-- `NEXT_PUBLIC_API_URL=https://cabinet-medical-maroc.onrender.com/api`
+Fichier `/opt/cabinet-medical-maroc/.env` sur le serveur (modèle : `.env.production.example`) :
+`POSTGRES_PASSWORD`, `JWT_SECRET`, `JWT_REFRESH_SECRET`, `CORS_ORIGIN`, `MINIO_ROOT_USER`,
+`MINIO_ROOT_PASSWORD`, `MINIO_PUBLIC_URL`, `NEXT_PUBLIC_API_URL`.
 
 ## Workflow de développement recommandé
 
 1. Nouvelle feature → brainstorming (`superpowers:brainstorming`)
 2. Plan → `docs/superpowers/plans/YYYY-MM-DD-<feature>.md`
 3. Implémentation → `superpowers:subagent-driven-development`
-4. Deploy → `git push origin master` + `npx vercel --prod`
+4. Deploy → merge sur master (déploiement auto une fois l'étape 7 faite, sinon manuel sur le VPS)
