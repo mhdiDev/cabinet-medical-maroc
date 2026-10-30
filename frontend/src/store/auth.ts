@@ -7,6 +7,7 @@ interface User {
   nom: string;
   prenom: string;
   role: 'ADMIN' | 'MEDECIN' | 'SECRETAIRE';
+  doitChangerMdp?: boolean;
 }
 
 interface AuthState {
@@ -17,6 +18,8 @@ interface AuthState {
   _hasHydrated: boolean;
   setAuth: (user: User, token: string, refreshToken: string) => void;
   setToken: (token: string) => void;
+  setTokens: (token: string, refreshToken: string) => void;
+  setDoitChangerMdp: (value: boolean) => void;
   clearAuth: () => void;
   setHasHydrated: (v: boolean) => void;
 }
@@ -30,6 +33,9 @@ export const useAuthStore = create<AuthState>()(
       _hasHydrated: false,
       setAuth: (user, token, refreshToken) => set({ user, token, refreshToken }),
       setToken: (token) => set({ token }),
+      setTokens: (token, refreshToken) => set({ token, refreshToken }),
+      setDoitChangerMdp: (value) =>
+        set((state) => ({ user: state.user ? { ...state.user, doitChangerMdp: value } : null })),
       clearAuth: () => set({ user: null, token: null, refreshToken: null }),
       setHasHydrated: (v) => set({ _hasHydrated: v }),
     }),

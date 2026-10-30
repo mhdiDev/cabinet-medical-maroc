@@ -33,6 +33,10 @@ apiClient.interceptors.response.use(
         window.location.href = '/login';
       }
     }
+    if (err.response?.status === 403 && err.response?.data?.code === 'MUST_CHANGE_PASSWORD') {
+      useAuthStore.getState().setDoitChangerMdp(true);
+      if (window.location.pathname !== '/mon-compte') window.location.href = '/mon-compte';
+    }
     return Promise.reject(err);
   },
 );
