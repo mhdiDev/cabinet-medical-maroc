@@ -10,6 +10,32 @@
 
 **Spec :** `docs/superpowers/specs/2026-10-31-modification-mot-de-passe-design.md`
 
+## Statut (2026-10-31)
+
+Tâches 1 à 9 faites sur la branche `feat/modification-mot-de-passe`, PR vers `master` ouverte, **non mergée**.
+
+### Décisions prises
+
+- Périmètre : self-service (« Mon compte ») + réinitialisation admin (« Utilisateurs », liste + reset seulement, pas de création/désactivation de comptes dans l'UI).
+- Après une réinitialisation admin, changement **forcé** à la connexion suivante, appliqué côté API (guard) et pas seulement côté frontend.
+- Ancien mot de passe incorrect → **400** (et non 401, que l'intercepteur axios traite comme un token expiré).
+- Pas de `ParseUUIDPipe` sur `:id` (les ids de test e2e ne sont pas des UUID) ; un id inconnu donne 404.
+- Mise à jour du mot de passe et révocation des sessions dans une transaction Prisma (retour de revue).
+- Frontend : le polling des notifications est coupé pendant un changement forcé (sinon un 403 tardif rebloquait l'utilisateur), et `/mon-compte` resynchronise le flag via `GET /auth/me` (changement fait depuis un autre appareil).
+- Tableau `/utilisateurs` sur le modèle de la page Stock (colonnes secondaires masquées en mobile).
+
+### Vérifications
+
+Unitaires 27/27, e2e 47/47 (base `cabinet_test`), `next build` OK, parcours navigateur Playwright 24/24 (reset admin, redirection forcée, erreur sans déconnexion, accès rétabli, médecin sans accès à `/utilisateurs`, mobile 375 px).
+
+### Reste à faire
+
+- [ ] Revue et merge de la PR.
+- [ ] Déploiement : la migration `add_doit_changer_mdp` est appliquée par `prisma migrate deploy` au démarrage du backend ; vérifier après déploiement.
+- [ ] En production : changer les mots de passe des comptes de démo via « Mon compte ».
+- [ ] Optionnel (hors spec) : forcer aussi le changement pour les comptes créés par `POST /auth/users`.
+- [ ] Optionnel : vider le cache React Query à la déconnexion ; renvoyer un `code` d'erreur pour « ancien mot de passe incorrect » au lieu de comparer le message.
+
 ---
 
 ## Prérequis d'environnement
@@ -60,7 +86,7 @@ cd backend && DATABASE_URL="$TEST_DB" npx prisma migrate deploy
 - Modify: `backend/prisma/schema.prisma` (model `User`)
 - Create: `backend/prisma/migrations/<timestamp>_add_doit_changer_mdp/migration.sql` (généré)
 
-- [ ] **Step 1: Ajouter le champ**
+- [x] **Step 1: Ajouter le champ**
 
 Dans `model User`, juste après `actif        Boolean  @default(true)` :
 
@@ -68,7 +94,7 @@ Dans `model User`, juste après `actif        Boolean  @default(true)` :
   doitChangerMdp Boolean @default(false)
 ```
 
-- [ ] **Step 2: Générer la migration**
+- [x] **Step 2: Générer la migration**
 
 ```bash
 cd backend && npx prisma migrate dev --name add_doit_changer_mdp
@@ -77,7 +103,7 @@ cd backend && npx prisma migrate dev --name add_doit_changer_mdp
 Expected : nouveau dossier `prisma/migrations/<timestamp>_add_doit_changer_mdp/` contenant
 `ALTER TABLE "users" ADD COLUMN "doitChangerMdp" BOOLEAN NOT NULL DEFAULT false;` et client Prisma régénéré.
 
-- [ ] **Step 3: Appliquer à la base de test**
+- [x] **Step 3: Appliquer à la base de test**
 
 ```bash
 cd backend && DATABASE_URL="$TEST_DB" npx prisma migrate deploy
@@ -85,7 +111,7 @@ cd backend && DATABASE_URL="$TEST_DB" npx prisma migrate deploy
 
 Expected : `1 migration applied` (ou `No pending migrations` si déjà fait).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add backend/prisma/schema.prisma backend/prisma/migrations
@@ -101,7 +127,7 @@ git commit -m "feat: add User.doitChangerMdp field"
 - Modify: `backend/src/auth/auth.service.ts`
 - Test: `backend/src/auth/auth.service.spec.ts`
 
-- [ ] **Step 1: Brancher `AuditService` dans le test unitaire et écrire les tests qui échouent**
+- [x] **Step 1: Brancher `AuditService` dans le test unitaire et écrire les tests qui échouent**
 
 Dans `backend/src/auth/auth.service.spec.ts` :
 
@@ -180,7 +206,7 @@ Ajouter à la fin du `describe('AuthService')` :
   });
 ```
 
-- [ ] **Step 2: Lancer les tests — ils échouent**
+- [x] **Step 2: Lancer les tests — ils échouent**
 
 ```bash
 cd backend && npx jest src/auth/auth.service.spec.ts
@@ -188,7 +214,7 @@ cd backend && npx jest src/auth/auth.service.spec.ts
 
 Expected : FAIL sur les tests `changePassword` (`UnauthorizedException` reçue au lieu de `BadRequestException`, `res` undefined, `deleteMany` non appelé). Les tests `validateUser` / `login` passent.
 
-- [ ] **Step 3: Importer `AuditModule` dans `AuthModule`**
+- [x] **Step 3: Importer `AuditModule` dans `AuthModule`**
 
 Dans `backend/src/auth/auth.module.ts`, ajouter l'import :
 
@@ -205,7 +231,7 @@ et l'ajouter à `imports` :
     JwtModule.register({
 ```
 
-- [ ] **Step 4: Implémenter dans `AuthService`**
+- [x] **Step 4: Implémenter dans `AuthService`**
 
 Dans `backend/src/auth/auth.service.ts` :
 
@@ -267,7 +293,7 @@ Remplacer intégralement `changePassword` :
   }
 ```
 
-- [ ] **Step 5: Lancer les tests — ils passent**
+- [x] **Step 5: Lancer les tests — ils passent**
 
 ```bash
 cd backend && npx jest src/auth/auth.service.spec.ts
@@ -275,7 +301,7 @@ cd backend && npx jest src/auth/auth.service.spec.ts
 
 Expected : PASS (tous les tests, y compris les anciens `validateUser` / `login`).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add backend/src/auth/auth.module.ts backend/src/auth/auth.service.ts backend/src/auth/auth.service.spec.ts
@@ -290,7 +316,7 @@ git commit -m "feat: revoke sessions and clear forced-change flag on password ch
 - Modify: `backend/src/auth/auth.service.ts`
 - Test: `backend/src/auth/auth.service.spec.ts`
 
-- [ ] **Step 1: Écrire les tests qui échouent**
+- [x] **Step 1: Écrire les tests qui échouent**
 
 Ajouter à la fin du `describe('AuthService')` :
 
@@ -339,7 +365,7 @@ Ajouter à la fin du `describe('AuthService')` :
   });
 ```
 
-- [ ] **Step 2: Lancer — échec**
+- [x] **Step 2: Lancer — échec**
 
 ```bash
 cd backend && npx jest src/auth/auth.service.spec.ts
@@ -347,7 +373,7 @@ cd backend && npx jest src/auth/auth.service.spec.ts
 
 Expected : FAIL — `service.listUsers is not a function`, `service.resetPassword is not a function`.
 
-- [ ] **Step 3: Implémenter**
+- [x] **Step 3: Implémenter**
 
 Dans `backend/src/auth/auth.service.ts`, ajouter après `changePassword` :
 
@@ -382,7 +408,7 @@ Dans `backend/src/auth/auth.service.ts`, ajouter après `changePassword` :
   }
 ```
 
-- [ ] **Step 4: Lancer — succès**
+- [x] **Step 4: Lancer — succès**
 
 ```bash
 cd backend && npx jest src/auth/auth.service.spec.ts
@@ -390,7 +416,7 @@ cd backend && npx jest src/auth/auth.service.spec.ts
 
 Expected : PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add backend/src/auth/auth.service.ts backend/src/auth/auth.service.spec.ts
@@ -410,7 +436,7 @@ git commit -m "feat: add admin user listing and password reset to AuthService"
 - Modify: `backend/test/helpers.ts`
 - Test: `backend/test/auth.e2e-spec.ts`
 
-- [ ] **Step 1: Helpers e2e**
+- [x] **Step 1: Helpers e2e**
 
 Dans `backend/test/helpers.ts`, ajouter à la fin :
 
@@ -438,7 +464,7 @@ export async function login(app: INestApplication, email: string, motDePasse: st
 }
 ```
 
-- [ ] **Step 2: Écrire les tests e2e qui échouent**
+- [x] **Step 2: Écrire les tests e2e qui échouent**
 
 Dans `backend/test/auth.e2e-spec.ts` :
 
@@ -592,7 +618,7 @@ Ajouter à la fin du `describe('Auth (e2e)')` (après le bloc `POST /api/auth/re
   });
 ```
 
-- [ ] **Step 3: Lancer — échec**
+- [x] **Step 3: Lancer — échec**
 
 ```bash
 cd backend && DATABASE_URL="$TEST_DB" npx jest --config ./test/jest-e2e.json --runInBand --forceExit test/auth.e2e-spec.ts
@@ -600,7 +626,7 @@ cd backend && DATABASE_URL="$TEST_DB" npx jest --config ./test/jest-e2e.json --r
 
 Expected : FAIL — `GET /api/auth/users` renvoie 404, reset-password 404, etc. Les tests existants (login, me, refresh) passent toujours.
 
-- [ ] **Step 4: Créer le décorateur**
+- [x] **Step 4: Créer le décorateur**
 
 `backend/src/common/decorators/autorise-si-mdp-a-changer.decorator.ts` :
 
@@ -613,7 +639,7 @@ export const AUTORISE_SI_MDP_A_CHANGER_KEY = 'autoriseSiMdpAChanger';
 export const AutoriseSiMdpAChanger = () => SetMetadata(AUTORISE_SI_MDP_A_CHANGER_KEY, true);
 ```
 
-- [ ] **Step 5: Modifier `JwtAuthGuard`**
+- [x] **Step 5: Modifier `JwtAuthGuard`**
 
 Remplacer intégralement `backend/src/common/guards/jwt-auth.guard.ts` :
 
@@ -650,7 +676,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 }
 ```
 
-- [ ] **Step 6: Exposer le flag dans `JwtStrategy`**
+- [x] **Step 6: Exposer le flag dans `JwtStrategy`**
 
 Dans `backend/src/auth/strategies/jwt.strategy.ts`, remplacer la ligne `select` :
 
@@ -658,7 +684,7 @@ Dans `backend/src/auth/strategies/jwt.strategy.ts`, remplacer la ligne `select` 
       select: { id: true, email: true, nom: true, prenom: true, role: true, actif: true, doitChangerMdp: true },
 ```
 
-- [ ] **Step 7: Créer le DTO**
+- [x] **Step 7: Créer le DTO**
 
 `backend/src/auth/dto/reset-password.dto.ts` :
 
@@ -674,7 +700,7 @@ export class ResetPasswordDto {
 }
 ```
 
-- [ ] **Step 8: Routes du contrôleur**
+- [x] **Step 8: Routes du contrôleur**
 
 Dans `backend/src/auth/auth.controller.ts` :
 
@@ -732,7 +758,7 @@ Ajouter après `createUser` :
   }
 ```
 
-- [ ] **Step 9: Lancer e2e auth — succès**
+- [x] **Step 9: Lancer e2e auth — succès**
 
 ```bash
 cd backend && DATABASE_URL="$TEST_DB" npx jest --config ./test/jest-e2e.json --runInBand --forceExit test/auth.e2e-spec.ts
@@ -740,7 +766,7 @@ cd backend && DATABASE_URL="$TEST_DB" npx jest --config ./test/jest-e2e.json --r
 
 Expected : PASS (tous les tests du fichier).
 
-- [ ] **Step 10: Lancer toute la suite backend (non-régression du guard)**
+- [x] **Step 10: Lancer toute la suite backend (non-régression du guard)**
 
 ```bash
 cd backend && npx jest && DATABASE_URL="$TEST_DB" npm run test:e2e && npx tsc --noEmit -p tsconfig.json
@@ -748,7 +774,7 @@ cd backend && npx jest && DATABASE_URL="$TEST_DB" npm run test:e2e && npx tsc --
 
 Expected : tous les tests unitaires et e2e PASS, aucune erreur TypeScript.
 
-- [ ] **Step 11: Commit**
+- [x] **Step 11: Commit**
 
 ```bash
 git add backend/src backend/test
@@ -763,7 +789,7 @@ git commit -m "feat: admin password reset and forced password change enforcement
 - Modify: `frontend/src/store/auth.ts`
 - Modify: `frontend/src/lib/api.ts`
 
-- [ ] **Step 1: Store**
+- [x] **Step 1: Store**
 
 Dans `frontend/src/store/auth.ts` :
 
@@ -788,7 +814,7 @@ Implémentation, ajouter après `setToken: ...` :
         set((state) => ({ user: state.user ? { ...state.user, doitChangerMdp: value } : null })),
 ```
 
-- [ ] **Step 2: Intercepteur**
+- [x] **Step 2: Intercepteur**
 
 Dans `frontend/src/lib/api.ts`, dans l'intercepteur de réponse de `apiClient`, ajouter **avant** `return Promise.reject(err);` :
 
@@ -799,7 +825,7 @@ Dans `frontend/src/lib/api.ts`, dans l'intercepteur de réponse de `apiClient`, 
     }
 ```
 
-- [ ] **Step 3: Vérifier le typage**
+- [x] **Step 3: Vérifier le typage**
 
 ```bash
 cd frontend && npx tsc --noEmit
@@ -807,7 +833,7 @@ cd frontend && npx tsc --noEmit
 
 Expected : aucune erreur.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add frontend/src/store/auth.ts frontend/src/lib/api.ts
@@ -822,7 +848,7 @@ git commit -m "feat: track forced password change in auth store and API client"
 - Modify: `frontend/src/app/(dashboard)/layout.tsx`
 - Modify: `frontend/src/components/layout/Sidebar.tsx`
 
-- [ ] **Step 1: Redirection forcée dans le layout**
+- [x] **Step 1: Redirection forcée dans le layout**
 
 Dans `frontend/src/app/(dashboard)/layout.tsx` :
 
@@ -859,7 +885,7 @@ Remplacer `if (!token) return null;` par :
   if (!token || mdpAChanger) return null;
 ```
 
-- [ ] **Step 2: Sidebar**
+- [x] **Step 2: Sidebar**
 
 Dans `frontend/src/components/layout/Sidebar.tsx`, ajouter à la fin du tableau `nav` :
 
@@ -891,7 +917,7 @@ Remplacer le bloc utilisateur en bas (`<div className="flex items-center gap-3 p
         </Link>
 ```
 
-- [ ] **Step 3: Vérifier**
+- [x] **Step 3: Vérifier**
 
 ```bash
 cd frontend && npx tsc --noEmit && npm run lint
@@ -899,7 +925,7 @@ cd frontend && npx tsc --noEmit && npm run lint
 
 Expected : aucune erreur.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add "frontend/src/app/(dashboard)/layout.tsx" frontend/src/components/layout/Sidebar.tsx
@@ -913,7 +939,7 @@ git commit -m "feat: redirect to account page while password change is required"
 **Files:**
 - Create: `frontend/src/app/(dashboard)/mon-compte/page.tsx`
 
-- [ ] **Step 1: Créer la page**
+- [x] **Step 1: Créer la page**
 
 ```tsx
 'use client';
@@ -1035,7 +1061,7 @@ export default function MonComptePage() {
 }
 ```
 
-- [ ] **Step 2: Vérifier**
+- [x] **Step 2: Vérifier**
 
 ```bash
 cd frontend && npx tsc --noEmit && npm run lint
@@ -1043,7 +1069,7 @@ cd frontend && npx tsc --noEmit && npm run lint
 
 Expected : aucune erreur.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add "frontend/src/app/(dashboard)/mon-compte/page.tsx"
@@ -1057,7 +1083,7 @@ git commit -m "feat: add account page with password change form"
 **Files:**
 - Create: `frontend/src/app/(dashboard)/utilisateurs/page.tsx`
 
-- [ ] **Step 1: Créer la page**
+- [x] **Step 1: Créer la page**
 
 ```tsx
 'use client';
@@ -1228,7 +1254,7 @@ function ResetModal({ utilisateur, onClose }: { utilisateur: Utilisateur; onClos
 }
 ```
 
-- [ ] **Step 2: Vérifier**
+- [x] **Step 2: Vérifier**
 
 ```bash
 cd frontend && npx tsc --noEmit && npm run lint
@@ -1236,7 +1262,7 @@ cd frontend && npx tsc --noEmit && npm run lint
 
 Expected : aucune erreur.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add "frontend/src/app/(dashboard)/utilisateurs/page.tsx"
@@ -1249,7 +1275,7 @@ git commit -m "feat: add admin users page with password reset"
 
 Pas de commit (sauf correctifs éventuels, préfixe `fix:`).
 
-- [ ] **Step 1: Lancer l'app locale**
+- [x] **Step 1: Lancer l'app locale**
 
 ```bash
 docker compose -f docker-compose.dev.yml up -d
@@ -1257,7 +1283,7 @@ cd backend && npx prisma migrate deploy && npm run start:dev   # terminal 1
 cd frontend && npm run dev                                     # terminal 2
 ```
 
-- [ ] **Step 2: Parcours à vérifier sur http://localhost:3000**
+- [x] **Step 2: Parcours à vérifier sur http://localhost:3000**
 
 1. Connexion `admin@cabinet.ma` / `Admin123!` → sidebar contient « Utilisateurs » et « Mon compte ».
 2. `/utilisateurs` : liste des comptes, pas de bouton de reset sur la ligne admin.
@@ -1268,7 +1294,7 @@ cd frontend && npm run dev                                     # terminal 2
 7. Connexion médecin → `/utilisateurs` dans l'URL → redirection `/dashboard` ; « Mon compte » permet un changement normal (sans bandeau) et la session reste active ensuite.
 8. Affichage mobile (DevTools, 375px) de `/utilisateurs` et `/mon-compte` : pas de scroll horizontal de page.
 
-- [ ] **Step 3: Suites complètes**
+- [x] **Step 3: Suites complètes**
 
 ```bash
 cd backend && npx jest && DATABASE_URL="$TEST_DB" npm run test:e2e
