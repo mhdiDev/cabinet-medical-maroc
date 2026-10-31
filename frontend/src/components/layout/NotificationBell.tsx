@@ -25,7 +25,7 @@ export function NotificationBell() {
     queryKey: ['notifications'],
     queryFn: () => apiClient.get('/notifications').then((r) => r.data),
     refetchInterval: 30_000,
-    enabled: user?.role === 'SECRETAIRE' || user?.role === 'ADMIN',
+    enabled: (user?.role === 'SECRETAIRE' || user?.role === 'ADMIN') && !user?.doitChangerMdp,
   });
 
   const unread = notifications.filter((n) => !n.lu).length;
