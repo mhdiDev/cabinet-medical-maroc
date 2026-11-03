@@ -61,7 +61,7 @@ Pas de vraies données patients d'ici là (données de santé, loi 09-08 / CNDP)
 
 ## Comptes de démo
 
-Le seed crée ces comptes s'ils n'existent pas. Mots de passe valables en local uniquement : en production, ils doivent être changés après le premier déploiement (pas d'écran pour ça, passer par `POST /api/auth/change-password`).
+Le seed crée ces comptes s'ils n'existent pas. Mots de passe valables en local uniquement : en production, ils doivent être changés après le premier déploiement (page « Mon compte » pour chacun, ou réinitialisation par l'admin depuis « Utilisateurs »).
 
 | Rôle | Email | Mot de passe (local) |
 |------|-------|----------------------|
@@ -96,6 +96,19 @@ cd backend && npx prisma studio
 
 En production, les migrations sont appliquées automatiquement au démarrage du backend.
 
+### Tests backend
+
+```bash
+# Unitaires
+cd backend && npx jest
+
+# E2E : ils VIDENT la base → toujours sur la base dédiée cabinet_test, jamais sur cabinet_medical
+docker compose -f docker-compose.dev.yml exec -T postgres psql -U postgres -c "CREATE DATABASE cabinet_test"  # une fois
+cd backend
+DATABASE_URL="postgresql://postgres:password@localhost:5432/cabinet_test" npx prisma migrate deploy
+DATABASE_URL="postgresql://postgres:password@localhost:5432/cabinet_test" npm run test:e2e
+```
+
 ### Déploiement (VPS OVH)
 
 ```bash
@@ -129,7 +142,8 @@ Relations clés :
 ## Architecture API (préfixe `/api`)
 
 ```
-/auth                login, refresh, logout, me, users, change-password
+/auth                login, refresh, logout, me, change-password
+                     users (GET liste / POST création) + users/:id/reset-password  (ADMIN)
 /patients            CRUD + export CSV + stats + /cin/:cin
 /rendez-vous         CRUD + agenda + today + statut
 /consultations       CRUD + /patient/:id  (filtre ?date= disponible)
@@ -142,6 +156,13 @@ Relations clés :
 /health              health check (UptimeRobot)
 ```
 
+## Auth : changement de mot de passe forcé
+
+- `User.doitChangerMdp` passe à `true` quand l'admin réinitialise un mot de passe (`POST /auth/users/:id/reset-password`).
+- Tant qu'il est vrai, `JwtAuthGuard` répond 403 `{ code: 'MUST_CHANGE_PASSWORD' }` sur toute route qui n'a pas le décorateur `@AutoriseSiMdpAChanger()` (aujourd'hui : `me`, `change-password`, `logout`).
+- Côté frontend, le layout `(dashboard)` et l'intercepteur axios redirigent vers `/mon-compte`.
+- Changer ou réinitialiser un mot de passe révoque tous les refresh tokens de l'utilisateur (dans une transaction Prisma).
+
 ## Conventions de code
 
 - **Commits** : préfixe `feat:` / `fix:` / `chore:` / `docs:` / `refactor:`
@@ -150,6 +171,8 @@ Relations clés :
 - **Champs optionnels** : toujours envoyer `undefined` (pas `""`) pour les champs avec contrainte UNIQUE (ex: `cin`)
 - **Dates** : format ISO string côté DTO, `fr-MA` locale pour l'affichage
 - **Responsive** : Tailwind breakpoints `sm:` (640px) / `lg:` (1024px)
+- **Routes protégées** : tout contrôleur utilise `JwtAuthGuard` (c'est lui qui applique le changement forcé). Une route qui doit rester accessible pendant un changement forcé prend `@AutoriseSiMdpAChanger()`.
+- **Erreurs métier côté formulaire** : ne pas renvoyer 401 (l'intercepteur axios le traite comme un token expiré → refresh/déconnexion) ; utiliser 400.
 
 ## Pièges connus
 
@@ -157,7 +180,10 @@ Relations clés :
 |----------|----------|
 | `cin: ""` → 500 PATCH patient | Convertir en `undefined` avant envoi (`cin: data.cin?.trim() \|\| undefined`) |
 | `consultations` vs `data` dans la réponse API | Le service retourne `{ consultations, meta }` (pas `{ data, meta }`) |
-| Node 10 actif par défaut | `nvm use 20` ou `PATH="/Users/Mehdi/.nvm/versions/node/v20.19.5/bin:$PATH"` |
+| Node ancien (v8) actif par défaut | `nvm use 20` ou `PATH="/Users/Mehdi/.nvm/versions/node/v20.19.5/bin:$PATH"`. Idem pour les serveurs MCP lancés via `npx` (chemin absolu de Node 20) |
+| Routes manquantes en local (404) alors qu'elles existent dans le code | `nest start --watch` lance un vieux `backend/dist/src/main.js` : `rm -rf backend/dist/src` puis relancer `npm run start:dev` |
+| Tests e2e qui effacent les données locales | Ils font `DELETE` sur toutes les tables : toujours `DATABASE_URL=…/cabinet_test` |
+| `frontend: npx tsc --noEmit` en erreur | 4 erreurs déjà présentes (`stock/page.tsx`, `NouveauRdvModal.tsx`) : vérifier qu'on n'en ajoute pas |
 | `NEXT_PUBLIC_API_URL` | Intégrée au build Next.js : la changer impose `docker compose up -d --build` |
 | `/api/health` | Répond « ok » sans interroger la base : ne prouve pas que la base fonctionne |
 

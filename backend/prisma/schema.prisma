@@ -51,6 +51,7 @@ model User {
   role         Role     @default(SECRETAIRE)
   telephone    String?
   actif        Boolean  @default(true)
+  doitChangerMdp Boolean @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

@@ -93,3 +93,25 @@ export async function loginAdmin(app: INestApplication): Promise<string> {
     .send({ email: 'admin@cabinet.ma', motDePasse: 'Admin123!' });
   return res.body.accessToken;
 }
+
+export async function seedTestSecretaire(prisma: PrismaService): Promise<string> {
+  const hash = await argon2.hash('Secretaire123!');
+  const user = await prisma.user.create({
+    data: {
+      id: 'test-secretaire-id',
+      email: 'secretaire@cabinet.ma',
+      motDePasse: hash,
+      nom: 'Alaoui',
+      prenom: 'Fatima',
+      role: Role.SECRETAIRE,
+    },
+  });
+  return user.id;
+}
+
+export async function login(app: INestApplication, email: string, motDePasse: string) {
+  const res = await request(app.getHttpServer())
+    .post('/api/auth/login')
+    .send({ email, motDePasse });
+  return res.body as { accessToken: string; refreshToken: string; user: any };
+}
