@@ -82,7 +82,7 @@ Utilisé pour : « Nouveau mot de passe » de `/mon-compte`, la modale de réini
 - Champs (React Hook Form + Zod) :
   - Prénom, Nom (deux colonnes, requis)
   - Email (requis, format email)
-  - Rôle (`select` : ADMIN / MEDECIN / SECRETAIRE, défaut SECRETAIRE)
+  - Rôle (`select` sans présélection : option vide « Choisir un rôle… », puis ADMIN / MEDECIN / SECRETAIRE ; requis, message `Choisissez un rôle` si rien n'est choisi)
   - Téléphone (optionnel, `^0[5-7][0-9]{8}$`, placeholder `0612345678`)
   - Mot de passe initial (`motDePasseFort`) + Confirmation (identique)
 - Envoi : téléphone vide → `undefined` (pas `""`), la confirmation n'est pas envoyée.
