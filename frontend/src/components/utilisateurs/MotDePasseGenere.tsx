@@ -19,18 +19,21 @@ async function copierDansPressePapiers(texte: string): Promise<boolean> {
       // on tente le repli ci-dessous
     }
   }
+  const focusPrecedent = document.activeElement as HTMLElement | null;
   const champ = document.createElement('textarea');
   champ.value = texte;
   champ.readOnly = true;
   champ.style.cssText = 'position: fixed; top: 0; left: -9999px';
   document.body.appendChild(champ);
   champ.select();
+  champ.setSelectionRange(0, texte.length);
   try {
     return document.execCommand('copy');
   } catch {
     return false;
   } finally {
     document.body.removeChild(champ);
+    focusPrecedent?.focus();
   }
 }
 
