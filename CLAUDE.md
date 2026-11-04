@@ -158,7 +158,9 @@ Relations clés :
 
 ## Auth : changement de mot de passe forcé
 
-- `User.doitChangerMdp` passe à `true` quand l'admin réinitialise un mot de passe (`POST /auth/users/:id/reset-password`).
+- Les mots de passe initiaux (`POST /auth/users`) et temporaires (`POST /auth/users/:id/reset-password`) sont **générés par le serveur** (`auth/generer-mot-de-passe.ts`) et renvoyés une seule fois à l'admin ; l'admin ne choisit jamais le mot de passe d'un autre. Le compte a alors `User.doitChangerMdp = true`.
+- Emails normalisés (trim + minuscules) à la création et au login (`@NormaliserEmail()`).
+- Seul l'utilisateur choisit son mot de passe (« Mon compte ») : 8 caractères minimum, avec majuscule, minuscule et chiffre.
 - Tant qu'il est vrai, `JwtAuthGuard` répond 403 `{ code: 'MUST_CHANGE_PASSWORD' }` sur toute route qui n'a pas le décorateur `@AutoriseSiMdpAChanger()` (aujourd'hui : `me`, `change-password`, `logout`).
 - Côté frontend, le layout `(dashboard)` et l'intercepteur axios redirigent vers `/mon-compte`.
 - Changer ou réinitialiser un mot de passe révoque tous les refresh tokens de l'utilisateur (dans une transaction Prisma).
@@ -183,6 +185,7 @@ Relations clés :
 | Node ancien (v8) actif par défaut | `nvm use 20` ou `PATH="/Users/Mehdi/.nvm/versions/node/v20.19.5/bin:$PATH"`. Idem pour les serveurs MCP lancés via `npx` (chemin absolu de Node 20) |
 | Routes manquantes en local (404) alors qu'elles existent dans le code | `nest start --watch` lance un vieux `backend/dist/src/main.js` : `rm -rf backend/dist/src` puis relancer `npm run start:dev` |
 | Tests e2e qui effacent les données locales | Ils font `DELETE` sur toutes les tables : toujours `DATABASE_URL=…/cabinet_test` |
+| `backend: npm run lint` reformate des dizaines de fichiers | Le script lance `eslint --fix` : pour vérifier sans modifier, `npx eslint <fichiers>` |
 | `frontend: npx tsc --noEmit` en erreur | 4 erreurs déjà présentes (`stock/page.tsx`, `NouveauRdvModal.tsx`) : vérifier qu'on n'en ajoute pas |
 | `NEXT_PUBLIC_API_URL` | Intégrée au build Next.js : la changer impose `docker compose up -d --build` |
 | `/api/health` | Répond « ok » sans interroger la base : ne prouve pas que la base fonctionne |
