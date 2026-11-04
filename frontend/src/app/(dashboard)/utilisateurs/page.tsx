@@ -5,12 +5,14 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/auth';
 import { apiClient } from '@/lib/api';
 import { ResetModal } from '@/components/utilisateurs/ResetModal';
+import { CreateUserModal } from '@/components/utilisateurs/CreateUserModal';
 import type { Utilisateur } from '@/components/utilisateurs/types';
 
 export default function UtilisateursPage() {
   const router = useRouter();
   const { user } = useAuthStore();
   const [cible, setCible] = useState<Utilisateur | null>(null);
+  const [creation, setCreation] = useState(false);
   const estAdmin = user?.role === 'ADMIN';
 
   useEffect(() => {
@@ -27,7 +29,15 @@ export default function UtilisateursPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Utilisateurs</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h1 className="text-2xl font-bold text-gray-900">Utilisateurs</h1>
+        <button
+          onClick={() => setCreation(true)}
+          className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
+        >
+          + Nouvel utilisateur
+        </button>
+      </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {isLoading ? (
@@ -80,6 +90,7 @@ export default function UtilisateursPage() {
       </div>
 
       {cible && <ResetModal utilisateur={cible} onClose={() => setCible(null)} />}
+      {creation && <CreateUserModal onClose={() => setCreation(false)} />}
     </div>
   );
 }
