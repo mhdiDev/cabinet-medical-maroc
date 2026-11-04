@@ -11,7 +11,10 @@ import toast from 'react-hot-toast';
 const schema = z
   .object({
     ancienMdp: z.string().min(1, 'Mot de passe actuel requis'),
-    nouveauMdp: z.string().min(8, '8 caractères minimum'),
+    nouveauMdp: z
+      .string()
+      .min(8, '8 caractères minimum')
+      .regex(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Au moins une majuscule, une minuscule et un chiffre'),
     confirmation: z.string(),
   })
   .refine(d => d.nouveauMdp === d.confirmation, {
@@ -81,8 +84,8 @@ export default function MonComptePage() {
 
       {force && (
         <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 text-sm text-orange-800">
-          Votre mot de passe a été réinitialisé par l&apos;administrateur. Choisissez un nouveau
-          mot de passe pour continuer.
+          Votre mot de passe a été défini par l&apos;administrateur. Choisissez un nouveau mot de
+          passe pour continuer.
         </div>
       )}
 
@@ -108,7 +111,13 @@ export default function MonComptePage() {
           <div>
             <label className="text-sm font-medium text-gray-700">Nouveau mot de passe</label>
             <input type="password" autoComplete="new-password" {...register('nouveauMdp')} className={inputClass} />
-            {errors.nouveauMdp && <p className="text-xs text-red-600 mt-1">{errors.nouveauMdp.message}</p>}
+            {errors.nouveauMdp ? (
+              <p className="text-xs text-red-600 mt-1">{errors.nouveauMdp.message}</p>
+            ) : (
+              <p className="text-xs text-gray-400 mt-1">
+                8 caractères minimum, avec une majuscule, une minuscule et un chiffre
+              </p>
+            )}
           </div>
           <div>
             <label className="text-sm font-medium text-gray-700">Confirmer le nouveau mot de passe</label>
