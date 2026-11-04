@@ -60,7 +60,7 @@
 - Create: `backend/src/auth/generer-mot-de-passe.ts`
 - Test: `backend/src/auth/generer-mot-de-passe.spec.ts`
 
-- [ ] **Step 1: Écrire les tests**
+- [x] **Step 1: Écrire les tests**
 
 `backend/src/auth/generer-mot-de-passe.spec.ts` :
 
@@ -92,7 +92,7 @@ describe('genererMotDePasse', () => {
 });
 ```
 
-- [ ] **Step 2: Lancer — échec**
+- [x] **Step 2: Lancer — échec**
 
 ```bash
 cd backend && npx jest src/auth/generer-mot-de-passe.spec.ts
@@ -100,7 +100,7 @@ cd backend && npx jest src/auth/generer-mot-de-passe.spec.ts
 
 Expected : FAIL — `Cannot find module './generer-mot-de-passe'`.
 
-- [ ] **Step 3: Implémenter**
+- [x] **Step 3: Implémenter**
 
 `backend/src/auth/generer-mot-de-passe.ts` :
 
@@ -130,7 +130,7 @@ export function genererMotDePasse(): string {
 }
 ```
 
-- [ ] **Step 4: Lancer — succès**
+- [x] **Step 4: Lancer — succès**
 
 ```bash
 cd backend && npx jest src/auth/generer-mot-de-passe.spec.ts
@@ -138,7 +138,7 @@ cd backend && npx jest src/auth/generer-mot-de-passe.spec.ts
 
 Expected : PASS (4 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add backend/src/auth/generer-mot-de-passe.ts backend/src/auth/generer-mot-de-passe.spec.ts
@@ -155,7 +155,7 @@ git commit -m "feat: add secure password generator"
 - Modify: `backend/src/auth/dto/create-user.dto.ts` (retrait de `motDePasse`)
 - Test: `backend/src/auth/auth.service.spec.ts`
 
-- [ ] **Step 1: Tests unitaires (échouent)**
+- [x] **Step 1: Tests unitaires (échouent)**
 
 Dans `backend/src/auth/auth.service.spec.ts`, remplacer **tout** le bloc `describe('resetPassword', () => { ... });` par :
 
@@ -217,7 +217,7 @@ Dans `backend/src/auth/auth.service.spec.ts`, remplacer **tout** le bloc `descri
   });
 ```
 
-- [ ] **Step 2: Lancer — échec**
+- [x] **Step 2: Lancer — échec**
 
 ```bash
 cd backend && npx jest src/auth/auth.service.spec.ts
@@ -225,7 +225,7 @@ cd backend && npx jest src/auth/auth.service.spec.ts
 
 Expected : FAIL (erreurs TypeScript : `resetPassword` attend 3 arguments, `createUser` 1 argument).
 
-- [ ] **Step 3: Implémenter dans `AuthService`**
+- [x] **Step 3: Implémenter dans `AuthService`**
 
 Dans `backend/src/auth/auth.service.ts`, ajouter l'import :
 
@@ -282,7 +282,7 @@ Remplacer intégralement `resetPassword` :
   }
 ```
 
-- [ ] **Step 4: Adapter le contrôleur**
+- [x] **Step 4: Adapter le contrôleur**
 
 Dans `backend/src/auth/auth.controller.ts`, remplacer la méthode `createUser` :
 
@@ -304,11 +304,11 @@ et la méthode `resetPassword` (le DTO devient vide en Task 3 ; on le garde pour
   }
 ```
 
-- [ ] **Step 5: Retirer `motDePasse` de `CreateUserDto`**
+- [x] **Step 5: Retirer `motDePasse` de `CreateUserDto`**
 
 Dans `backend/src/auth/dto/create-user.dto.ts`, supprimer la propriété `motDePasse` et ses décorateurs (le bloc `@ApiProperty() @IsString() @MinLength(8) @Matches(...) motDePasse: string;`), puis retirer `MinLength` et `Matches` de l'import `class-validator` s'ils ne sont plus utilisés. (Le reste du DTO est réécrit en Task 3.)
 
-- [ ] **Step 6: Lancer — succès**
+- [x] **Step 6: Lancer — succès**
 
 ```bash
 cd backend && npx jest src/auth && npx tsc --noEmit -p tsconfig.json
@@ -316,7 +316,7 @@ cd backend && npx jest src/auth && npx tsc --noEmit -p tsconfig.json
 
 Expected : PASS (tous les tests de `src/auth`), aucune erreur TypeScript.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add backend/src/auth/auth.service.ts backend/src/auth/auth.controller.ts backend/src/auth/auth.service.spec.ts backend/src/auth/dto/create-user.dto.ts
@@ -335,7 +335,7 @@ git commit -m "feat: generate initial and temporary passwords server-side"
 - Modify: `backend/src/auth/dto/change-password.dto.ts`
 - Test: `backend/test/auth.e2e-spec.ts`
 
-- [ ] **Step 1: Adapter et compléter les tests e2e (échouent)**
+- [x] **Step 1: Adapter et compléter les tests e2e (échouent)**
 
 Dans `backend/test/auth.e2e-spec.ts` :
 
@@ -509,7 +509,7 @@ puis, dans le même test, remplacer les deux `ancienMdp: 'Temp1234!'` par `ancie
     });
 ```
 
-- [ ] **Step 2: Lancer — échec**
+- [x] **Step 2: Lancer — échec**
 
 ```bash
 cd backend && DATABASE_URL="postgresql://postgres:password@localhost:5432/cabinet_test" npx jest --config ./test/jest-e2e.json --runInBand --forceExit test/auth.e2e-spec.ts
@@ -517,7 +517,7 @@ cd backend && DATABASE_URL="postgresql://postgres:password@localhost:5432/cabine
 
 Expected : FAIL — notamment création sans `motDePasse` → 400, email non normalisé, `400 si un mot de passe est envoyé` (reset) → 201, mots de passe faibles acceptés.
 
-- [ ] **Step 3: Transformation `@NormaliserEmail()`**
+- [x] **Step 3: Transformation `@NormaliserEmail()`**
 
 `backend/src/common/transforms/normaliser-email.ts` :
 
@@ -529,7 +529,7 @@ export const NormaliserEmail = () =>
   Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value));
 ```
 
-- [ ] **Step 4: DTO**
+- [x] **Step 4: DTO**
 
 Remplacer intégralement `backend/src/auth/dto/create-user.dto.ts` :
 
@@ -601,7 +601,7 @@ export class ChangePasswordDto {
 }
 ```
 
-- [ ] **Step 5: Lancer — succès**
+- [x] **Step 5: Lancer — succès**
 
 ```bash
 cd backend && DATABASE_URL="postgresql://postgres:password@localhost:5432/cabinet_test" npx jest --config ./test/jest-e2e.json --runInBand --forceExit test/auth.e2e-spec.ts
@@ -609,7 +609,7 @@ cd backend && DATABASE_URL="postgresql://postgres:password@localhost:5432/cabine
 
 Expected : PASS (tous les tests du fichier).
 
-- [ ] **Step 6: Non-régression backend complète**
+- [x] **Step 6: Non-régression backend complète**
 
 ```bash
 cd backend && npx jest && DATABASE_URL="postgresql://postgres:password@localhost:5432/cabinet_test" npm run test:e2e && npx tsc --noEmit -p tsconfig.json
@@ -617,7 +617,7 @@ cd backend && npx jest && DATABASE_URL="postgresql://postgres:password@localhost
 
 Expected : tous les tests unitaires et e2e PASS, aucune erreur TypeScript. (Les autres suites e2e se connectent avec des emails déjà en minuscules : la normalisation ne les affecte pas.)
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add backend/src backend/test
@@ -632,7 +632,7 @@ git commit -m "feat: normalize emails, validate phone and enforce strong user-ch
 - Create: `frontend/src/components/utilisateurs/types.ts`
 - Create: `frontend/src/components/utilisateurs/MotDePasseGenere.tsx`
 
-- [ ] **Step 1: Types**
+- [x] **Step 1: Types**
 
 `frontend/src/components/utilisateurs/types.ts` :
 
@@ -652,7 +652,7 @@ export interface Utilisateur {
 }
 ```
 
-- [ ] **Step 2: Composant**
+- [x] **Step 2: Composant**
 
 `frontend/src/components/utilisateurs/MotDePasseGenere.tsx` :
 
@@ -718,7 +718,7 @@ export function MotDePasseGenere({ titre, utilisateur, motDePasse, onClose }: Pr
 }
 ```
 
-- [ ] **Step 3: Vérifier**
+- [x] **Step 3: Vérifier**
 
 ```bash
 cd frontend && npx tsc --noEmit; npm run lint
@@ -726,7 +726,7 @@ cd frontend && npx tsc --noEmit; npm run lint
 
 Expected : uniquement les 4 erreurs `tsc` déjà présentes ; lint sans erreur.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add frontend/src/components/utilisateurs
@@ -741,7 +741,7 @@ git commit -m "feat: add one-time generated password display"
 - Create: `frontend/src/components/utilisateurs/ResetModal.tsx`
 - Modify: `frontend/src/app/(dashboard)/utilisateurs/page.tsx`
 
-- [ ] **Step 1: Modale de réinitialisation**
+- [x] **Step 1: Modale de réinitialisation**
 
 `frontend/src/components/utilisateurs/ResetModal.tsx` :
 
@@ -810,7 +810,7 @@ export function ResetModal({ utilisateur, onClose }: { utilisateur: Utilisateur;
 }
 ```
 
-- [ ] **Step 2: Page — utiliser les composants partagés**
+- [x] **Step 2: Page — utiliser les composants partagés**
 
 Dans `frontend/src/app/(dashboard)/utilisateurs/page.tsx` :
 
@@ -828,7 +828,7 @@ import type { Utilisateur } from '@/components/utilisateurs/types';
 
 Supprimer tout ce qui suit la fin de `UtilisateursPage` : `const resetSchema = ...`, `type ResetForm = ...` et `function ResetModal(...) { ... }`.
 
-- [ ] **Step 3: Vérifier**
+- [x] **Step 3: Vérifier**
 
 ```bash
 cd frontend && npx tsc --noEmit; npm run lint
@@ -836,7 +836,7 @@ cd frontend && npx tsc --noEmit; npm run lint
 
 Expected : uniquement les 4 erreurs `tsc` déjà présentes ; lint sans erreur (aucun import inutilisé).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add frontend/src/components/utilisateurs/ResetModal.tsx "frontend/src/app/(dashboard)/utilisateurs/page.tsx"
@@ -851,7 +851,7 @@ git commit -m "feat: reset password with server-generated temporary password"
 - Create: `frontend/src/components/utilisateurs/CreateUserModal.tsx`
 - Modify: `frontend/src/app/(dashboard)/utilisateurs/page.tsx`
 
-- [ ] **Step 1: Modale de création**
+- [x] **Step 1: Modale de création**
 
 `frontend/src/components/utilisateurs/CreateUserModal.tsx` :
 
@@ -985,7 +985,7 @@ export function CreateUserModal({ onClose }: { onClose: () => void }) {
 }
 ```
 
-- [ ] **Step 2: Bouton dans la page**
+- [x] **Step 2: Bouton dans la page**
 
 Dans `frontend/src/app/(dashboard)/utilisateurs/page.tsx` :
 
@@ -1021,7 +1021,7 @@ Après la ligne `{cible && <ResetModal utilisateur={cible} onClose={() => setCib
       {creation && <CreateUserModal onClose={() => setCreation(false)} />}
 ```
 
-- [ ] **Step 3: Vérifier**
+- [x] **Step 3: Vérifier**
 
 ```bash
 cd frontend && npx tsc --noEmit; npm run lint
@@ -1029,7 +1029,7 @@ cd frontend && npx tsc --noEmit; npm run lint
 
 Expected : uniquement les 4 erreurs `tsc` déjà présentes ; lint sans erreur.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add frontend/src/components/utilisateurs/CreateUserModal.tsx "frontend/src/app/(dashboard)/utilisateurs/page.tsx"
@@ -1043,7 +1043,7 @@ git commit -m "feat: add admin user creation modal"
 **Files:**
 - Modify: `frontend/src/app/(dashboard)/mon-compte/page.tsx`
 
-- [ ] **Step 1: Règle stricte**
+- [x] **Step 1: Règle stricte**
 
 Dans le schéma Zod, remplacer la ligne :
 
@@ -1060,7 +1060,7 @@ par :
       .regex(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Au moins une majuscule, une minuscule et un chiffre'),
 ```
 
-- [ ] **Step 2: Aide sous le champ**
+- [x] **Step 2: Aide sous le champ**
 
 Remplacer la ligne :
 
@@ -1080,7 +1080,7 @@ par :
             )}
 ```
 
-- [ ] **Step 3: Bandeau**
+- [x] **Step 3: Bandeau**
 
 Remplacer :
 
@@ -1096,7 +1096,7 @@ par :
           passe pour continuer.
 ```
 
-- [ ] **Step 4: Vérifier**
+- [x] **Step 4: Vérifier**
 
 ```bash
 cd frontend && npx tsc --noEmit; npm run lint
@@ -1104,7 +1104,7 @@ cd frontend && npx tsc --noEmit; npm run lint
 
 Expected : uniquement les 4 erreurs `tsc` déjà présentes ; lint sans erreur.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add "frontend/src/app/(dashboard)/mon-compte/page.tsx"
@@ -1115,7 +1115,7 @@ git commit -m "feat: enforce strong password rule on account page"
 
 ### Task 8: Vérification de bout en bout et documentation
 
-- [ ] **Step 1: Suites complètes**
+- [x] **Step 1: Suites complètes**
 
 ```bash
 cd backend && npx jest && DATABASE_URL="postgresql://postgres:password@localhost:5432/cabinet_test" npm run test:e2e
@@ -1124,11 +1124,11 @@ cd ../frontend && npx tsc --noEmit; npm run lint && npm run build
 
 Expected : tests PASS, 4 erreurs `tsc` déjà présentes seulement, lint OK, build OK avec `/utilisateurs` et `/mon-compte`.
 
-- [ ] **Step 2: Lancer l'application locale**
+- [x] **Step 2: Lancer l'application locale**
 
 Si `backend/dist/src` existe, le supprimer (ancien build que `nest start --watch` lancerait à la place du nouveau). Puis backend (`npm run start:dev`) et frontend (`npm run dev`) ; vérifier `curl -s -o /dev/null -w "%{http_code}" localhost:3001/api/auth/users` → `401`.
 
-- [ ] **Step 3: Parcours navigateur (Playwright)**
+- [x] **Step 3: Parcours navigateur (Playwright)**
 
 Sur http://localhost:3000 :
 
@@ -1143,7 +1143,7 @@ Sur http://localhost:3000 :
 
 Les comptes créés pour le test restent dans la base de dev locale (pas de suppression possible dans l'UI pour l'instant).
 
-- [ ] **Step 4: CLAUDE.md**
+- [x] **Step 4: CLAUDE.md**
 
 Dans `CLAUDE.md`, section « Auth : changement de mot de passe forcé », remplacer la première puce par :
 
@@ -1153,7 +1153,7 @@ Dans `CLAUDE.md`, section « Auth : changement de mot de passe forcé », rempla
 - Seul l'utilisateur choisit son mot de passe (« Mon compte ») : 8 caractères minimum, avec majuscule, minuscule et chiffre.
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add CLAUDE.md
