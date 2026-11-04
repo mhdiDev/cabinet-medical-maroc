@@ -9,13 +9,37 @@ interface Props {
   onClose: () => void;
 }
 
+// navigator.clipboard n'existe qu'en contexte sécurisé (HTTPS) : repli sur execCommand en HTTP
+async function copierDansPressePapiers(texte: string): Promise<boolean> {
+  if (navigator.clipboard?.writeText && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(texte);
+      return true;
+    } catch {
+      // on tente le repli ci-dessous
+    }
+  }
+  const champ = document.createElement('textarea');
+  champ.value = texte;
+  champ.readOnly = true;
+  champ.style.cssText = 'position: fixed; top: 0; left: -9999px';
+  document.body.appendChild(champ);
+  champ.select();
+  try {
+    return document.execCommand('copy');
+  } catch {
+    return false;
+  } finally {
+    document.body.removeChild(champ);
+  }
+}
+
 // Affiché une seule fois : le serveur ne conserve que le hash
 export function MotDePasseGenere({ titre, utilisateur, motDePasse, onClose }: Props) {
   const copier = async () => {
-    try {
-      await navigator.clipboard.writeText(motDePasse);
+    if (await copierDansPressePapiers(motDePasse)) {
       toast.success('Mot de passe copié');
-    } catch {
+    } else {
       toast.error('Copie impossible : sélectionnez le mot de passe');
     }
   };
