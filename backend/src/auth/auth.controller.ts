@@ -74,6 +74,7 @@ export class AuthController {
   resetPassword(
     @CurrentUser('sub') adminId: string,
     @Param('id') userId: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Body() _dto: ResetPasswordDto,
   ) {
     return this.authService.resetPassword(adminId, userId);
