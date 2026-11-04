@@ -1,5 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UnauthorizedException, ConflictException, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  UnauthorizedException,
+  ConflictException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import { AuthService } from './auth.service';
@@ -9,7 +14,12 @@ import { Role } from '@prisma/client';
 
 const mockPrisma = {
   user: { findUnique: jest.fn(), findMany: jest.fn(), create: jest.fn(), update: jest.fn() },
-  refreshToken: { create: jest.fn(), findUnique: jest.fn(), delete: jest.fn(), deleteMany: jest.fn() },
+  refreshToken: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn(),
+  },
   $transaction: jest.fn((ops: Promise<unknown>[]) => Promise.all(ops)),
 };
 
@@ -35,11 +45,16 @@ describe('AuthService', () => {
   });
 
   describe('validateUser', () => {
-    it('retourne l\'utilisateur si identifiants corrects', async () => {
+    it("retourne l'utilisateur si identifiants corrects", async () => {
       const hash = await argon2.hash('Password123!');
       mockPrisma.user.findUnique.mockResolvedValue({
-        id: 'u1', email: 'test@ma', motDePasse: hash,
-        nom: 'Test', prenom: 'User', role: Role.MEDECIN, actif: true,
+        id: 'u1',
+        email: 'test@ma',
+        motDePasse: hash,
+        nom: 'Test',
+        prenom: 'User',
+        role: Role.MEDECIN,
+        actif: true,
       });
 
       const user = await service.validateUser('test@ma', 'Password123!');
@@ -51,7 +66,10 @@ describe('AuthService', () => {
     it('retourne null si mot de passe incorrect', async () => {
       const hash = await argon2.hash('correct-password');
       mockPrisma.user.findUnique.mockResolvedValue({
-        id: 'u1', email: 'test@ma', motDePasse: hash, actif: true,
+        id: 'u1',
+        email: 'test@ma',
+        motDePasse: hash,
+        actif: true,
       });
 
       const result = await service.validateUser('test@ma', 'wrong-password');
@@ -68,34 +86,42 @@ describe('AuthService', () => {
   describe('login', () => {
     it('lève UnauthorizedException si identifiants invalides', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
-      await expect(service.login({ email: 'bad@ma', motDePasse: 'bad' })).rejects.toThrow(UnauthorizedException);
+      await expect(service.login({ email: 'bad@ma', motDePasse: 'bad' })).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
   describe('changePassword', () => {
     const userAvecMdp = async (mdp: string) => ({
-      id: 'u1', email: 'test@ma', role: Role.SECRETAIRE,
-      motDePasse: await argon2.hash(mdp), doitChangerMdp: true,
+      id: 'u1',
+      email: 'test@ma',
+      role: Role.SECRETAIRE,
+      motDePasse: await argon2.hash(mdp),
+      doitChangerMdp: true,
     });
 
     it('lève BadRequestException si ancien mot de passe incorrect', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(await userAvecMdp('Ancien123!'));
-      await expect(service.changePassword('u1', 'Faux123!', 'Nouveau123!'))
-        .rejects.toThrow(BadRequestException);
+      await expect(service.changePassword('u1', 'Faux123!', 'Nouveau123!')).rejects.toThrow(
+        BadRequestException,
+      );
       expect(mockPrisma.user.update).not.toHaveBeenCalled();
     });
 
-    it('lève BadRequestException si nouveau identique à l\'ancien', async () => {
+    it("lève BadRequestException si nouveau identique à l'ancien", async () => {
       mockPrisma.user.findUnique.mockResolvedValue(await userAvecMdp('Ancien123!'));
-      await expect(service.changePassword('u1', 'Ancien123!', 'Ancien123!'))
-        .rejects.toThrow(BadRequestException);
+      await expect(service.changePassword('u1', 'Ancien123!', 'Ancien123!')).rejects.toThrow(
+        BadRequestException,
+      );
       expect(mockPrisma.user.update).not.toHaveBeenCalled();
     });
 
     it('lève NotFoundException si utilisateur inexistant', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
-      await expect(service.changePassword('u1', 'Ancien123!', 'Nouveau123!'))
-        .rejects.toThrow(NotFoundException);
+      await expect(service.changePassword('u1', 'Ancien123!', 'Nouveau123!')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('met à jour le hash, lève le flag, révoque les sessions et renvoie de nouveaux tokens', async () => {
@@ -124,38 +150,74 @@ describe('AuthService', () => {
       expect(arg.orderBy).toEqual([{ nom: 'asc' }, { prenom: 'asc' }]);
       expect(arg.select.motDePasse).toBeUndefined();
       expect(arg.select).toMatchObject({
-        id: true, nom: true, prenom: true, email: true, role: true,
-        actif: true, doitChangerMdp: true, createdAt: true,
+        id: true,
+        nom: true,
+        prenom: true,
+        email: true,
+        role: true,
+        actif: true,
+        doitChangerMdp: true,
+        createdAt: true,
       });
     });
   });
 
   describe('resetPassword', () => {
-    it('lève BadRequestException si l\'admin cible son propre compte', async () => {
-      await expect(service.resetPassword('admin1', 'admin1', 'Temp1234!'))
-        .rejects.toThrow(BadRequestException);
+    it("lève BadRequestException si l'admin cible son propre compte", async () => {
+      await expect(service.resetPassword('admin1', 'admin1')).rejects.toThrow(BadRequestException);
       expect(mockPrisma.user.update).not.toHaveBeenCalled();
     });
 
     it('lève NotFoundException si utilisateur inexistant', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
-      await expect(service.resetPassword('admin1', 'u1', 'Temp1234!'))
-        .rejects.toThrow(NotFoundException);
+      await expect(service.resetPassword('admin1', 'u1')).rejects.toThrow(NotFoundException);
     });
 
-    it('définit le mot de passe, force le changement, révoque les sessions et audite', async () => {
+    it('génère un mot de passe, force le changement, révoque les sessions et audite', async () => {
       mockPrisma.user.findUnique.mockResolvedValue({ id: 'u1' });
 
-      const res = await service.resetPassword('admin1', 'u1', 'Temp1234!');
+      const res = await service.resetPassword('admin1', 'u1');
 
+      expect(res.motDePasseTemporaire).toHaveLength(12);
       const updateArg = mockPrisma.user.update.mock.calls[0][0];
       expect(updateArg.where).toEqual({ id: 'u1' });
       expect(updateArg.data.doitChangerMdp).toBe(true);
-      expect(await argon2.verify(updateArg.data.motDePasse, 'Temp1234!')).toBe(true);
+      expect(await argon2.verify(updateArg.data.motDePasse, res.motDePasseTemporaire)).toBe(true);
       expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1);
       expect(mockPrisma.refreshToken.deleteMany).toHaveBeenCalledWith({ where: { userId: 'u1' } });
       expect(mockAudit.log).toHaveBeenCalledWith('admin1', 'RESET_PASSWORD', 'User', 'u1');
-      expect(res).toEqual({ success: true });
+    });
+  });
+
+  describe('createUser', () => {
+    const dto = {
+      email: 'nouveau@cabinet.ma',
+      nom: 'Idrissi',
+      prenom: 'Karim',
+      role: Role.MEDECIN,
+    };
+
+    it("lève ConflictException si l'email est déjà utilisé", async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({ id: 'u1' });
+      await expect(service.createUser('admin1', dto)).rejects.toThrow(ConflictException);
+      expect(mockPrisma.user.create).not.toHaveBeenCalled();
+    });
+
+    it('crée le compte avec un mot de passe généré, force le changement et audite', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.create.mockResolvedValue({ id: 'u2', email: dto.email });
+
+      const res = await service.createUser('admin1', dto);
+
+      const arg = mockPrisma.user.create.mock.calls[0][0];
+      expect(arg.data.email).toBe(dto.email);
+      expect(arg.data.doitChangerMdp).toBe(true);
+      expect(res.motDePasseInitial).toHaveLength(12);
+      expect(await argon2.verify(arg.data.motDePasse, res.motDePasseInitial)).toBe(true);
+      expect(arg.select.motDePasse).toBeUndefined();
+      expect(arg.select).toMatchObject({ telephone: true, actif: true, doitChangerMdp: true });
+      expect(res.user).toEqual({ id: 'u2', email: dto.email });
+      expect(mockAudit.log).toHaveBeenCalledWith('admin1', 'CREATE_USER', 'User', 'u2');
     });
   });
 });
