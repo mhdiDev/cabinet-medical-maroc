@@ -15,7 +15,7 @@ describe('genererMotDePasse', () => {
     });
   });
 
-  it('n\'utilise aucun caractère ambigu (0, O, 1, l, I)', () => {
+  it("n'utilise aucun caractère ambigu (0, O, 1, l, I)", () => {
     tirages.forEach((m) => expect(m).toMatch(/^[A-HJ-NP-Za-km-z2-9]+$/));
   });
 

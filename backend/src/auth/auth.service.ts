@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { Prisma } from '@prisma/client';
 import * as argon2 from 'argon2';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '../prisma/prisma.service';
@@ -76,20 +77,28 @@ export class AuthService {
     if (existing) throw new ConflictException('Email déjà utilisé');
 
     const motDePasseInitial = genererMotDePasse();
-    const user = await this.prisma.user.create({
-      data: { ...dto, motDePasse: await argon2.hash(motDePasseInitial), doitChangerMdp: true },
-      select: {
-        id: true,
-        email: true,
-        nom: true,
-        prenom: true,
-        role: true,
-        telephone: true,
-        actif: true,
-        doitChangerMdp: true,
-        createdAt: true,
-      },
-    });
+    const user = await this.prisma.user
+      .create({
+        data: { ...dto, motDePasse: await argon2.hash(motDePasseInitial), doitChangerMdp: true },
+        select: {
+          id: true,
+          email: true,
+          nom: true,
+          prenom: true,
+          role: true,
+          telephone: true,
+          actif: true,
+          doitChangerMdp: true,
+          createdAt: true,
+        },
+      })
+      .catch((e) => {
+        // Deux créations simultanées : la contrainte unique l'emporte sur le pré-contrôle
+        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+          throw new ConflictException('Email déjà utilisé');
+        }
+        throw e;
+      });
     await this.audit.log(adminId, 'CREATE_USER', 'User', user.id);
 
     // Renvoyé une seule fois à l'admin : seul le hash est stocké

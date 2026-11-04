@@ -1,4 +1,5 @@
 import { IsEmail, IsString, IsNotEmpty, IsEnum, IsOptional, Matches } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { NormaliserEmail } from '../../common/transforms/normaliser-email';
@@ -10,8 +11,17 @@ export class CreateUserDto {
   @IsEmail({}, { message: 'Email invalide' })
   email: string;
 
-  @ApiProperty() @IsString() @IsNotEmpty() nom: string;
-  @ApiProperty() @IsString() @IsNotEmpty() prenom: string;
+  @ApiProperty()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @IsString()
+  @IsNotEmpty()
+  nom: string;
+
+  @ApiProperty()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @IsString()
+  @IsNotEmpty()
+  prenom: string;
 
   @ApiProperty({ enum: Role })
   @IsEnum(Role, { message: 'Rôle invalide' })

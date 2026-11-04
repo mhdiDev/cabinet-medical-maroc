@@ -210,6 +210,16 @@ describe('Auth (e2e)', () => {
       expect(res.status).toBe(201);
       expect(res.body.user.telephone).toBe('0612345678');
     });
+
+    it('400 si le nom ne contient que des espaces', async () => {
+      const token = await loginAdmin(app);
+      const res = await request(app.getHttpServer())
+        .post('/api/auth/users')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ email: 'espaces@cabinet.ma', nom: '   ', prenom: 'Karim', role: 'MEDECIN' });
+
+      expect(res.status).toBe(400);
+    });
   });
 
   describe('POST /api/auth/users/:id/reset-password — validations', () => {

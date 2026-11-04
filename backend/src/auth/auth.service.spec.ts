@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { Prisma } from '@prisma/client';
 import * as argon2 from 'argon2';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -201,6 +202,18 @@ describe('AuthService', () => {
       mockPrisma.user.findUnique.mockResolvedValue({ id: 'u1' });
       await expect(service.createUser('admin1', dto)).rejects.toThrow(ConflictException);
       expect(mockPrisma.user.create).not.toHaveBeenCalled();
+    });
+
+    it('lève ConflictException si la contrainte unique saute (création concurrente)', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.create.mockRejectedValueOnce(
+        new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+          code: 'P2002',
+          clientVersion: 'test',
+        }),
+      );
+      await expect(service.createUser('admin1', dto)).rejects.toThrow(ConflictException);
+      expect(mockAudit.log).not.toHaveBeenCalled();
     });
 
     it('crée le compte avec un mot de passe généré, force le changement et audite', async () => {
