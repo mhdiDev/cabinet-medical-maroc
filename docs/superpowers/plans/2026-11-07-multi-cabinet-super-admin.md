@@ -1,5 +1,7 @@
 # Multi-cabinet, étape 2 (espace Super Admin) — Plan d'implémentation
 
+**Statut :** réalisé le 2026-11-07 sur la branche feat/multi-cabinet-super-admin, non mergé.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Permettre à un Super Admin, créé par une commande serveur, de créer, consulter, modifier, suspendre et réactiver des cabinets, et de réinitialiser le mot de passe d'un titulaire, sans jamais accéder aux données des patients.
@@ -62,7 +64,7 @@ cd $REPO/backend && DATABASE_URL="$TEST_DB" npx prisma migrate deploy && DATABAS
 - Create: `backend/src/ordonnances/lieu-et-date.ts`, `backend/src/ordonnances/lieu-et-date.spec.ts`
 - Modify: `backend/src/ordonnances/ordonnances.service.ts`
 
-- [ ] **Step 1 : Écrire les tests**
+- [x] **Step 1 : Écrire les tests**
 
 Dans `backend/src/prisma/client-filtre.spec.ts`, le bloc qui teste `creerClientFiltre` construit déjà un `PrismaClient` sur une URL factice, sans connexion. Ajouter dans ce bloc, en reprenant sa variable de client (`client` ci-dessous ; adapter au nom réel) :
 
@@ -96,14 +98,14 @@ describe('lieuEtDate', () => {
 });
 ```
 
-- [ ] **Step 2 : Vérifier l'échec**
+- [x] **Step 2 : Vérifier l'échec**
 
 Run: `cd $REPO/backend && npx jest src/prisma/client-filtre.spec.ts src/ordonnances/lieu-et-date.spec.ts`
 Expected : FAIL. `lieu-et-date` est introuvable et `cabinet.findMany` ne lève pas l'erreur attendue.
 
 Si le format `fr-MA` de Node ne donne pas `07/11/2026`, corriger l'attendu du test selon la sortie réelle de `new Date('2026-11-07T10:00:00Z').toLocaleDateString('fr-MA')`, qui est déjà le format utilisé aujourd'hui sur l'ordonnance.
 
-- [ ] **Step 3 : Refuser Cabinet**
+- [x] **Step 3 : Refuser Cabinet**
 
 Dans `backend/src/prisma/client-filtre.ts`, dans `$allOperations`, juste après la ligne qui refuse le SQL brut :
 
@@ -115,7 +117,7 @@ Dans `backend/src/prisma/client-filtre.ts`, dans `$allOperations`, juste après 
         }
 ```
 
-- [ ] **Step 4 : Écrire la ville de l'ordonnance**
+- [x] **Step 4 : Écrire la ville de l'ordonnance**
 
 `backend/src/ordonnances/lieu-et-date.ts` :
 
@@ -135,12 +137,12 @@ Dans `backend/src/ordonnances/ordonnances.service.ts` :
         .text(lieuEtDate(ord.cabinet.ville, new Date(ord.createdAt)), { align: 'right' });
 ```
 
-- [ ] **Step 5 : Vérifier**
+- [x] **Step 5 : Vérifier**
 
 Run : les commandes de vérification backend (unitaires et e2e).
 Expected : tout est vert. Si un test unitaire d'`OrdonnancesService` simule `findUnique` sans `cabinet`, n'y ajouter `cabinet: { ville: 'Rabat' }` que si un test appelle `generatePdf`.
 
-- [ ] **Step 6 : Commit**
+- [x] **Step 6 : Commit**
 
 ```bash
 cd $REPO && git add backend/src/prisma/client-filtre.ts backend/src/prisma/client-filtre.spec.ts backend/src/ordonnances/lieu-et-date.ts backend/src/ordonnances/lieu-et-date.spec.ts backend/src/ordonnances/ordonnances.service.ts
@@ -159,7 +161,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Modify: `backend/src/auth/strategies/jwt.strategy.ts`
 - Modify: `backend/src/prisma/prisma-sans-filtre.spec.ts`
 
-- [ ] **Step 1 : Écrire les tests unitaires**
+- [x] **Step 1 : Écrire les tests unitaires**
 
 Dans `backend/src/auth/auth.service.spec.ts`, ajouter `ForbiddenException` à l'import de `@nestjs/common`, et dans `describe('validateUser', ...)` :
 
@@ -241,12 +243,12 @@ Ajouter un bloc :
   });
 ```
 
-- [ ] **Step 2 : Vérifier l'échec**
+- [x] **Step 2 : Vérifier l'échec**
 
 Run: `cd $REPO/backend && npx jest src/auth/auth.service.spec.ts`
 Expected : FAIL sur les nouveaux tests.
 
-- [ ] **Step 3 : Message partagé**
+- [x] **Step 3 : Message partagé**
 
 `backend/src/auth/cabinet-suspendu.ts` :
 
@@ -262,7 +264,7 @@ export function cabinetSuspendu(cabinet: { actif: boolean } | null | undefined):
 }
 ```
 
-- [ ] **Step 4 : Adapter `AuthService`**
+- [x] **Step 4 : Adapter `AuthService`**
 
 Dans `backend/src/auth/auth.service.ts`, ajouter `ForbiddenException` à l'import de `@nestjs/common` et :
 
@@ -344,7 +346,7 @@ Si eslint signale `_cabinet` inutilisé, suivre la même solution que celle déj
 
 L'audit `CHANGE_PASSWORD` reste sur `AuditService` : pour un `SUPER_ADMIN`, il est ignoré sans erreur (`AuditService` intercepte l'exception), comme le prévoit la spec, qui ne demande l'audit que des actions de la plateforme.
 
-- [ ] **Step 5 : Adapter `JwtStrategy`**
+- [x] **Step 5 : Adapter `JwtStrategy`**
 
 Dans `backend/src/auth/strategies/jwt.strategy.ts`, importer `MESSAGE_CABINET_SUSPENDU` et `cabinetSuspendu` depuis `'../cabinet-suspendu'`, ajouter au `select` :
 
@@ -367,7 +369,7 @@ et remplacer la fin de `validate` par :
     return { ...profil, sub: user.id };
 ```
 
-- [ ] **Step 6 : Élargir le garde-fou d'`auth.service.ts`**
+- [x] **Step 6 : Élargir le garde-fou d'`auth.service.ts`**
 
 Dans `backend/src/prisma/prisma-sans-filtre.spec.ts`, remplacer le test `auth.service.ts n'utilise que prismaSansFiltre.user.findUnique` par :
 
@@ -384,12 +386,12 @@ Dans `backend/src/prisma/prisma-sans-filtre.spec.ts`, remplacer le test `auth.se
 
 Vérifier par mutation : ajouter temporairement `this.prismaSansFiltre.patient.findMany();` dans `auth.service.ts`, constater l'échec du test, puis retirer la ligne.
 
-- [ ] **Step 7 : Vérifier**
+- [x] **Step 7 : Vérifier**
 
 Run : les commandes de vérification backend.
 Expected : tout est vert. `auth.e2e-spec.ts` et `isolation.e2e-spec.ts` couvrent la connexion, le renouvellement et le changement de mot de passe existants.
 
-- [ ] **Step 8 : Commit**
+- [x] **Step 8 : Commit**
 
 ```bash
 cd $REPO && git add backend/src/auth/cabinet-suspendu.ts backend/src/auth/auth.service.ts backend/src/auth/auth.service.spec.ts backend/src/auth/strategies/jwt.strategy.ts backend/src/prisma/prisma-sans-filtre.spec.ts
@@ -407,7 +409,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Create: `backend/src/common/decorators/super-admin-seulement.decorator.ts`
 - Create: `backend/src/prisma/creer-super-admin.ts`, `backend/src/prisma/creer-super-admin.spec.ts`
 
-- [ ] **Step 1 : Écrire les tests**
+- [x] **Step 1 : Écrire les tests**
 
 `backend/src/common/guards/super-admin.guard.spec.ts` :
 
@@ -495,12 +497,12 @@ describe('creerSuperAdmin', () => {
 });
 ```
 
-- [ ] **Step 2 : Vérifier l'échec**
+- [x] **Step 2 : Vérifier l'échec**
 
 Run: `cd $REPO/backend && npx jest src/common/guards/super-admin.guard.spec.ts src/prisma/creer-super-admin.spec.ts`
 Expected : FAIL, modules introuvables.
 
-- [ ] **Step 3 : Garde et décorateur**
+- [x] **Step 3 : Garde et décorateur**
 
 `backend/src/common/guards/super-admin.guard.ts` :
 
@@ -530,7 +532,7 @@ import { SuperAdminGuard } from '../guards/super-admin.guard';
 export const SuperAdminSeulement = () => UseGuards(JwtAuthGuard, SuperAdminGuard);
 ```
 
-- [ ] **Step 4 : Commande de création**
+- [x] **Step 4 : Commande de création**
 
 `backend/src/prisma/creer-super-admin.ts` :
 
@@ -597,7 +599,7 @@ if (require.main === module) {
 }
 ```
 
-- [ ] **Step 5 : Vérifier**
+- [x] **Step 5 : Vérifier**
 
 ```bash
 cd $REPO/backend && npx jest src/common/guards/super-admin.guard.spec.ts src/prisma/creer-super-admin.spec.ts src/prisma/prisma-sans-filtre.spec.ts
@@ -611,7 +613,7 @@ Expected : tests verts ; le fichier compilé existe ; sans argument, le message 
 
 Supprimer ensuite le compte de test : `docker compose -f $REPO/docker-compose.dev.yml exec -T postgres psql -U postgres -d cabinet_test -c "DELETE FROM audit_logs WHERE action='CREATE_SUPER_ADMIN'; DELETE FROM users WHERE email='super.essai@plateforme.ma';"`
 
-- [ ] **Step 6 : Commit**
+- [x] **Step 6 : Commit**
 
 ```bash
 cd $REPO && git add backend/src/common/guards/super-admin.guard.ts backend/src/common/guards/super-admin.guard.spec.ts backend/src/common/decorators/super-admin-seulement.decorator.ts backend/src/prisma/creer-super-admin.ts backend/src/prisma/creer-super-admin.spec.ts
@@ -629,7 +631,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Modify: `backend/src/app.module.ts`, `backend/src/prisma/prisma-sans-filtre.spec.ts`
 - Test: `backend/test/plateforme.e2e-spec.ts`
 
-- [ ] **Step 1 : Écrire le test e2e**
+- [x] **Step 1 : Écrire le test e2e**
 
 `backend/test/plateforme.e2e-spec.ts` :
 
@@ -916,12 +918,12 @@ describe('Plateforme (e2e)', () => {
 });
 ```
 
-- [ ] **Step 2 : Vérifier l'échec**
+- [x] **Step 2 : Vérifier l'échec**
 
 Run: `cd $REPO/backend && DATABASE_URL="$TEST_DB" npx jest --config ./test/jest-e2e.json --runInBand --forceExit test/plateforme.e2e-spec.ts`
 Expected : FAIL, les routes `/plateforme` répondent 404.
 
-- [ ] **Step 3 : DTOs**
+- [x] **Step 3 : DTOs**
 
 `backend/src/plateforme/dto/cabinet.dto.ts` :
 
@@ -980,7 +982,7 @@ export class StatutCabinetDto {
 
 Le `ValidationPipe` global a `enableImplicitConversion` : vérifier par le test e2e que `{ actif: 'non' }` répond bien 400. Si la conversion implicite transforme la chaîne en booléen, ajouter sur `actif` un `@Transform(({ obj }) => obj.actif)` qui renvoie la valeur brute, puis relancer le test.
 
-- [ ] **Step 4 : Service**
+- [x] **Step 4 : Service**
 
 `backend/src/plateforme/plateforme.service.ts` :
 
@@ -1130,7 +1132,7 @@ export class PlateformeService {
 
 Si eslint signale `_maj` inutilisé, appliquer la même solution que celle déjà employée dans le dépôt pour ce cas.
 
-- [ ] **Step 5 : Contrôleur et module**
+- [x] **Step 5 : Contrôleur et module**
 
 `backend/src/plateforme/plateforme.controller.ts` :
 
@@ -1208,7 +1210,7 @@ Dans `backend/src/app.module.ts`, importer `PlateformeModule` et l'ajouter à la
 
 Vérifier dans `backend/src/common/decorators/current-user.decorator.ts` que `@CurrentUser('id')` renvoie bien l'identifiant (il est utilisé ainsi dans `consultations.controller.ts`).
 
-- [ ] **Step 6 : Garde-fous du service plateforme**
+- [x] **Step 6 : Garde-fous du service plateforme**
 
 Dans `backend/src/prisma/prisma-sans-filtre.spec.ts` :
 
@@ -1233,12 +1235,12 @@ Ajouter `'plateforme/plateforme.service.ts'` à `AUTORISES`, puis ces tests :
 
 Vérifier par mutation : ajouter temporairement `await this.prismaSansFiltre.patient.count();` dans `lister()`, constater l'échec du premier test ; ajouter `patients: true,` dans l'`include` de `lister()`, constater l'échec du second ; retirer les deux.
 
-- [ ] **Step 7 : Vérifier**
+- [x] **Step 7 : Vérifier**
 
 Run : les commandes de vérification backend, puis `cd $REPO/backend && npx eslint src/plateforme src/common src/prisma/prisma-sans-filtre.spec.ts`.
 Expected : tout est vert, y compris `plateforme.e2e-spec.ts`.
 
-- [ ] **Step 8 : Commit**
+- [x] **Step 8 : Commit**
 
 ```bash
 cd $REPO && git add backend/src/plateforme backend/src/app.module.ts backend/src/prisma/prisma-sans-filtre.spec.ts backend/test/plateforme.e2e-spec.ts
@@ -1256,7 +1258,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Modify: `frontend/src/app/(dashboard)/layout.tsx`
 - Modify: `frontend/src/components/layout/Sidebar.tsx`
 
-- [ ] **Step 1 : Connexion**
+- [x] **Step 1 : Connexion**
 
 Dans `frontend/src/app/(auth)/login/page.tsx`, remplacer `router.push('/dashboard');` par :
 
@@ -1266,7 +1268,7 @@ Dans `frontend/src/app/(auth)/login/page.tsx`, remplacer `router.push('/dashboar
 
 Le message d'un cabinet suspendu s'affiche déjà : la page montre `err.response?.data?.message`.
 
-- [ ] **Step 2 : Layout**
+- [x] **Step 2 : Layout**
 
 Dans `frontend/src/app/(dashboard)/layout.tsx`, après la ligne `const mdpAChanger = …` :
 
@@ -1292,7 +1294,7 @@ Remplacer `if (!token || mdpAChanger) return null;` par :
 
 Tous les hooks doivent rester avant le premier `return`.
 
-- [ ] **Step 3 : Menu**
+- [x] **Step 3 : Menu**
 
 Dans `frontend/src/components/layout/Sidebar.tsx`, ajouter en tête de `nav` :
 
@@ -1302,7 +1304,7 @@ Dans `frontend/src/components/layout/Sidebar.tsx`, ajouter en tête de `nav` :
 
 et remplacer les rôles de « Mon compte » par `['MEDECIN', 'SECRETAIRE', 'SUPER_ADMIN']`.
 
-- [ ] **Step 4 : Vérifier**
+- [x] **Step 4 : Vérifier**
 
 ```bash
 cd $REPO/frontend && npx tsc --noEmit; npm run lint
@@ -1310,7 +1312,7 @@ cd $REPO/frontend && npx tsc --noEmit; npm run lint
 
 Expected : seulement les 4 erreurs `tsc` connues (`stock/page.tsx`, `NouveauRdvModal.tsx`) ; lint sans erreur. Pas de `next build` pendant qu'un serveur de développement tourne.
 
-- [ ] **Step 5 : Commit**
+- [x] **Step 5 : Commit**
 
 ```bash
 cd $REPO && git add "frontend/src/app/(auth)/login/page.tsx" "frontend/src/app/(dashboard)/layout.tsx" frontend/src/components/layout/Sidebar.tsx
@@ -1327,7 +1329,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Create: `frontend/src/components/cabinets/types.ts`, `CreateCabinetModal.tsx`, `EditCabinetModal.tsx`, `StatutCabinetModal.tsx`, `ResetTitulaireModal.tsx`
 - Create: `frontend/src/app/(dashboard)/cabinets/page.tsx`
 
-- [ ] **Step 1 : Types**
+- [x] **Step 1 : Types**
 
 `frontend/src/components/cabinets/types.ts` :
 
@@ -1347,7 +1349,7 @@ export interface Cabinet {
 export const TELEPHONE = /^0[5-7][0-9]{8}$/;
 ```
 
-- [ ] **Step 2 : Création**
+- [x] **Step 2 : Création**
 
 `frontend/src/components/cabinets/CreateCabinetModal.tsx` :
 
@@ -1502,7 +1504,7 @@ export function CreateCabinetModal({ onClose }: { onClose: () => void }) {
 }
 ```
 
-- [ ] **Step 3 : Modification**
+- [x] **Step 3 : Modification**
 
 `frontend/src/components/cabinets/EditCabinetModal.tsx` :
 
@@ -1596,7 +1598,7 @@ export function EditCabinetModal({ cabinet, onClose }: { cabinet: Cabinet; onClo
 }
 ```
 
-- [ ] **Step 4 : Suspension et réactivation**
+- [x] **Step 4 : Suspension et réactivation**
 
 `frontend/src/components/cabinets/StatutCabinetModal.tsx` :
 
@@ -1649,7 +1651,7 @@ export function StatutCabinetModal({ cabinet, onClose }: { cabinet: Cabinet; onC
 }
 ```
 
-- [ ] **Step 5 : Réinitialisation du titulaire**
+- [x] **Step 5 : Réinitialisation du titulaire**
 
 `frontend/src/components/cabinets/ResetTitulaireModal.tsx` :
 
@@ -1721,7 +1723,7 @@ export function ResetTitulaireModal({
 }
 ```
 
-- [ ] **Step 6 : Page**
+- [x] **Step 6 : Page**
 
 `frontend/src/app/(dashboard)/cabinets/page.tsx` :
 
@@ -1854,7 +1856,7 @@ export default function CabinetsPage() {
 }
 ```
 
-- [ ] **Step 7 : Vérifier**
+- [x] **Step 7 : Vérifier**
 
 ```bash
 cd $REPO/frontend && npx tsc --noEmit; npm run lint
@@ -1862,7 +1864,7 @@ cd $REPO/frontend && npx tsc --noEmit; npm run lint
 
 Expected : seulement les 4 erreurs `tsc` connues ; lint sans erreur. Vérifier que `MotDePasseGenere` accepte bien `{ prenom, nom, email }` (son type est `Pick<Utilisateur, 'prenom' | 'nom' | 'email'>`).
 
-- [ ] **Step 8 : Commit**
+- [x] **Step 8 : Commit**
 
 ```bash
 cd $REPO && git add frontend/src/components/cabinets "frontend/src/app/(dashboard)/cabinets/page.tsx"
@@ -1879,7 +1881,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Modify: `CLAUDE.md`
 - Modify: `docs/superpowers/plans/2026-11-07-multi-cabinet-super-admin.md`
 
-- [ ] **Step 1 : Parcours Playwright sur la base locale**
+- [x] **Step 1 : Parcours Playwright sur la base locale**
 
 Démarrer Docker, puis le backend (`cd backend && npm run start:dev`) et le frontend (`cd frontend && npm run dev`) en arrière-plan. Pour les documents en local, `MINIO_ENDPOINT=http://localhost:9000`.
 
@@ -1900,7 +1902,7 @@ Vérifier avec les outils Playwright, sur http://localhost:3000 :
 
 Nettoyer ensuite la base locale par des requêtes ciblées sur les identifiants créés : cabinet de test, ses comptes, leurs sessions, les lignes d'audit correspondantes, le Super Admin local. Arrêter les serveurs.
 
-- [ ] **Step 2 : Vérifications complètes**
+- [x] **Step 2 : Vérifications complètes**
 
 ```bash
 cd $REPO/backend && npx tsc --noEmit -p tsconfig.json && npx jest && DATABASE_URL="$TEST_DB" npm run test:e2e
@@ -1909,7 +1911,7 @@ cd $REPO/frontend && npm run build
 
 Expected : tout est vert. `next build` seulement après l'arrêt du serveur de développement. Noter les nombres de tests pour la PR.
 
-- [ ] **Step 3 : `CLAUDE.md`**
+- [x] **Step 3 : `CLAUDE.md`**
 
 Dans la section « Multi-cabinet : isolation », ajouter :
 
@@ -1945,11 +1947,11 @@ Dans « Pièges connus », ajouter :
 | Identifiant de cabinet refusé par `@IsUUID` | Le premier cabinet a l'identifiant fixe `00000000-0000-0000-0000-000000000001` (hors v4) : ne pas valider les `:id` de cabinet comme UUID |
 ```
 
-- [ ] **Step 4 : Marquer le plan**
+- [x] **Step 4 : Marquer le plan**
 
 Cocher toutes les étapes de ce fichier et ajouter sous le titre : `**Statut :** réalisé le <date> sur la branche feat/multi-cabinet-super-admin, non mergé.`
 
-- [ ] **Step 5 : Commit**
+- [x] **Step 5 : Commit**
 
 ```bash
 cd $REPO && git add CLAUDE.md docs/superpowers/plans/2026-11-07-multi-cabinet-super-admin.md
