@@ -38,4 +38,25 @@ describe('garde-fous du cloisonnement', () => {
       .sort();
     expect(modeles).toEqual([...MODELES_CLOISONNES].sort());
   });
+
+  it('aucun client Prisma ne se crée hors de src/prisma', () => {
+    const fautifs = fichiers(RACINE)
+      .filter((f) => f.endsWith('.ts'))
+      .map((f) => relative(RACINE, f))
+      .filter((f) => !f.startsWith('prisma/'))
+      .filter((f) => /new PrismaClient|extends PrismaClient/.test(readFileSync(join(RACINE, f), 'utf8')));
+    expect(fautifs).toEqual([]);
+  });
+
+  it("auth.service.ts n'utilise que prismaSansFiltre.user.findUnique", () => {
+    const source = readFileSync(join(RACINE, 'auth/auth.service.ts'), 'utf8');
+    const autres = source.match(/prismaSansFiltre\.(?!user\.findUnique\b)\S*/g) ?? [];
+    expect(autres).toEqual([]);
+  });
+
+  it("prisma.service.ts n'exporte aucun alias de PrismaSansFiltre", () => {
+    const source = readFileSync(join(RACINE, 'prisma/prisma.service.ts'), 'utf8');
+    expect(source).not.toMatch(/export\s*\{[^}]*PrismaSansFiltre\s+as\b/);
+    expect(source).not.toMatch(/export\s+(const|type)\s+\w+\s*=\s*PrismaSansFiltre/);
+  });
 });

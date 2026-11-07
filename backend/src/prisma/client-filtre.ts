@@ -71,6 +71,8 @@ export function appliquerCabinet(
   }
 }
 
+// Le cabinet est lu à l'exécution de la requête : ne jamais partager ni mettre en
+// cache une promesse Prisma entre deux requêtes.
 export function creerClientFiltre(base: PrismaClient) {
   return base.$extends({
     query: {

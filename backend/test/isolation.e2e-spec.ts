@@ -2,6 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import * as argon2 from 'argon2';
 import { Role } from '@prisma/client';
+import * as XLSX from 'xlsx';
 import { PrismaSansFiltre, PrismaService } from '../src/prisma/prisma.service';
 import { MinioService } from '../src/documents/minio.service';
 import { createApp, login, resetDb, seedCabinet } from './helpers';
@@ -229,6 +230,51 @@ describe('Isolation entre cabinets (e2e)', () => {
       expect(contenu).not.toContain('b-ord');
       expect(contenu).not.toContain('b-paiement');
       expect(contenu).not.toContain('Article-b');
+    });
+
+    it("l'export Excel des paiements ne contient rien de B", async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/paiements/export?debut=2000-01-01&fin=2099-12-31')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .buffer(true)
+        .parse((r, cb) => {
+          const morceaux: Buffer[] = [];
+          r.on('data', (c: Buffer) => morceaux.push(c));
+          r.on('end', () => cb(null, Buffer.concat(morceaux)));
+        });
+      expect(res.status).toBe(200);
+      const wb = XLSX.read(res.body, { type: 'buffer' });
+      const texte = wb.SheetNames.map((n) => XLSX.utils.sheet_to_csv(wb.Sheets[n])).join('\n');
+      expect(texte).not.toContain('Patient-b');
+    });
+
+    it("l'agenda d'un médecin de B est vide", async () => {
+      const res = await get(
+        '/rendez-vous/agenda?medecinId=b-titulaire&debut=2000-01-01T00:00:00.000Z&fin=2099-12-31T00:00:00.000Z',
+      );
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual([]);
+    });
+
+    it('les rendez-vous du jour ne contiennent rien de B', async () => {
+      const res = await get('/rendez-vous/today?medecinId=b-titulaire');
+      expect(res.status).toBe(200);
+      expect(res.text).not.toContain('b-rdv');
+    });
+
+    it('marquer lue une notification de B ne la modifie pas', async () => {
+      await patch('/notifications/b-notif/lue', {}, tokenSecA);
+      expect((await prisma.notification.findUnique({ where: { id: 'b-notif' } }))?.lu).toBe(false);
+    });
+
+    it('un refresh token donne un accès qui reste dans le cabinet', async () => {
+      const { refreshToken } = await login(app, 'a.titulaire@cabinet.ma', MDP);
+      const res = await request(app.getHttpServer()).post('/api/auth/refresh').send({ refreshToken });
+      expect(res.status).toBeLessThan(300);
+      const liste = await get('/patients', res.body.accessToken);
+      expect(liste.status).toBe(200);
+      expect(liste.text).toContain('Patient-a');
+      expect(liste.text).not.toContain('Patient-b');
     });
 
     it('les statistiques ne comptent que le cabinet', async () => {

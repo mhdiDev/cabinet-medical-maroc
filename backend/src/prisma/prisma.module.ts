@@ -8,6 +8,8 @@ import { creerClientFiltre } from './client-filtre';
     PrismaSansFiltre,
     {
       provide: PrismaService,
+      // Le client étendu hérite de onModuleInit et onModuleDestroy : ils sont donc
+      // appelés deux fois (connexion et déconnexion), sans danger.
       useFactory: (base: PrismaSansFiltre) => creerClientFiltre(base),
       inject: [PrismaSansFiltre],
     },
