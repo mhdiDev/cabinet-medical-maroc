@@ -8,6 +8,14 @@ import {
 import * as AWS from 'aws-sdk';
 import { v4 as uuidv4 } from 'uuid';
 
+const EXTENSIONS: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/gif': 'gif',
+  'image/webp': 'webp',
+  'application/pdf': 'pdf',
+};
+
 @Injectable()
 export class MinioService implements OnModuleInit {
   private s3: AWS.S3;
@@ -35,7 +43,8 @@ export class MinioService implements OnModuleInit {
   }
 
   async uploadFile(file: Express.Multer.File, folder: string): Promise<string> {
-    const ext = file.originalname.split('.').pop() || 'bin';
+    // L'extension vient du type (déjà filtré par la liste blanche), jamais du nom envoyé par le client
+    const ext = EXTENSIONS[file.mimetype] ?? 'bin';
     const key = `${folder}/${uuidv4()}.${ext}`;
 
     try {
