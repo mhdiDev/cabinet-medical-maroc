@@ -128,26 +128,36 @@ Le seed s'exécute à chaque démarrage de la production : il doit rester idempo
 |-----------|-------|
 | `findMany`, `findFirst`, `findUnique` et variantes `OrThrow`, `count`, `aggregate`, `groupBy`, `updateMany`, `deleteMany` | `cabinetId` ajouté au `where` |
 | `update`, `delete` | `cabinetId` ajouté au `where` (`where` unique étendu de Prisma 5) |
-| `create` | `cabinetId` ajouté à `data` |
-| `createMany` | `cabinetId` ajouté à chaque ligne |
-| `upsert` | `cabinetId` ajouté au `where` et à `create` |
+| `create` | `cabinetId` imposé dans `data` |
+| `createMany` | `cabinetId` imposé sur chaque ligne |
+| `upsert` | `cabinetId` ajouté au `where` et imposé dans `create` |
 
-**Refus par défaut :** sur un modèle cloisonné, si le contexte n'a pas de `cabinetId`, l'extension lève une exception. Le filtre n'est jamais simplement omis. Cette règle couvre le `SUPER_ADMIN`, dont le `cabinetId` est nul, et le code exécuté hors requête. Une exception non prévue devient une erreur 500 : c'est préférable à une fuite.
+Une modification ne peut jamais déplacer une ligne : `update`, `updateMany` et la partie `update` d'un `upsert` retirent tout `cabinetId` de `data`.
 
-Les écritures imbriquées et les `include` ne passent pas par cette extension. Elles restent autorisées dans la mesure où elles suivent les relations d'une ligne déjà filtrée. Une écriture imbriquée vers un modèle cloisonné doit renseigner elle-même son `cabinetId` ; aucune n'existe aujourd'hui.
+Les types Prisma exigent `cabinetId` à la création : chaque `create` d'un modèle où il est obligatoire le passe explicitement avec `cabinetCourant()`. L'extension impose quand même la valeur du contexte. `AuditLog`, où il est optionnel, le reçoit uniquement de l'extension.
+
+**Refus par défaut :** sur un modèle cloisonné, si le contexte n'a pas de `cabinetId`, l'extension lève une `ForbiddenException` (403). Le filtre n'est jamais simplement omis. Cette règle couvre le `SUPER_ADMIN`, dont le `cabinetId` est nul, et le code exécuté hors requête. Une opération Prisma que l'extension ne connaît pas lève aussi une exception.
+
+Les écritures imbriquées et les `include` ne passent pas par cette extension. Elles restent autorisées dans la mesure où elles suivent les relations d'une ligne déjà filtrée. Une écriture imbriquée vers un modèle cloisonné doit renseigner elle-même son `cabinetId` ; aucune n'existe aujourd'hui (`Ordonnance` crée ses `OrdonnanceMedicament`, qui ne sont pas cloisonnés).
+
+Un test vérifie que tout modèle du schéma ayant un champ `cabinetId` figure dans la liste des modèles cloisonnés.
 
 ### Client non filtré
 
 `PrismaSansFiltre`, service distinct au nom explicite, réservé à :
 
-- la connexion et la recherche de l'utilisateur par email (`validateUser`) ;
-- `JwtStrategy` ;
-- le rafraîchissement et la révocation des tokens ;
-- le contrôle d'unicité de l'email à la création d'un compte ;
-- l'écriture de l'audit quand le contexte de requête n'a pas de cabinet (connexion) : `AuditService` reçoit alors le `cabinetId` en paramètre ;
+- `AuthService.validateUser` : le cabinet n'est pas encore connu à la connexion ;
+- `AuthService.createUser` : le contrôle d'unicité de l'email porte sur toute la plateforme ;
+- `JwtStrategy` : c'est elle qui découvre le cabinet ;
 - les helpers de tests.
 
-Toute autre utilisation doit être justifiée en revue. Un test vérifie que ce service n'est injecté que dans les fichiers autorisés.
+`RefreshToken` n'est pas cloisonné : le rafraîchissement des tokens utilise le client filtré sans contexte.
+
+Toute autre utilisation doit être justifiée en revue. Un test vérifie que ce service n'est utilisé que dans les fichiers autorisés.
+
+### Validation des requêtes
+
+`PATCH /consultations/:id` reçoit aujourd'hui un `Partial<CreateConsultationDto>` : ce type n'existe pas à l'exécution, donc le corps n'est pas validé. Il est remplacé par une classe `UpdateConsultationDto`.
 
 ### Références croisées
 
@@ -155,14 +165,18 @@ Le filtre ne protège pas une écriture qui cite l'identifiant d'une donnée d'u
 
 | Donnée écrite | Références vérifiées |
 |---------------|----------------------|
-| `RendezVous` | `patientId`, `medecinId` (médecin actif du cabinet) |
-| `Consultation` | `patientId`, `rendezVousId` |
+| `RendezVous` | `patientId`, `medecinId` |
+| `Consultation` | `patientId`, `medecinId`, `rendezVousId` |
 | `Ordonnance` | `patientId`, `consultationId` |
 | `Paiement` | `patientId`, `rendezVousId`, `consultationId` |
 | `Document` | `patientId`, `consultationId` |
 | `StockMouvement` | `articleId`, `consultationId` |
 
 Une référence étrangère au cabinet donne le même résultat qu'une référence inexistante : 404.
+
+`medecinId` doit désigner un utilisateur actif du cabinet, sans contrôle de son rôle : aujourd'hui, l'agenda enregistre l'utilisateur connecté comme médecin, y compris une secrétaire (`NouveauRdvModal`). Ce comportement ne change pas ici. Choisir le médecin d'un rendez-vous dans un cabinet à plusieurs médecins reste à traiter.
+
+Ces contrôles s'appliquent aux créations et à toute modification (`PATCH /rendez-vous/:id`, `PATCH /consultations/:id`).
 
 ### Réponses
 
@@ -218,8 +232,9 @@ Dans le dossier patient, « Ouvrir » appelle la route avec le token, crée une 
 
 ### Unitaires
 
-- Extension Prisma : ajout du `cabinetId` pour chaque opération du tableau ; exception sans contexte ; modèles non cloisonnés (`Medicament`) non modifiés.
-- `AuthService`, `RendezVousService` et autres services dont le comportement change.
+- Extension Prisma : ajout du `cabinetId` pour chaque opération du tableau ; `cabinetId` retiré des modifications ; opération inconnue refusée ; 403 sans contexte ; tous les modèles ayant `cabinetId` sont cloisonnés.
+- `PrismaSansFiltre` n'apparaît que dans les fichiers autorisés.
+- `AuthService` et les autres services dont le comportement change.
 
 ### E2E (base `cabinet_test`)
 
@@ -231,10 +246,10 @@ Nouveau fichier `backend/test/isolation.e2e-spec.ts`, avec deux cabinets A et B,
 - la même référence de stock existe dans A et dans B ;
 - `GET /auth/users` n'affiche que A, et réinitialiser un compte de B répond 404 ;
 - une notification de fin de consultation ne prévient pas les secrétaires de B ;
-- un `cabinetId` envoyé dans une requête répond 400 ;
-- un `SUPER_ADMIN` créé par le test n'obtient aucune donnée patient.
+- un `cabinetId` envoyé dans une requête répond 400, y compris sur `PATCH /consultations/:id` ;
+- un `SUPER_ADMIN` créé par le test reçoit 403 sur les données patients.
 
-Documents : sans token 401, depuis B 404, depuis A 200 avec le bon contenu.
+Documents : sans token 401, depuis B 404, depuis A 200 avec le bon contenu. MinIO est remplacé par un faux service dans ces tests, car la CI n'en a pas.
 
 Droits : un médecin non titulaire reçoit 403 sur la gestion des comptes, le titulaire y accède.
 
