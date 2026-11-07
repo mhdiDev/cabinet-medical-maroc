@@ -287,7 +287,7 @@ describe('AuthService', () => {
     });
 
     it('génère un mot de passe, force le changement, révoque les sessions et audite', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({ id: 'u1' });
+      mockPrisma.user.findUnique.mockResolvedValue({ id: 'u1', actif: true });
 
       const res = await service.resetPassword('admin1', 'u1');
 

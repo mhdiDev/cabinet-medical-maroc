@@ -194,4 +194,65 @@ describe('Équipe du cabinet (e2e)', () => {
       expect((await request(server()).patch(`/api/auth/users/${secretaireId}`).send({ nom: 'X' })).status).toBe(401);
     });
   });
+
+  describe('PATCH /api/auth/users/:id/statut', () => {
+    const statut = (id: string, body: object, t = token) =>
+      request(server()).patch(`/api/auth/users/${id}/statut`).set({ Authorization: `Bearer ${t}` }).send(body);
+
+    it('désactive : connexion refusée, session coupée, refresh refusé, audit', async () => {
+      const session = await login(app, 'dr.test@cabinet.ma', 'Medecin123!');
+
+      const res = await statut(medecinId, { actif: false });
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({ id: medecinId, actif: false });
+
+      const loginRes = await request(server()).post('/api/auth/login').send({ email: 'dr.test@cabinet.ma', motDePasse: 'Medecin123!' });
+      expect(loginRes.status).toBe(401);
+      const me = await request(server()).get('/api/auth/me').set({ Authorization: `Bearer ${session.accessToken}` });
+      expect(me.status).toBe(401);
+      const refresh = await request(server()).post('/api/auth/refresh').send({ refreshToken: session.refreshToken });
+      expect(refresh.status).toBe(401);
+      expect(await prisma.refreshToken.count({ where: { userId: medecinId } })).toBe(0);
+
+      expect(await prisma.auditLog.count({ where: { action: 'DEACTIVATE_USER', entiteId: medecinId } })).toBe(1);
+      // Les rendez-vous restent
+      expect(await prisma.rendezVous.count({ where: { medecinId } })).toBe(4);
+    });
+
+    it('même état : 200 sans nouvel audit', async () => {
+      expect((await statut(medecinId, { actif: false })).status).toBe(200);
+      expect(await prisma.auditLog.count({ where: { action: 'DEACTIVATE_USER', entiteId: medecinId } })).toBe(1);
+    });
+
+    it('réactive : connexion avec le même mot de passe, audit', async () => {
+      const res = await statut(medecinId, { actif: true });
+      expect(res.status).toBe(200);
+      expect(res.body.actif).toBe(true);
+      expect((await login(app, 'dr.test@cabinet.ma', 'Medecin123!')).accessToken).toBeDefined();
+      expect(await prisma.auditLog.count({ where: { action: 'REACTIVATE_USER', entiteId: medecinId } })).toBe(1);
+    });
+
+    it('400 sur son propre compte', async () => {
+      const res = await statut('test-admin-id', { actif: false });
+      expect(res.status).toBe(400);
+      expect(res.body.message).toBe('Vous ne pouvez pas désactiver votre propre compte');
+    });
+
+    it.each([[{}], [{ actif: 'non' }], [{ actif: 'false' }], [{ actif: 0 }], [{ actif: null }]])('400 pour %j', async (body) => {
+      expect((await statut(secretaireId, body)).status).toBe(400);
+    });
+
+    it('404 pour un compte d\'un autre cabinet ou inexistant', async () => {
+      expect((await statut(autreId, { actif: false })).status).toBe(404);
+      expect((await statut('inexistant', { actif: false })).status).toBe(404);
+      expect((await prisma.user.findUnique({ where: { id: autreId } }))!.actif).toBe(true);
+    });
+
+    it('403 pour un médecin non titulaire et une secrétaire', async () => {
+      const medecin = await login(app, 'dr.test@cabinet.ma', 'Medecin123!');
+      const secretaire = await login(app, 'secretaire@cabinet.ma', 'Secretaire123!');
+      expect((await statut(secretaireId, { actif: false }, medecin.accessToken)).status).toBe(403);
+      expect((await statut(medecinId, { actif: false }, secretaire.accessToken)).status).toBe(403);
+    });
+  });
 });

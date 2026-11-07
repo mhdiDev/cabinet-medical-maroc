@@ -270,6 +270,25 @@ export class AuthService {
     );
   }
 
+  async changerStatutUser(titulaireId: string, id: string, actif: boolean) {
+    if (id === titulaireId) {
+      throw new BadRequestException('Vous ne pouvez pas désactiver votre propre compte');
+    }
+    const user = await this.prisma.user.findUnique({ where: { id }, select: selectUtilisateur() });
+    if (!user) throw new NotFoundException('Utilisateur non trouvé');
+    if (user.actif === actif) return versUtilisateur(user);
+
+    const [modifie] = await this.prisma.$transaction([
+      this.prisma.user.update({ where: { id }, data: { actif }, select: selectUtilisateur() }),
+      // Désactivation : les sessions ouvertes sont fermées tout de suite
+      ...(actif ? [] : [this.prisma.refreshToken.deleteMany({ where: { userId: id } })]),
+    ]);
+    await this.audit.log(titulaireId, actif ? 'REACTIVATE_USER' : 'DEACTIVATE_USER', 'User', id);
+    return versUtilisateur(
+      modifie as Prisma.UserGetPayload<{ select: ReturnType<typeof selectUtilisateur> }>,
+    );
+  }
+
   async resetPassword(adminId: string, userId: string) {
     if (adminId === userId) {
       throw new BadRequestException(

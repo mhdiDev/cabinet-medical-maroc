@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { StatutUserDto } from './dto/statut-user.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -73,6 +74,18 @@ export class AuthController {
     @Body() dto: UpdateUserDto,
   ) {
     return this.authService.modifierUser(titulaireId, id, dto);
+  }
+
+  @Patch('users/:id/statut')
+  @TitulaireSeulement()
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Désactiver ou réactiver un compte de l'équipe (titulaire)" })
+  changerStatutUser(
+    @CurrentUser('sub') titulaireId: string,
+    @Param('id') id: string,
+    @Body() dto: StatutUserDto,
+  ) {
+    return this.authService.changerStatutUser(titulaireId, id, dto.actif);
   }
 
   @Post('users/:id/reset-password')
