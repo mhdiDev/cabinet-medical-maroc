@@ -58,7 +58,11 @@ export class ConsultationsService {
   async create(dto: CreateConsultationDto, userId: string) {
     await this.references.verifier(dto);
     const consultation = await this.prisma.consultation.create({
-      data: { ...dto, cabinetId: cabinetCourant() },
+      data: {
+        ...dto,
+        dateConsultation: dto.dateConsultation ? new Date(dto.dateConsultation) : undefined,
+        cabinetId: cabinetCourant(),
+      },
       include: {
         patient: { select: { nom: true, prenom: true } },
         medecin: { select: { nom: true, prenom: true } },
@@ -103,7 +107,10 @@ export class ConsultationsService {
   async update(id: string, dto: UpdateConsultationDto, userId: string) {
     await this.findOne(id);
     await this.references.verifier(dto);
-    const c = await this.prisma.consultation.update({ where: { id }, data: dto });
+    const data = dto.dateConsultation
+      ? { ...dto, dateConsultation: new Date(dto.dateConsultation) }
+      : dto;
+    const c = await this.prisma.consultation.update({ where: { id }, data });
     await this.audit.log(userId, 'UPDATE', 'Consultation', id, dto);
     return c;
   }

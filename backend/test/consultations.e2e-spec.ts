@@ -43,6 +43,16 @@ describe('Consultations (e2e)', () => {
       consultationId = res.body.id;
     });
 
+    it('201 avec une date de consultation au format AAAA-MM-JJ', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/consultations')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ patientId, medecinId, motif: 'Contrôle', dateConsultation: '2026-03-10' });
+
+      expect(res.status).toBe(201);
+      expect(res.body.dateConsultation).toBe('2026-03-10T00:00:00.000Z');
+    });
+
     it('400 si patientId manquant', async () => {
       const res = await request(app.getHttpServer())
         .post('/api/consultations')

@@ -1,7 +1,6 @@
 import {
   Injectable,
   NotFoundException,
-  ConflictException,
   Logger,
 } from '@nestjs/common';
 import { DOCUMENT_PUBLIC } from '../documents/document-public';
@@ -24,7 +23,7 @@ export class PatientsService {
 
   async create(dto: CreatePatientDto, userId: string) {
     const patient = await this.prisma.patient.create({
-      data: { ...dto, cabinetId: cabinetCourant() },
+      data: { ...dto, dateNaissance: new Date(dto.dateNaissance), cabinetId: cabinetCourant() },
     });
 
     await this.audit.log(userId, 'CREATE', 'Patient', patient.id, {
@@ -105,7 +104,8 @@ export class PatientsService {
   async update(id: string, dto: UpdatePatientDto, userId: string) {
     await this.findOne(id);
 
-    const patient = await this.prisma.patient.update({ where: { id }, data: dto });
+    const data = dto.dateNaissance ? { ...dto, dateNaissance: new Date(dto.dateNaissance) } : dto;
+    const patient = await this.prisma.patient.update({ where: { id }, data });
 
     await this.audit.log(userId, 'UPDATE', 'Patient', id, dto);
     return patient;
