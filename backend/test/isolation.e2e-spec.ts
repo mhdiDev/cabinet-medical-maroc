@@ -245,6 +245,7 @@ describe('Isolation entre cabinets (e2e)', () => {
       expect(res.status).toBe(200);
       const wb = XLSX.read(res.body, { type: 'buffer' });
       const texte = wb.SheetNames.map((n) => XLSX.utils.sheet_to_csv(wb.Sheets[n])).join('\n');
+      expect(texte).toContain('Patient-a');
       expect(texte).not.toContain('Patient-b');
     });
 
@@ -498,6 +499,27 @@ describe('Isolation entre cabinets (e2e)', () => {
       expect((await patch(url, body)).status).toBe(404);
     });
 
+    it("PATCH /consultations/a-consult vers un médecin ou un patient de B répond 404 sans modifier la ligne", async () => {
+      const avant = await prisma.consultation.findUnique({ where: { id: 'a-consult' } });
+      expect((await patch('/consultations/a-consult', { medecinId: 'b-titulaire' })).status).toBe(404);
+      expect((await patch('/consultations/a-consult', { patientId: 'b-patient' })).status).toBe(404);
+      const apres = await prisma.consultation.findUnique({ where: { id: 'a-consult' } });
+      expect(apres?.medecinId).toBe('a-titulaire');
+      expect(apres?.patientId).toBe('a-patient');
+      expect(apres?.medecinId).toBe(avant?.medecinId);
+      expect(apres?.patientId).toBe(avant?.patientId);
+    });
+
+    it("une référence vide est vérifiée et répond 404", async () => {
+      const res = await post('/stock/mouvements', {
+        articleId: 'a-article',
+        type: 'ENTREE',
+        quantite: 1,
+        consultationId: '',
+      });
+      expect(res.status).toBe(404);
+    });
+
     it('un utilisateur inactif du cabinet ne peut pas être désigné', async () => {
       await prisma.user.update({ where: { id: 'a-medecin' }, data: { actif: false } });
       try {
@@ -564,8 +586,53 @@ describe('Isolation entre cabinets (e2e)', () => {
       expect(liste.body[0].url).toBeUndefined();
       const patient = await get('/patients/a-patient');
       expect(patient.body.documents[0].url).toBeUndefined();
-      const consult = await get('/consultations/a-consult');
-      for (const d of consult.body.documents ?? []) expect(d.url).toBeUndefined();
+      await prisma.document.create({
+        data: {
+          id: 'a-doc-consult',
+          cabinetId: 'a-cabinet',
+          patientId: 'a-patient',
+          consultationId: 'a-consult',
+          nom: 'doc-consult.pdf',
+          type: 'application/pdf',
+          url: 'http://minio/a-consult.pdf',
+        },
+      });
+      try {
+        const consult = await get('/consultations/a-consult');
+        expect(consult.body.documents.length).toBeGreaterThan(0);
+        for (const d of consult.body.documents) expect(d.url).toBeUndefined();
+      } finally {
+        await prisma.document.delete({ where: { id: 'a-doc-consult' } });
+      }
+    });
+
+    it("un téléversement avec la consultation d'un autre cabinet répond 404", async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/documents/upload')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .field('patientId', 'a-patient')
+        .field('consultationId', 'b-consult')
+        .attach('file', Buffer.from('pdf'), { filename: 'test.pdf', contentType: 'application/pdf' });
+      expect(res.status).toBe(404);
+    });
+
+    it('conserve les accents du nom de fichier téléversé', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/documents/upload')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .field('patientId', 'a-patient')
+        .attach('file', Buffer.from('%PDF-1.4'), {
+          filename: 'rapport médical été.pdf',
+          contentType: 'application/pdf',
+        });
+      expect(res.status).toBe(201);
+      expect(res.body.nom).toBe('rapport médical été.pdf');
+      await prisma.document.delete({ where: { id: res.body.id } });
+    });
+
+    it('la réponse du fichier interdit la mise en cache', async () => {
+      const res = await get('/documents/a-doc/fichier');
+      expect(res.headers['cache-control']).toBe('private, no-store');
     });
 
     it("un téléversement pour le patient d'un autre cabinet répond 404", async () => {

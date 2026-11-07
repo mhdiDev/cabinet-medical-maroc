@@ -28,6 +28,9 @@ export class DocumentsService {
 
     await this.references.verifier({ patientId, consultationId });
 
+    // multer décode le nom en latin1 : on le réinterprète en UTF-8
+    const nom = Buffer.from(file.originalname, 'latin1').toString('utf8');
+
     const cabinetId = cabinetCourant();
     const key = await this.minio.uploadFile(file, `cabinets/${cabinetId}/patients/${patientId}`);
     const url = this.minio.getPublicUrl(key);
@@ -37,7 +40,7 @@ export class DocumentsService {
         cabinetId,
         patientId,
         consultationId: consultationId || null,
-        nom: file.originalname,
+        nom,
         type: file.mimetype,
         taille: file.size,
         url,

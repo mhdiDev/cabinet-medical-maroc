@@ -18,28 +18,28 @@ export class ReferencesService {
   async verifier(refs: References): Promise<void> {
     const { patientId, medecinId, rendezVousId, consultationId, articleId } = refs;
 
-    if (patientId) {
+    if (patientId !== undefined && patientId !== null) {
       await this.exiger(this.prisma.patient.count({ where: { id: patientId } }), 'Patient');
     }
-    if (medecinId) {
+    if (medecinId !== undefined && medecinId !== null) {
       await this.exiger(
         this.prisma.user.count({ where: { id: medecinId, actif: true } }),
         'Médecin',
       );
     }
-    if (rendezVousId) {
+    if (rendezVousId !== undefined && rendezVousId !== null) {
       await this.exiger(
         this.prisma.rendezVous.count({ where: { id: rendezVousId } }),
         'Rendez-vous',
       );
     }
-    if (consultationId) {
+    if (consultationId !== undefined && consultationId !== null) {
       await this.exiger(
         this.prisma.consultation.count({ where: { id: consultationId } }),
         'Consultation',
       );
     }
-    if (articleId) {
+    if (articleId !== undefined && articleId !== null) {
       await this.exiger(this.prisma.stockArticle.count({ where: { id: articleId } }), 'Article');
     }
   }

@@ -61,7 +61,7 @@ services:
     entrypoint: >
       /bin/sh -c "(aws --endpoint-url http://minio:9000 s3api head-bucket --bucket cabinet-medical ||
                    aws --endpoint-url http://minio:9000 s3 mb s3://cabinet-medical) &&
-                  (aws --endpoint-url http://minio:9000 s3api delete-bucket-policy --bucket cabinet-medical || true)"
+                  (aws --endpoint-url http://minio:9000 s3api delete-bucket-policy --bucket cabinet-medical)"
     networks:
       - cabinet_net
 
