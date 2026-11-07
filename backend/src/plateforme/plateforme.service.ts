@@ -26,7 +26,6 @@ export class PlateformeService {
         _count: { select: { users: true } },
       },
     });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return cabinets.map(({ users, _count, updatedAt: _maj, ...cabinet }) => ({
       ...cabinet,
       nbUtilisateurs: _count.users,

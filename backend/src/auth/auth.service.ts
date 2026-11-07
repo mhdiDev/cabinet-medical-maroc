@@ -23,6 +23,18 @@ import {
   cabinetSuspendu,
 } from './cabinet-suspendu';
 
+// Hash vérifié quand le compte n'existe pas, pour que la réponse prenne le même temps
+// qu'avec un vrai compte. Calculé une seule fois, avec les options par défaut d'argon2.hash,
+// les mêmes que pour les vrais mots de passe
+let hashFactice: Promise<string> | undefined;
+function obtenirHashFactice(): Promise<string> {
+  hashFactice ??= argon2.hash(uuidv4()).catch((e) => {
+    hashFactice = undefined; // réessayé à la prochaine connexion
+    throw e;
+  });
+  return hashFactice;
+}
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -32,7 +44,10 @@ export class AuthService {
     private prismaSansFiltre: PrismaSansFiltre,
     private jwt: JwtService,
     private audit: AuditService,
-  ) {}
+  ) {
+    // Calculé dès le démarrage : la première tentative ne doit pas être plus lente
+    obtenirHashFactice().catch(() => undefined);
+  }
 
   async validateUser(email: string, motDePasse: string) {
     // Le cabinet n'est pas encore connu à la connexion
@@ -40,11 +55,13 @@ export class AuthService {
       where: { email },
       include: { cabinet: { select: { actif: true } } },
     });
-    if (!user || !user.actif) return null;
 
-    // Vérification sécurisée avec argon2 (résistant timing attacks)
-    const valid = await argon2.verify(user.motDePasse, motDePasse);
-    if (!valid) return null;
+    // Toujours vérifier un hash : sinon un compte inexistant ou inactif répondrait plus vite
+    const motDePasseValide = await argon2.verify(
+      user?.motDePasse ?? (await obtenirHashFactice()),
+      motDePasse,
+    );
+    if (!user || !user.actif || !motDePasseValide) return null;
 
     // Vérifiée après le mot de passe : la suspension n'est révélée qu'au titulaire du compte
     if (cabinetSuspendu(user.cabinet)) {

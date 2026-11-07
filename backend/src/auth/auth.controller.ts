@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Req, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -69,7 +69,6 @@ export class AuthController {
   resetPassword(
     @CurrentUser('sub') adminId: string,
     @Param('id') userId: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Body() _dto: ResetPasswordDto,
   ) {
     return this.authService.resetPassword(adminId, userId);

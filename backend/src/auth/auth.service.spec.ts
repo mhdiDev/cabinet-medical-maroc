@@ -81,6 +81,30 @@ describe('AuthService', () => {
       expect(result).toBeNull();
     });
 
+    it("vérifie un hash même si l'utilisateur n'existe pas (temps de réponse égal)", async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      const verify = jest.spyOn(argon2, 'verify');
+      try {
+        await expect(service.validateUser('inconnu@ma', 'Password123!')).resolves.toBeNull();
+        expect(verify).toHaveBeenCalledTimes(1);
+        expect(verify).toHaveBeenCalledWith(expect.stringMatching(/^\$argon2id\$/), 'Password123!');
+      } finally {
+        verify.mockRestore();
+      }
+    });
+
+    it('vérifie le hash même si le compte est inactif', async () => {
+      const hash = await argon2.hash('Password123!');
+      mockPrisma.user.findUnique.mockResolvedValue({ id: 'u1', motDePasse: hash, actif: false });
+      const verify = jest.spyOn(argon2, 'verify');
+      try {
+        await expect(service.validateUser('test@ma', 'Password123!')).resolves.toBeNull();
+        expect(verify).toHaveBeenCalledWith(hash, 'Password123!');
+      } finally {
+        verify.mockRestore();
+      }
+    });
+
     it('retourne null si utilisateur inactif', async () => {
       mockPrisma.user.findUnique.mockResolvedValue({ id: 'u1', actif: false });
       const result = await service.validateUser('test@ma', 'any');

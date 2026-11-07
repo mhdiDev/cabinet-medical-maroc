@@ -64,13 +64,32 @@ describe('garde-fous du cloisonnement', () => {
     expect(fautifs).toEqual([]);
   });
 
-  it("auth.service.ts n'utilise que les accès sans filtre prévus", () => {
+  it("auth.service.ts n'utilise les accès sans filtre que dans les méthodes prévues", () => {
     const source = readFileSync(join(RACINE, 'auth/auth.service.ts'), 'utf8');
-    const autres =
-      source.match(
-        /prismaSansFiltre\.(?!(user\.findUnique|user\.update|refreshToken\.deleteMany|\$transaction)\b)\S*/g,
-      ) ?? [];
-    expect(autres).toEqual([]);
+    // Découpe le fichier par méthode de la classe (déclarations indentées de deux espaces)
+    const debuts = [...source.matchAll(/^ {2}(?:private |public )?(?:async )?(\w+)\(/gm)];
+    const parMethode: Record<string, string[]> = {};
+    const blocs = [
+      { nom: '(hors méthode)', texte: source.slice(0, debuts[0]?.index ?? source.length) },
+      ...debuts.map((d, i) => ({
+        nom: d[1],
+        texte: source.slice(d.index, debuts[i + 1]?.index ?? source.length),
+      })),
+    ];
+    for (const { nom, texte } of blocs) {
+      // Toute mention compte, pas seulement les appels : un alias (const db = this.prismaSansFiltre) aussi
+      const mentions = [...texte.matchAll(/prismaSansFiltre\b(?:\.(\$?\w+(?:\.\w+)?))?/g)].map(
+        (m) => m[1] ?? '(mention)',
+      );
+      if (mentions.length) parMethode[nom] = mentions;
+    }
+    expect(parMethode).toEqual({
+      constructor: ['(mention)'], // private prismaSansFiltre: PrismaSansFiltre
+      validateUser: ['user.findUnique'], // le cabinet n'est pas connu à la connexion
+      createUser: ['user.findUnique'], // l'email est unique sur toute la plateforme
+      // un SUPER_ADMIN n'a pas de cabinet
+      changePassword: ['user.findUnique', '$transaction', 'user.update', 'refreshToken.deleteMany'],
+    });
   });
 
   it("prisma.service.ts n'exporte aucun alias de PrismaSansFiltre", () => {
