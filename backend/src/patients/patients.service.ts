@@ -4,6 +4,7 @@ import {
   ConflictException,
   Logger,
 } from '@nestjs/common';
+import { DOCUMENT_PUBLIC } from '../documents/document-public';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { cabinetCourant } from '../prisma/contexte-cabinet';
@@ -93,7 +94,7 @@ export class PatientsService {
           include: { medecin: { select: { nom: true, prenom: true } } },
         },
         ordonnances: { orderBy: { createdAt: 'desc' }, take: 10 },
-        documents: { orderBy: { createdAt: 'desc' } },
+        documents: { orderBy: { createdAt: 'desc' }, select: DOCUMENT_PUBLIC },
       },
     });
 

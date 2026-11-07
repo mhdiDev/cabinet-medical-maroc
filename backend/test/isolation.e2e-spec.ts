@@ -423,7 +423,10 @@ describe('Isolation entre cabinets (e2e)', () => {
           contentType: 'application/pdf',
         });
       expect(res.status).toBe(201);
-      expect(res.body.cabinetId).toBe('a-cabinet');
+      expect(res.body.url).toBeUndefined();
+      const doc = await prisma.document.findUnique({ where: { id: res.body.id } });
+      expect(doc?.cabinetId).toBe('a-cabinet');
+      expect(doc?.url).toContain('cabinets/a-cabinet/patients/a-patient/');
       await prisma.document.delete({ where: { id: res.body.id } });
     });
 
@@ -528,6 +531,50 @@ describe('Isolation entre cabinets (e2e)', () => {
     it('PATCH /consultations/:id accepte une modification valide', async () => {
       const res = await patch('/consultations/a-consult', { motif: 'Motif-a' });
       expect(res.status).toBe(200);
+    });
+  });
+
+  describe('documents', () => {
+    it('sans token répond 401', async () => {
+      const res = await request(app.getHttpServer()).get('/api/documents/a-doc/fichier');
+      expect(res.status).toBe(401);
+    });
+
+    it('depuis un autre cabinet répond 404', async () => {
+      expect((await get('/documents/b-doc/fichier')).status).toBe(404);
+    });
+
+    it('depuis le bon cabinet renvoie le fichier', async () => {
+      const res = await get('/documents/a-doc/fichier')
+        .buffer(true)
+        .parse((r, fin) => {
+          const morceaux: Buffer[] = [];
+          r.on('data', (m: Buffer) => morceaux.push(m));
+          r.on('end', () => fin(null, Buffer.concat(morceaux)));
+        });
+      expect(res.status).toBe(200);
+      expect(res.headers['content-type']).toContain('application/pdf');
+      expect(res.headers['content-disposition']).toContain('inline');
+      expect(res.body.toString()).toBe('contenu-du-document');
+    });
+
+    it("n'expose plus l'adresse de stockage", async () => {
+      const liste = await get('/documents/patient/a-patient');
+      expect(liste.body[0].id).toBe('a-doc');
+      expect(liste.body[0].url).toBeUndefined();
+      const patient = await get('/patients/a-patient');
+      expect(patient.body.documents[0].url).toBeUndefined();
+      const consult = await get('/consultations/a-consult');
+      for (const d of consult.body.documents ?? []) expect(d.url).toBeUndefined();
+    });
+
+    it("un téléversement pour le patient d'un autre cabinet répond 404", async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/documents/upload')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .field('patientId', 'b-patient')
+        .attach('file', Buffer.from('pdf'), { filename: 'test.pdf', contentType: 'application/pdf' });
+      expect(res.status).toBe(404);
     });
   });
 

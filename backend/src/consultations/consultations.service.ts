@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { DOCUMENT_PUBLIC } from '../documents/document-public';
 import { PrismaService } from '../prisma/prisma.service';
 import { ReferencesService } from '../prisma/references.service';
 import { cabinetCourant } from '../prisma/contexte-cabinet';
@@ -92,7 +93,7 @@ export class ConsultationsService {
         patient: true,
         medecin: { select: { id: true, nom: true, prenom: true } },
         ordonnances: { include: { medicaments: { include: { medicament: true } } } },
-        documents: true,
+        documents: { select: DOCUMENT_PUBLIC },
       },
     });
     if (!c) throw new NotFoundException(`Consultation ${id} introuvable`);

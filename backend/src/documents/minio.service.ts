@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, OnModuleInit, ServiceUnavailableException } from '@nestjs/common';
 import * as AWS from 'aws-sdk';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -56,6 +56,17 @@ export class MinioService implements OnModuleInit {
   extractKey(url: string): string {
     const prefix = `${this.publicUrl}/`;
     return url.startsWith(prefix) ? url.slice(prefix.length) : url;
+  }
+
+  async lireFichier(key: string): Promise<Buffer> {
+    try {
+      const objet = await this.s3.getObject({ Bucket: this.bucket, Key: key }).promise();
+      return objet.Body as Buffer;
+    } catch (err: any) {
+      if (err.code === 'NoSuchKey') throw new NotFoundException('Fichier introuvable');
+      this.logger.error(`Lecture échouée: ${err.message}`);
+      throw new ServiceUnavailableException('Le stockage de fichiers est temporairement indisponible');
+    }
   }
 
   async deleteFile(key: string): Promise<void> {
