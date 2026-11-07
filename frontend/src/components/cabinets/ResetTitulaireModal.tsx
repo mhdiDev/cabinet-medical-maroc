@@ -1,10 +1,11 @@
 'use client';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { apiClient } from '@/lib/api';
 import { MotDePasseGenere } from '@/components/utilisateurs/MotDePasseGenere';
 import type { Cabinet } from './types';
+import { useModale } from './useModale';
 
 type Titulaire = NonNullable<Cabinet['titulaire']>;
 
@@ -32,9 +33,12 @@ export function ResetTitulaireModal({
     onError: (err: any) => toast.error(err.response?.data?.message || 'Erreur lors de la réinitialisation'),
   });
 
+  const titreId = `${useId()}-titre`;
+  const modaleRef = useModale(onClose, mutation.isPending || motDePasse !== null);
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto">
+      <div ref={modaleRef} role="dialog" aria-modal="true" aria-labelledby={titreId} className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto">
         {motDePasse ? (
           <MotDePasseGenere
             titre="Mot de passe réinitialisé"
@@ -44,7 +48,7 @@ export function ResetTitulaireModal({
           />
         ) : (
           <>
-            <h2 className="font-bold text-lg mb-3">Réinitialiser le mot de passe</h2>
+            <h2 id={titreId} className="font-bold text-lg mb-3">Réinitialiser le mot de passe</h2>
             <p className="text-sm text-gray-600">
               Réinitialiser le mot de passe de {titulaire.prenom} {titulaire.nom}, titulaire de {cabinet.nom} ?
               Un nouveau mot de passe temporaire sera généré et ses sessions seront fermées.
@@ -53,7 +57,7 @@ export function ResetTitulaireModal({
               <button type="button" onClick={onClose} disabled={mutation.isPending} className="px-4 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50">
                 Annuler
               </button>
-              <button type="button" onClick={() => mutation.mutate()} disabled={mutation.isPending} className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm disabled:opacity-50">
+              <button type="button" data-autofocus onClick={() => mutation.mutate()} disabled={mutation.isPending} className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm disabled:opacity-50">
                 {mutation.isPending ? '...' : 'Réinitialiser'}
               </button>
             </div>

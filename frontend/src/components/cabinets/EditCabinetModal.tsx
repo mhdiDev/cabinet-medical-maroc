@@ -1,4 +1,5 @@
 'use client';
+import { useId } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -6,6 +7,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { apiClient } from '@/lib/api';
 import { TELEPHONE, type Cabinet } from './types';
+import { useModale } from './useModale';
 
 const schema = z.object({
   nom: z.string().trim().min(1, 'Nom requis'),
@@ -45,31 +47,42 @@ export function EditCabinetModal({ cabinet, onClose }: { cabinet: Cabinet; onClo
     },
   });
 
+  const uid = useId();
+  const titreId = `${uid}-titre`;
+  const champ = (nom: string, e?: { message?: string }) => ({
+    id: `${uid}-${nom}`,
+    'aria-invalid': !!e,
+    'aria-describedby': e ? `${uid}-${nom}-err` : undefined,
+  });
+  const erreur = (nom: string, e?: { message?: string }) =>
+    e && <p id={`${uid}-${nom}-err`} className={errClass}>{e.message}</p>;
+  const modaleRef = useModale(onClose, mutation.isPending);
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto">
-        <h2 className="font-bold text-lg mb-4">Modifier {cabinet.nom}</h2>
+      <div ref={modaleRef} role="dialog" aria-modal="true" aria-labelledby={titreId} className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto">
+        <h2 id={titreId} className="font-bold text-lg mb-4">Modifier {cabinet.nom}</h2>
         <form noValidate onSubmit={handleSubmit(d => mutation.mutate(d))} className="space-y-3">
           <div>
-            <label className={labelClass}>Nom *</label>
-            <input {...register('nom')} className={inputClass} />
-            {errors.nom && <p className={errClass}>{errors.nom.message}</p>}
+            <label htmlFor={`${uid}-nom`} className={labelClass}>Nom *</label>
+            <input {...register('nom')} data-autofocus {...champ('nom', errors.nom)} className={inputClass} />
+            {erreur('nom', errors.nom)}
           </div>
           <div>
-            <label className={labelClass}>Adresse *</label>
-            <input {...register('adresse')} className={inputClass} />
-            {errors.adresse && <p className={errClass}>{errors.adresse.message}</p>}
+            <label htmlFor={`${uid}-adresse`} className={labelClass}>Adresse *</label>
+            <input {...register('adresse')} {...champ('adresse', errors.adresse)} className={inputClass} />
+            {erreur('adresse', errors.adresse)}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className={labelClass}>Ville *</label>
-              <input {...register('ville')} className={inputClass} />
-              {errors.ville && <p className={errClass}>{errors.ville.message}</p>}
+              <label htmlFor={`${uid}-ville`} className={labelClass}>Ville *</label>
+              <input {...register('ville')} {...champ('ville', errors.ville)} className={inputClass} />
+              {erreur('ville', errors.ville)}
             </div>
             <div>
-              <label className={labelClass}>Téléphone *</label>
-              <input {...register('telephone')} className={inputClass} />
-              {errors.telephone && <p className={errClass}>{errors.telephone.message}</p>}
+              <label htmlFor={`${uid}-telephone`} className={labelClass}>Téléphone *</label>
+              <input {...register('telephone')} {...champ('telephone', errors.telephone)} className={inputClass} />
+              {erreur('telephone', errors.telephone)}
             </div>
           </div>
           <div className="flex justify-end gap-3 pt-2">

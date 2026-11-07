@@ -72,6 +72,13 @@ export default function CabinetsPage() {
                       <p className="text-xs text-gray-400 sm:hidden">
                         {c.titulaire ? `${c.titulaire.prenom} ${c.titulaire.nom}` : 'Aucun titulaire'} · {c.actif ? 'Actif' : 'Suspendu'}
                       </p>
+                      <p className="text-xs text-gray-400 sm:hidden">
+                        {c.titulaire && <>{c.titulaire.email} · </>}
+                        {c.nbUtilisateurs} {c.nbUtilisateurs > 1 ? 'utilisateurs' : 'utilisateur'}
+                      </p>
+                      <p className="text-xs text-gray-400 lg:hidden">
+                        Créé le {new Date(c.createdAt).toLocaleDateString('fr-MA')}
+                      </p>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell">
                       {c.titulaire ? (
@@ -94,14 +101,14 @@ export default function CabinetsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-x-3 gap-y-1">
-                        <button onClick={() => setAction({ type: 'modifier', cabinet: c })} className="text-xs text-blue-600 hover:underline">
+                        <button onClick={() => setAction({ type: 'modifier', cabinet: c })} aria-label={`Modifier ${c.nom}`} className="text-xs text-blue-600 hover:underline">
                           Modifier
                         </button>
-                        <button onClick={() => setAction({ type: 'statut', cabinet: c })} className={`text-xs hover:underline ${c.actif ? 'text-red-600' : 'text-green-700'}`}>
+                        <button onClick={() => setAction({ type: 'statut', cabinet: c })} aria-label={`${c.actif ? 'Suspendre' : 'Réactiver'} ${c.nom}`} className={`text-xs hover:underline ${c.actif ? 'text-red-600' : 'text-green-700'}`}>
                           {c.actif ? 'Suspendre' : 'Réactiver'}
                         </button>
                         {c.titulaire && (
-                          <button onClick={() => setAction({ type: 'reset', cabinet: c })} className="text-xs text-blue-600 hover:underline">
+                          <button onClick={() => setAction({ type: 'reset', cabinet: c })} aria-label={`Réinitialiser le titulaire de ${c.nom}`} className="text-xs text-blue-600 hover:underline">
                             Réinitialiser le titulaire
                           </button>
                         )}

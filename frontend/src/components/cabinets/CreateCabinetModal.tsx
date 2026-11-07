@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { apiClient } from '@/lib/api';
 import { MotDePasseGenere } from '@/components/utilisateurs/MotDePasseGenere';
 import { TELEPHONE } from './types';
+import { useModale } from './useModale';
 
 const schema = z.object({
   nom: z.string().trim().min(1, 'Nom requis'),
@@ -18,7 +19,7 @@ const schema = z.object({
     prenom: z.string().trim().min(1, 'Prénom requis'),
     nom: z.string().trim().min(1, 'Nom requis'),
     email: z.string().trim().email('Email invalide'),
-    telephone: z.string().trim().regex(TELEPHONE, 'Téléphone marocain invalide').or(z.literal('')),
+    telephone: z.string().trim().refine(v => v === '' || TELEPHONE.test(v), 'Téléphone marocain invalide'),
   }),
 });
 
@@ -62,9 +63,20 @@ export function CreateCabinetModal({ onClose }: { onClose: () => void }) {
     },
   });
 
+  const uid = useId();
+  const titreId = `${uid}-titre`;
+  const champ = (nom: string, e?: { message?: string }) => ({
+    id: `${uid}-${nom}`,
+    'aria-invalid': !!e,
+    'aria-describedby': e ? `${uid}-${nom}-err` : undefined,
+  });
+  const erreur = (nom: string, e?: { message?: string }) =>
+    e && <p id={`${uid}-${nom}-err`} className={errClass}>{e.message}</p>;
+  const modaleRef = useModale(onClose, mutation.isPending || cree !== null);
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
+      <div ref={modaleRef} role="dialog" aria-modal="true" aria-labelledby={titreId} className="bg-white rounded-xl p-6 w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
         {cree ? (
           <MotDePasseGenere
             titre="Cabinet créé"
@@ -74,30 +86,30 @@ export function CreateCabinetModal({ onClose }: { onClose: () => void }) {
           />
         ) : (
           <>
-            <h2 className="font-bold text-lg mb-4">Nouveau cabinet</h2>
+            <h2 id={titreId} className="font-bold text-lg mb-4">Nouveau cabinet</h2>
             <form noValidate onSubmit={handleSubmit(d => mutation.mutate(d))} className="space-y-4">
               <fieldset className="space-y-3">
                 <legend className="text-sm font-semibold text-gray-900 mb-1">Cabinet</legend>
                 <div>
-                  <label className={labelClass}>Nom *</label>
-                  <input {...register('nom')} className={inputClass} />
-                  {errors.nom && <p className={errClass}>{errors.nom.message}</p>}
+                  <label htmlFor={`${uid}-nom`} className={labelClass}>Nom *</label>
+                  <input {...register('nom')} data-autofocus {...champ('nom', errors.nom)} className={inputClass} />
+                  {erreur('nom', errors.nom)}
                 </div>
                 <div>
-                  <label className={labelClass}>Adresse *</label>
-                  <input {...register('adresse')} className={inputClass} />
-                  {errors.adresse && <p className={errClass}>{errors.adresse.message}</p>}
+                  <label htmlFor={`${uid}-adresse`} className={labelClass}>Adresse *</label>
+                  <input {...register('adresse')} {...champ('adresse', errors.adresse)} className={inputClass} />
+                  {erreur('adresse', errors.adresse)}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className={labelClass}>Ville *</label>
-                    <input {...register('ville')} className={inputClass} />
-                    {errors.ville && <p className={errClass}>{errors.ville.message}</p>}
+                    <label htmlFor={`${uid}-ville`} className={labelClass}>Ville *</label>
+                    <input {...register('ville')} {...champ('ville', errors.ville)} className={inputClass} />
+                    {erreur('ville', errors.ville)}
                   </div>
                   <div>
-                    <label className={labelClass}>Téléphone *</label>
-                    <input {...register('telephone')} placeholder="0522123456" className={inputClass} />
-                    {errors.telephone && <p className={errClass}>{errors.telephone.message}</p>}
+                    <label htmlFor={`${uid}-telephone`} className={labelClass}>Téléphone *</label>
+                    <input {...register('telephone')} {...champ('telephone', errors.telephone)} placeholder="0522123456" className={inputClass} />
+                    {erreur('telephone', errors.telephone)}
                   </div>
                 </div>
               </fieldset>
@@ -106,25 +118,25 @@ export function CreateCabinetModal({ onClose }: { onClose: () => void }) {
                 <legend className="text-sm font-semibold text-gray-900 mb-1">Médecin titulaire</legend>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className={labelClass}>Prénom *</label>
-                    <input {...register('titulaire.prenom')} className={inputClass} />
-                    {errors.titulaire?.prenom && <p className={errClass}>{errors.titulaire.prenom.message}</p>}
+                    <label htmlFor={`${uid}-t-prenom`} className={labelClass}>Prénom *</label>
+                    <input {...register('titulaire.prenom')} {...champ('t-prenom', errors.titulaire?.prenom)} className={inputClass} />
+                    {erreur('t-prenom', errors.titulaire?.prenom)}
                   </div>
                   <div>
-                    <label className={labelClass}>Nom *</label>
-                    <input {...register('titulaire.nom')} className={inputClass} />
-                    {errors.titulaire?.nom && <p className={errClass}>{errors.titulaire.nom.message}</p>}
+                    <label htmlFor={`${uid}-t-nom`} className={labelClass}>Nom *</label>
+                    <input {...register('titulaire.nom')} {...champ('t-nom', errors.titulaire?.nom)} className={inputClass} />
+                    {erreur('t-nom', errors.titulaire?.nom)}
                   </div>
                 </div>
                 <div>
-                  <label className={labelClass}>Email *</label>
-                  <input type="email" autoComplete="off" {...register('titulaire.email')} className={inputClass} />
-                  {errors.titulaire?.email && <p className={errClass}>{errors.titulaire.email.message}</p>}
+                  <label htmlFor={`${uid}-t-email`} className={labelClass}>Email *</label>
+                  <input type="email" autoComplete="off" {...register('titulaire.email')} {...champ('t-email', errors.titulaire?.email)} className={inputClass} />
+                  {erreur('t-email', errors.titulaire?.email)}
                 </div>
                 <div>
-                  <label className={labelClass}>Téléphone</label>
-                  <input {...register('titulaire.telephone')} placeholder="0612345678" className={inputClass} />
-                  {errors.titulaire?.telephone && <p className={errClass}>{errors.titulaire.telephone.message}</p>}
+                  <label htmlFor={`${uid}-t-telephone`} className={labelClass}>Téléphone</label>
+                  <input {...register('titulaire.telephone')} {...champ('t-telephone', errors.titulaire?.telephone)} placeholder="0612345678" className={inputClass} />
+                  {erreur('t-telephone', errors.titulaire?.telephone)}
                 </div>
               </fieldset>
 
