@@ -214,7 +214,6 @@ Relations clés :
 | `backend: npm run lint` reformate des dizaines de fichiers | Le script lance `eslint --fix` : pour vérifier sans modifier, `npx eslint <fichiers>` |
 | `frontend: npx tsc --noEmit` en erreur | 4 erreurs déjà présentes (`stock/page.tsx`, `NouveauRdvModal.tsx`) : vérifier qu'on n'en ajoute pas |
 | `NEXT_PUBLIC_API_URL` | Intégrée au build Next.js : la changer impose `docker compose up -d --build` |
-| Création d'un patient depuis le formulaire : 500 | `dateNaissance` arrive en `AAAA-MM-JJ`, que Prisma refuse (bug antérieur, à corriger) |
 | Upload de documents en local : 503 | `MINIO_ENDPOINT` doit avoir schéma et port (`http://localhost:9000`) et le bucket `cabinet-medical` doit exister : `docker-compose.dev.yml` ne le crée pas |
 | `/api/health` | Répond « ok » sans interroger la base : ne prouve pas que la base fonctionne |
 | Identifiant de cabinet refusé par `@IsUUID` | Le premier cabinet a l'identifiant fixe `00000000-0000-0000-0000-000000000001` (hors v4) : ne pas valider les `:id` de cabinet comme UUID |

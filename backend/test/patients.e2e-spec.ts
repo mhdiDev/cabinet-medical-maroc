@@ -42,6 +42,25 @@ describe('Patients (e2e)', () => {
       patientId = res.body.id;
     });
 
+    it('201 avec une date de naissance au format AAAA-MM-JJ (formulaire)', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/patients')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ ...validPatient, dateNaissance: '1990-07-21' });
+
+      expect(res.status).toBe(201);
+      expect(res.body.dateNaissance).toBe('1990-07-21T00:00:00.000Z');
+    });
+
+    it('400 si la date de naissance est invalide', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/patients')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ ...validPatient, dateNaissance: '1990-13-45' });
+
+      expect(res.status).toBe(400);
+    });
+
     it('400 si champs obligatoires manquants', async () => {
       const res = await request(app.getHttpServer())
         .post('/api/patients')
@@ -118,6 +137,18 @@ describe('Patients (e2e)', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.ville).toBe('Casablanca');
+    });
+  });
+
+  describe('PATCH /api/patients/:id (date)', () => {
+    it('200 avec une date de naissance au format AAAA-MM-JJ', async () => {
+      const res = await request(app.getHttpServer())
+        .patch(`/api/patients/${patientId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ dateNaissance: '1986-04-02' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.dateNaissance).toBe('1986-04-02T00:00:00.000Z');
     });
   });
 

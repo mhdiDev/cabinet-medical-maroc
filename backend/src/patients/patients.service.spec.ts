@@ -51,7 +51,7 @@ describe('PatientsService', () => {
       const result = await service.create(dto as any, 'user-1');
 
       expect(mockPrisma.patient.create).toHaveBeenCalledWith({
-        data: { ...dto, cabinetId: 'cabinet-test' },
+        data: { ...dto, dateNaissance: new Date('1985-03-15'), cabinetId: 'cabinet-test' },
       });
       expect(mockAudit.log).toHaveBeenCalledWith(
         'user-1', 'CREATE', 'Patient', 'uuid-1',
