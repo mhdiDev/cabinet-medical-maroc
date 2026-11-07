@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { StatutRDV } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { ReferencesService } from '../prisma/references.service';
 import { cabinetCourant } from '../prisma/contexte-cabinet';
 import { AuditService } from '../audit/audit.service';
 import { CreateRendezVousDto } from './dto/create-rendez-vous.dto';
@@ -8,9 +9,14 @@ import { UpdateRendezVousDto } from './dto/update-rendez-vous.dto';
 
 @Injectable()
 export class RendezVousService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(
+    private prisma: PrismaService,
+    private audit: AuditService,
+    private references: ReferencesService,
+  ) {}
 
   async create(dto: CreateRendezVousDto, userId: string) {
+    await this.references.verifier(dto);
     const debut = new Date(dto.dateHeure);
     const fin = new Date(debut.getTime() + (dto.dureeMinutes || 30) * 60000);
 
@@ -85,6 +91,7 @@ export class RendezVousService {
 
   async update(id: string, dto: UpdateRendezVousDto, userId: string) {
     await this.findOne(id);
+    await this.references.verifier(dto);
     const rdv = await this.prisma.rendezVous.update({ where: { id }, data: dto });
     await this.audit.log(userId, 'UPDATE', 'RendezVous', id, dto);
     return rdv;

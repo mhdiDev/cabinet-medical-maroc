@@ -3,6 +3,7 @@ import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger'
 import { Role } from '@prisma/client';
 import { ConsultationsService } from './consultations.service';
 import { CreateConsultationDto } from './dto/create-consultation.dto';
+import { UpdateConsultationDto } from './dto/update-consultation.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -52,7 +53,7 @@ export class ConsultationsController {
   @UseGuards(RolesGuard)
   @Roles(Role.MEDECIN)
   @ApiOperation({ summary: 'Modifier une consultation (MEDECIN uniquement)' })
-  update(@Param('id') id: string, @Body() dto: Partial<CreateConsultationDto>, @CurrentUser('id') userId: string) {
+  update(@Param('id') id: string, @Body() dto: UpdateConsultationDto, @CurrentUser('id') userId: string) {
     return this.service.update(id, dto, userId);
   }
 }

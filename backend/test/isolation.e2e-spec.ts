@@ -459,6 +459,78 @@ describe('Isolation entre cabinets (e2e)', () => {
     });
   });
 
+  describe('références vers un autre cabinet', () => {
+    const dateHeure = new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString();
+    const ordonnance = {
+      medecinNom: 'Dr',
+      medicaments: [{ nomLibre: 'X', posologie: '1/j' }],
+    };
+
+    it.each([
+      ['/rendez-vous', { patientId: 'b-patient', medecinId: 'a-titulaire', dateHeure }],
+      ['/rendez-vous', { patientId: 'a-patient', medecinId: 'b-titulaire', dateHeure }],
+      ['/consultations', { patientId: 'b-patient', medecinId: 'a-titulaire' }],
+      ['/consultations', { patientId: 'a-patient', medecinId: 'b-titulaire' }],
+      ['/consultations', { patientId: 'a-patient', medecinId: 'a-titulaire', rendezVousId: 'b-rdv' }],
+      ['/ordonnances', { ...ordonnance, patientId: 'b-patient' }],
+      ['/ordonnances', { ...ordonnance, patientId: 'a-patient', consultationId: 'b-consult' }],
+      ['/paiements', { patientId: 'b-patient', montant: 10, typePaiement: 'ESPECE' }],
+      ['/paiements', { consultationId: 'b-consult', montant: 10, typePaiement: 'ESPECE' }],
+      ['/paiements', { rendezVousId: 'b-rdv', montant: 10, typePaiement: 'ESPECE' }],
+      ['/stock/mouvements', { articleId: 'b-article', type: 'ENTREE', quantite: 1 }],
+      [
+        '/stock/mouvements',
+        { articleId: 'a-article', type: 'ENTREE', quantite: 1, consultationId: 'b-consult' },
+      ],
+    ])('POST %s %j répond 404', async (url, body) => {
+      expect((await post(url, body)).status).toBe(404);
+    });
+
+    it.each([
+      ['/rendez-vous/a-rdv', { patientId: 'b-patient' }],
+      ['/rendez-vous/a-rdv', { medecinId: 'b-titulaire' }],
+      ['/consultations/a-consult', { patientId: 'b-patient' }],
+      ['/consultations/a-consult', { rendezVousId: 'b-rdv' }],
+    ])('PATCH %s %j répond 404', async (url, body) => {
+      expect((await patch(url, body)).status).toBe(404);
+    });
+
+    it('un utilisateur inactif du cabinet ne peut pas être désigné', async () => {
+      await prisma.user.update({ where: { id: 'a-medecin' }, data: { actif: false } });
+      try {
+        const res = await post('/consultations', { patientId: 'a-patient', medecinId: 'a-medecin' });
+        expect(res.status).toBe(404);
+      } finally {
+        await prisma.user.update({ where: { id: 'a-medecin' }, data: { actif: true } });
+      }
+    });
+
+    it('une secrétaire peut encore créer un rendez-vous à son nom (agenda actuel)', async () => {
+      const res = await post(
+        '/rendez-vous',
+        { patientId: 'a-patient', medecinId: 'a-secretaire', dateHeure },
+        tokenSecA,
+      );
+      expect(res.status).toBe(201);
+      await prisma.rendezVous.delete({ where: { id: res.body.id } });
+    });
+
+    it('PATCH /consultations/:id refuse un cabinetId', async () => {
+      const res = await patch('/consultations/a-consult', { cabinetId: 'b-cabinet' });
+      expect(res.status).toBe(400);
+    });
+
+    it('PATCH /consultations/:id refuse un champ inconnu', async () => {
+      const res = await patch('/consultations/a-consult', { pirate: true });
+      expect(res.status).toBe(400);
+    });
+
+    it('PATCH /consultations/:id accepte une modification valide', async () => {
+      const res = await patch('/consultations/a-consult', { motif: 'Motif-a' });
+      expect(res.status).toBe(200);
+    });
+  });
+
   describe('SUPER_ADMIN', () => {
     it('reçoit 403 sur les données des cabinets', async () => {
       await prisma.user.create({

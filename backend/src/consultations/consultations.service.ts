@@ -1,9 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { ReferencesService } from '../prisma/references.service';
 import { cabinetCourant } from '../prisma/contexte-cabinet';
 import { AuditService } from '../audit/audit.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CreateConsultationDto } from './dto/create-consultation.dto';
+import { UpdateConsultationDto } from './dto/update-consultation.dto';
 
 @Injectable()
 export class ConsultationsService {
@@ -11,6 +13,7 @@ export class ConsultationsService {
     private prisma: PrismaService,
     private audit: AuditService,
     private notifications: NotificationsService,
+    private references: ReferencesService,
   ) {}
 
   async findAll(page = 1, limit = 20, q?: string, date?: string) {
@@ -52,6 +55,7 @@ export class ConsultationsService {
   }
 
   async create(dto: CreateConsultationDto, userId: string) {
+    await this.references.verifier(dto);
     const consultation = await this.prisma.consultation.create({
       data: { ...dto, cabinetId: cabinetCourant() },
       include: {
@@ -95,8 +99,9 @@ export class ConsultationsService {
     return c;
   }
 
-  async update(id: string, dto: Partial<CreateConsultationDto>, userId: string) {
+  async update(id: string, dto: UpdateConsultationDto, userId: string) {
     await this.findOne(id);
+    await this.references.verifier(dto);
     const c = await this.prisma.consultation.update({ where: { id }, data: dto });
     await this.audit.log(userId, 'UPDATE', 'Consultation', id, dto);
     return c;

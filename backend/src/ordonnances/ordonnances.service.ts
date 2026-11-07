@@ -1,13 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import * as PDFDocument from 'pdfkit';
 import { PrismaService } from '../prisma/prisma.service';
+import { ReferencesService } from '../prisma/references.service';
 import { cabinetCourant } from '../prisma/contexte-cabinet';
 import { AuditService } from '../audit/audit.service';
 import { CreateOrdonnanceDto } from './dto/create-ordonnance.dto';
 
 @Injectable()
 export class OrdonnancesService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(
+    private prisma: PrismaService,
+    private audit: AuditService,
+    private references: ReferencesService,
+  ) {}
 
   async findAll(page = 1, limit = 20, q?: string) {
     const skip = (page - 1) * limit;
@@ -39,6 +44,7 @@ export class OrdonnancesService {
   }
 
   async create(dto: CreateOrdonnanceDto, userId: string) {
+    await this.references.verifier({ patientId: dto.patientId, consultationId: dto.consultationId });
     const { medicaments, ...rest } = dto;
 
     const ordonnance = await this.prisma.ordonnance.create({

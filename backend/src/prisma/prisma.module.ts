@@ -1,11 +1,13 @@
 import { Global, Module } from '@nestjs/common';
 import { PrismaSansFiltre, PrismaService } from './prisma.service';
 import { creerClientFiltre } from './client-filtre';
+import { ReferencesService } from './references.service';
 
 @Global()
 @Module({
   providers: [
     PrismaSansFiltre,
+    ReferencesService,
     {
       provide: PrismaService,
       // Le client étendu hérite de onModuleInit et onModuleDestroy : ils sont donc
@@ -14,6 +16,6 @@ import { creerClientFiltre } from './client-filtre';
       inject: [PrismaSansFiltre],
     },
   ],
-  exports: [PrismaSansFiltre, PrismaService],
+  exports: [PrismaSansFiltre, PrismaService, ReferencesService],
 })
 export class PrismaModule {}

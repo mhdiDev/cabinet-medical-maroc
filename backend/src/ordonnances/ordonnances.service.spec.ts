@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ReferencesService } from '../prisma/references.service';
 import { NotFoundException } from '@nestjs/common';
 import { OrdonnancesService } from './ordonnances.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -23,6 +24,7 @@ describe('OrdonnancesService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
+        { provide: ReferencesService, useValue: { verifier: jest.fn() } },
         OrdonnancesService,
         { provide: PrismaService, useValue: mockPrisma },
         { provide: AuditService, useValue: mockAudit },
