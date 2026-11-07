@@ -1,8 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ReferencesService } from '../prisma/references.service';
 import { PaiementsService } from './paiements.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { TypePaiement } from '@prisma/client';
+
+jest.mock('../prisma/contexte-cabinet', () => ({ cabinetCourant: () => 'cabinet-test' }));
 
 const mockPrisma = {
   paiement: {
@@ -19,6 +22,7 @@ describe('PaiementsService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
+        { provide: ReferencesService, useValue: { verifier: jest.fn() } },
         PaiementsService,
         { provide: PrismaService, useValue: mockPrisma },
         { provide: AuditService, useValue: mockAudit },
@@ -37,7 +41,7 @@ describe('PaiementsService', () => {
       const result = await service.create(dto as any, 'user-1');
 
       expect(mockPrisma.paiement.create).toHaveBeenCalledWith({
-        data: { ...dto, createdById: 'user-1' },
+        data: { ...dto, createdById: 'user-1', cabinetId: 'cabinet-test' },
       });
       expect(mockAudit.log).toHaveBeenCalledWith('user-1', 'CREATE', 'Paiement', 'p1', { montant: 200 });
       expect(result.id).toBe('p1');

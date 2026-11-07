@@ -1,6 +1,9 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { cabinetCourant } from '../prisma/contexte-cabinet';
+import { ReferencesService } from '../prisma/references.service';
 import { MinioService } from './minio.service';
+import { DOCUMENT_PUBLIC } from './document-public';
 
 const ALLOWED_MIME_TYPES = [
   'image/jpeg',
@@ -12,25 +15,37 @@ const ALLOWED_MIME_TYPES = [
 
 @Injectable()
 export class DocumentsService {
-  constructor(private prisma: PrismaService, private minio: MinioService) {}
+  constructor(
+    private prisma: PrismaService,
+    private minio: MinioService,
+    private references: ReferencesService,
+  ) {}
 
   async upload(file: Express.Multer.File, patientId: string, consultationId?: string) {
     if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
       throw new BadRequestException('Seuls les fichiers image (JPG, PNG, GIF, WEBP) et PDF sont acceptés');
     }
 
-    const key = await this.minio.uploadFile(file, `patients/${patientId}`);
+    await this.references.verifier({ patientId, consultationId });
+
+    // multer décode le nom en latin1 : on le réinterprète en UTF-8
+    const nom = Buffer.from(file.originalname, 'latin1').toString('utf8');
+
+    const cabinetId = cabinetCourant();
+    const key = await this.minio.uploadFile(file, `cabinets/${cabinetId}/patients/${patientId}`);
     const url = this.minio.getPublicUrl(key);
 
     return this.prisma.document.create({
       data: {
+        cabinetId,
         patientId,
         consultationId: consultationId || null,
-        nom: file.originalname,
+        nom,
         type: file.mimetype,
         taille: file.size,
         url,
       },
+      select: DOCUMENT_PUBLIC,
     });
   }
 
@@ -38,7 +53,16 @@ export class DocumentsService {
     return this.prisma.document.findMany({
       where: { patientId },
       orderBy: { createdAt: 'desc' },
+      select: DOCUMENT_PUBLIC,
     });
+  }
+
+  async lireFichier(id: string) {
+    const doc = await this.prisma.document.findUnique({ where: { id } });
+    if (!doc) throw new NotFoundException(`Document ${id} introuvable`);
+
+    const contenu = await this.minio.lireFichier(this.minio.extractKey(doc.url));
+    return { contenu, nom: doc.nom, type: doc.type };
   }
 
   async delete(id: string) {
@@ -52,6 +76,6 @@ export class DocumentsService {
       // Ne pas bloquer la suppression DB si MinIO échoue
     }
 
-    return this.prisma.document.delete({ where: { id } });
+    return this.prisma.document.delete({ where: { id }, select: DOCUMENT_PUBLIC });
   }
 }

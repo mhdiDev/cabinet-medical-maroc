@@ -1,16 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { ReferencesService } from '../prisma/references.service';
+import { cabinetCourant } from '../prisma/contexte-cabinet';
 import { AuditService } from '../audit/audit.service';
 import { CreatePaiementDto } from './dto/create-paiement.dto';
 import * as XLSX from 'xlsx';
 
 @Injectable()
 export class PaiementsService {
-  constructor(private prisma: PrismaService, private audit: AuditService) {}
+  constructor(
+    private prisma: PrismaService,
+    private audit: AuditService,
+    private references: ReferencesService,
+  ) {}
 
   async create(dto: CreatePaiementDto, userId: string) {
+    await this.references.verifier(dto);
     const paiement = await this.prisma.paiement.create({
-      data: { ...dto, createdById: userId },
+      data: { ...dto, createdById: userId, cabinetId: cabinetCourant() },
     });
     await this.audit.log(userId, 'CREATE', 'Paiement', paiement.id, { montant: dto.montant });
     return paiement;

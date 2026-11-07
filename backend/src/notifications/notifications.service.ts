@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Role } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { cabinetCourant } from '../prisma/contexte-cabinet';
 
 @Injectable()
 export class NotificationsService {
@@ -16,6 +17,7 @@ export class NotificationsService {
     await this.prisma.notification.createMany({
       data: secretaires.map((s) => ({
         userId: s.id,
+        cabinetId: cabinetCourant(),
         message: `Consultation terminée — ${patientNom} à encaisser`,
         type: 'ENCAISSEMENT',
         patientId,

@@ -9,9 +9,11 @@ import { JwtService } from '@nestjs/jwt';
 import { Prisma } from '@prisma/client';
 import * as argon2 from 'argon2';
 import { AuthService } from './auth.service';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaSansFiltre, PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { Role } from '@prisma/client';
+
+jest.mock('../prisma/contexte-cabinet', () => ({ cabinetCourant: () => 'cabinet-test' }));
 
 const mockPrisma = {
   user: { findUnique: jest.fn(), findMany: jest.fn(), create: jest.fn(), update: jest.fn() },
@@ -36,6 +38,7 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         { provide: PrismaService, useValue: mockPrisma },
+        { provide: PrismaSansFiltre, useValue: mockPrisma },
         { provide: JwtService, useValue: mockJwt },
         { provide: AuditService, useValue: mockAudit },
       ],
@@ -225,6 +228,7 @@ describe('AuthService', () => {
       const arg = mockPrisma.user.create.mock.calls[0][0];
       expect(arg.data.email).toBe(dto.email);
       expect(arg.data.doitChangerMdp).toBe(true);
+      expect(arg.data.cabinetId).toBe('cabinet-test');
       expect(res.motDePasseInitial).toHaveLength(12);
       expect(await argon2.verify(arg.data.motDePasse, res.motDePasseInitial)).toBe(true);
       expect(arg.select.motDePasse).toBeUndefined();

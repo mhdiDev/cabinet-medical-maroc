@@ -31,8 +31,8 @@ export class OrdonnancesController {
 
   @Post()
   @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN, Role.MEDECIN)
-  @ApiOperation({ summary: 'Créer une ordonnance (ADMIN, MEDECIN uniquement)' })
+  @Roles(Role.MEDECIN)
+  @ApiOperation({ summary: 'Créer une ordonnance (MEDECIN uniquement)' })
   create(@Body() dto: CreateOrdonnanceDto, @CurrentUser('id') userId: string) {
     return this.service.create(dto, userId);
   }

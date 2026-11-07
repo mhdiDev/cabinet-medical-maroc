@@ -1,6 +1,6 @@
-export type Role = 'ADMIN' | 'MEDECIN' | 'SECRETAIRE';
+export type Role = 'MEDECIN' | 'SECRETAIRE';
 
-export const ROLES: Role[] = ['ADMIN', 'MEDECIN', 'SECRETAIRE'];
+export const ROLES: Role[] = ['MEDECIN', 'SECRETAIRE'];
 
 export interface Utilisateur {
   id: string;
@@ -8,6 +8,7 @@ export interface Utilisateur {
   prenom: string;
   email: string;
   role: Role;
+  estTitulaire: boolean;
   actif: boolean;
   doitChangerMdp: boolean;
 }

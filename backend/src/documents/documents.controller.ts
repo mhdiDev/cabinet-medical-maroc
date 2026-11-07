@@ -9,11 +9,15 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Res,
+  StreamableFile,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
+import { Response } from 'express';
 import { DocumentsService } from './documents.service';
+import { UploadDocumentDto } from './dto/upload-document.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 @ApiTags('documents')
@@ -45,10 +49,9 @@ export class DocumentsController {
   )
   upload(
     @UploadedFile() file: Express.Multer.File,
-    @Body() body: { patientId: string; consultationId?: string },
+    @Body() body: UploadDocumentDto,
   ) {
     if (!file) throw new BadRequestException('Aucun fichier reçu');
-    if (!body.patientId) throw new BadRequestException('patientId requis');
     return this.service.upload(file, body.patientId, body.consultationId);
   }
 
@@ -56,6 +59,18 @@ export class DocumentsController {
   @ApiOperation({ summary: 'Documents d\'un patient' })
   findByPatient(@Param('patientId') patientId: string) {
     return this.service.findByPatient(patientId);
+  }
+
+  @Get(':id/fichier')
+  @ApiOperation({ summary: "Télécharger le fichier d'un document" })
+  async fichier(@Param('id') id: string, @Res({ passthrough: true }) res: Response) {
+    const { contenu, nom, type } = await this.service.lireFichier(id);
+    res.set({
+      'Content-Type': type,
+      'Cache-Control': 'private, no-store',
+      'Content-Disposition': `inline; filename*=UTF-8''${encodeURIComponent(nom)}`,
+    });
+    return new StreamableFile(contenu);
   }
 
   @Delete(':id')

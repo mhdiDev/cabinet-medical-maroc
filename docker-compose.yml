@@ -46,8 +46,8 @@ services:
       - cabinet_net
     restart: unless-stopped
 
-  # Crée le bucket au premier démarrage et rend ses fichiers lisibles publiquement
-  # (lecture seule, sans listing ; les documents patients sont servis par Nginx sous /files/)
+  # Crée le bucket au premier démarrage et retire toute politique d'accès public
+  # (les documents patients sont servis par le backend, jamais directement)
   minio-init:
     image: amazon/aws-cli:2.31.0
     container_name: cabinet_minio_init
@@ -58,12 +58,10 @@ services:
       AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
       AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
       AWS_DEFAULT_REGION: us-east-1
-    volumes:
-      - ./minio/public-read-policy.json:/policy.json:ro
     entrypoint: >
       /bin/sh -c "(aws --endpoint-url http://minio:9000 s3api head-bucket --bucket cabinet-medical ||
                    aws --endpoint-url http://minio:9000 s3 mb s3://cabinet-medical) &&
-                  aws --endpoint-url http://minio:9000 s3api put-bucket-policy --bucket cabinet-medical --policy file:///policy.json"
+                  (aws --endpoint-url http://minio:9000 s3api delete-bucket-policy --bucket cabinet-medical)"
     networks:
       - cabinet_net
 

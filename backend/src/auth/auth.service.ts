@@ -10,7 +10,8 @@ import { JwtService } from '@nestjs/jwt';
 import { Prisma } from '@prisma/client';
 import * as argon2 from 'argon2';
 import { v4 as uuidv4 } from 'uuid';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaSansFiltre, PrismaService } from '../prisma/prisma.service';
+import { cabinetCourant } from '../prisma/contexte-cabinet';
 import { AuditService } from '../audit/audit.service';
 import { LoginDto } from './dto/login.dto';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -22,12 +23,14 @@ export class AuthService {
 
   constructor(
     private prisma: PrismaService,
+    private prismaSansFiltre: PrismaSansFiltre,
     private jwt: JwtService,
     private audit: AuditService,
   ) {}
 
   async validateUser(email: string, motDePasse: string) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
+    // Le cabinet n'est pas encore connu à la connexion
+    const user = await this.prismaSansFiltre.user.findUnique({ where: { email } });
     if (!user || !user.actif) return null;
 
     // Vérification sécurisée avec argon2 (résistant timing attacks)
@@ -73,13 +76,19 @@ export class AuthService {
   }
 
   async createUser(adminId: string, dto: CreateUserDto) {
-    const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    // L'email est unique sur toute la plateforme, pas seulement dans le cabinet
+    const existing = await this.prismaSansFiltre.user.findUnique({ where: { email: dto.email } });
     if (existing) throw new ConflictException('Email déjà utilisé');
 
     const motDePasseInitial = genererMotDePasse();
     const user = await this.prisma.user
       .create({
-        data: { ...dto, motDePasse: await argon2.hash(motDePasseInitial), doitChangerMdp: true },
+        data: {
+          ...dto,
+          cabinetId: cabinetCourant(),
+          motDePasse: await argon2.hash(motDePasseInitial),
+          doitChangerMdp: true,
+        },
         select: {
           id: true,
           email: true,
@@ -89,6 +98,7 @@ export class AuthService {
           telephone: true,
           actif: true,
           doitChangerMdp: true,
+          estTitulaire: true,
           createdAt: true,
         },
       })
@@ -142,6 +152,7 @@ export class AuthService {
         role: true,
         actif: true,
         doitChangerMdp: true,
+        estTitulaire: true,
         createdAt: true,
       },
       orderBy: [{ nom: 'asc' }, { prenom: 'asc' }],

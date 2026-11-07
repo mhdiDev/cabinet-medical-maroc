@@ -1,9 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ReferencesService } from '../prisma/references.service';
 import { NotFoundException } from '@nestjs/common';
 import { ConsultationsService } from './consultations.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { NotificationsService } from '../notifications/notifications.service';
+
+jest.mock('../prisma/contexte-cabinet', () => ({ cabinetCourant: () => 'cabinet-test' }));
 
 const mockPrisma = {
   consultation: {
@@ -24,6 +27,7 @@ describe('ConsultationsService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
+        { provide: ReferencesService, useValue: { verifier: jest.fn() } },
         ConsultationsService,
         { provide: PrismaService, useValue: mockPrisma },
         { provide: AuditService, useValue: mockAudit },

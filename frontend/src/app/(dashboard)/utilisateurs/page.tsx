@@ -13,19 +13,19 @@ export default function UtilisateursPage() {
   const { user } = useAuthStore();
   const [cible, setCible] = useState<Utilisateur | null>(null);
   const [creation, setCreation] = useState(false);
-  const estAdmin = user?.role === 'ADMIN';
+  const estTitulaire = !!user?.estTitulaire;
 
   useEffect(() => {
-    if (!estAdmin) router.replace('/dashboard');
-  }, [estAdmin, router]);
+    if (!estTitulaire) router.replace('/dashboard');
+  }, [estTitulaire, router]);
 
   const { data: utilisateurs = [], isLoading } = useQuery<Utilisateur[]>({
     queryKey: ['users'],
     queryFn: () => apiClient.get('/auth/users').then(r => r.data),
-    enabled: estAdmin,
+    enabled: estTitulaire,
   });
 
-  if (!estAdmin) return null;
+  if (!estTitulaire) return null;
 
   return (
     <div className="space-y-6">
@@ -59,13 +59,13 @@ export default function UtilisateursPage() {
                   <tr key={u.id} className="hover:bg-gray-50 transition">
                     <td className="px-4 py-3">
                       <p className="font-medium text-gray-900">{u.prenom} {u.nom}</p>
-                      <p className="text-xs text-gray-400 sm:hidden">{u.email} · {u.role}</p>
+                      <p className="text-xs text-gray-400 sm:hidden">{u.email} · {u.role}{u.estTitulaire ? ' · Titulaire' : ''}</p>
                       {u.doitChangerMdp && (
                         <span className="text-xs text-orange-600 font-medium">Changement requis</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell">{u.email}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell">{u.role}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell">{u.role}{u.estTitulaire ? ' · Titulaire' : ''}</td>
                     <td className="px-4 py-3 hidden sm:table-cell">
                       <span className={`text-xs px-2 py-1 rounded-full ${u.actif ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                         {u.actif ? 'Actif' : 'Inactif'}

@@ -2,6 +2,7 @@ import { ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { AUTORISE_SI_MDP_A_CHANGER_KEY } from '../decorators/autorise-si-mdp-a-changer.decorator';
+import { definirCabinet } from '../../prisma/contexte-cabinet';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -14,6 +15,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (!authenticated) return false;
 
     const { user } = context.switchToHttp().getRequest();
+    definirCabinet(user?.cabinetId ?? null);
     if (!user?.doitChangerMdp) return true;
 
     const autorise = this.reflector.getAllAndOverride<boolean>(AUTORISE_SI_MDP_A_CHANGER_KEY, [

@@ -35,14 +35,14 @@ export class PatientsController {
   }
 
   @Get('stats')
-  @Roles(Role.ADMIN, Role.MEDECIN)
+  @Roles(Role.MEDECIN)
   @ApiOperation({ summary: 'Statistiques patients' })
   getStats() {
     return this.patientsService.getStats();
   }
 
   @Get('export/csv')
-  @Roles(Role.ADMIN, Role.MEDECIN)
+  @Roles(Role.MEDECIN)
   @ApiOperation({ summary: 'Export CSV des patients' })
   async exportCsv(@Res() res: Response) {
     const csv = await this.patientsService.exportCsv();
@@ -69,7 +69,7 @@ export class PatientsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Roles(Role.ADMIN, Role.MEDECIN)
+  @Roles(Role.MEDECIN)
   @ApiOperation({ summary: 'Supprimer (désactiver) un patient' })
   remove(@Param('id') id: string, @CurrentUser('id') userId: string) {
     return this.patientsService.remove(id, userId);

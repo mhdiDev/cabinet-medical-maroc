@@ -4,8 +4,10 @@ import {
   ConflictException,
   Logger,
 } from '@nestjs/common';
+import { DOCUMENT_PUBLIC } from '../documents/document-public';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { cabinetCourant } from '../prisma/contexte-cabinet';
 import { AuditService } from '../audit/audit.service';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
@@ -21,7 +23,9 @@ export class PatientsService {
   ) {}
 
   async create(dto: CreatePatientDto, userId: string) {
-    const patient = await this.prisma.patient.create({ data: dto });
+    const patient = await this.prisma.patient.create({
+      data: { ...dto, cabinetId: cabinetCourant() },
+    });
 
     await this.audit.log(userId, 'CREATE', 'Patient', patient.id, {
       nom: patient.nom,
@@ -90,7 +94,7 @@ export class PatientsService {
           include: { medecin: { select: { nom: true, prenom: true } } },
         },
         ordonnances: { orderBy: { createdAt: 'desc' }, take: 10 },
-        documents: { orderBy: { createdAt: 'desc' } },
+        documents: { orderBy: { createdAt: 'desc' }, select: DOCUMENT_PUBLIC },
       },
     });
 

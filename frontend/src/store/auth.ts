@@ -1,12 +1,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-interface User {
+export interface User {
   id: string;
   email: string;
   nom: string;
   prenom: string;
-  role: 'ADMIN' | 'MEDECIN' | 'SECRETAIRE';
+  role: 'SUPER_ADMIN' | 'MEDECIN' | 'SECRETAIRE';
+  cabinetId?: string | null;
+  estTitulaire?: boolean;
   doitChangerMdp?: boolean;
 }
 
@@ -17,6 +19,7 @@ interface AuthState {
   // Vrai une fois que persist a fini de lire localStorage
   _hasHydrated: boolean;
   setAuth: (user: User, token: string, refreshToken: string) => void;
+  setUser: (user: User) => void;
   setToken: (token: string) => void;
   setTokens: (token: string, refreshToken: string) => void;
   setDoitChangerMdp: (value: boolean) => void;
@@ -32,6 +35,7 @@ export const useAuthStore = create<AuthState>()(
       refreshToken: null,
       _hasHydrated: false,
       setAuth: (user, token, refreshToken) => set({ user, token, refreshToken }),
+      setUser: (user) => set({ user }),
       setToken: (token) => set({ token }),
       setTokens: (token, refreshToken) => set({ token, refreshToken }),
       setDoitChangerMdp: (value) =>
