@@ -29,7 +29,7 @@
 |---|---|
 | `backend/src/auth/dto/update-user.dto.ts` (nouveau) | `UpdateUserDto` |
 | `backend/src/auth/dto/statut-user.dto.ts` (nouveau) | `StatutUserDto` |
-| `backend/src/auth/auth.service.ts` | `SELECT_UTILISATEUR`, `versUtilisateur`, `listUsers`, `modifierUser`, `changerStatutUser`, `resetPassword` (409) |
+| `backend/src/auth/auth.service.ts` | `selectUtilisateur()`, `versUtilisateur`, `listUsers`, `modifierUser`, `changerStatutUser`, `resetPassword` (409) |
 | `backend/src/auth/auth.controller.ts` | 2 routes `PATCH` |
 | `backend/test/equipe.e2e-spec.ts` (nouveau) | tests e2e de l'étape |
 | `frontend/src/components/commun/useModale.ts` (déplacé depuis `components/cabinets/`) | hook des modales |
