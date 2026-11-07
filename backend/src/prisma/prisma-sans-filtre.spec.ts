@@ -9,6 +9,7 @@ const AUTORISES = [
   'auth/auth.service.ts',
   'auth/auth.service.spec.ts',
   'auth/strategies/jwt.strategy.ts',
+  'plateforme/plateforme.service.ts',
   'prisma/prisma.module.ts',
   'prisma/prisma.service.ts',
   'prisma/prisma-sans-filtre.spec.ts',
@@ -29,6 +30,21 @@ describe('garde-fous du cloisonnement', () => {
       .map((f) => relative(RACINE, f))
       .sort();
     expect(utilisateurs).toEqual([...AUTORISES].sort());
+  });
+
+  it("plateforme.service.ts n'atteint que les cabinets, comptes, sessions et audit", () => {
+    const source = readFileSync(join(RACINE, 'plateforme/plateforme.service.ts'), 'utf8');
+    const acces = [...source.matchAll(/\b(?:prismaSansFiltre|tx)\.(\$?\w+)/g)].map((m) => m[1]);
+    const permis = new Set(['cabinet', 'user', 'auditLog', 'refreshToken', '$transaction']);
+    expect(acces.filter((a) => !permis.has(a))).toEqual([]);
+    expect(acces.length).toBeGreaterThan(0);
+  });
+
+  it('plateforme.service.ts ne cite aucune relation vers les données des patients', () => {
+    const source = readFileSync(join(RACINE, 'plateforme/plateforme.service.ts'), 'utf8');
+    const relations =
+      /\b(patients|rendezVous|consultations|ordonnances|paiements|stockArticles|stockMouvements|documents|notifications|parametres)\s*:/;
+    expect(source).not.toMatch(relations);
   });
 
   it('tout modèle ayant un cabinetId est cloisonné', () => {

@@ -15,6 +15,7 @@ import { AuditModule } from './audit/audit.module';
 import { MedicamentsModule } from './medicaments/medicaments.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { DocumentsModule } from './documents/documents.module';
+import { PlateformeModule } from './plateforme/plateforme.module';
 
 @Module({
   controllers: [AppController],
@@ -33,6 +34,7 @@ import { DocumentsModule } from './documents/documents.module';
     MedicamentsModule,
     NotificationsModule,
     DocumentsModule,
+    PlateformeModule,
   ],
 })
 export class AppModule implements NestModule {
