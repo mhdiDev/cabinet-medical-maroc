@@ -122,8 +122,14 @@ describe('garde-fous du cloisonnement', () => {
       constructor: ['(mention)'], // private prismaSansFiltre: PrismaSansFiltre
       validateUser: ['user.findUnique'], // le cabinet n'est pas connu à la connexion
       createUser: ['user.findUnique'], // l'email est unique sur toute la plateforme
-      // un SUPER_ADMIN n'a pas de cabinet
-      changePassword: ['user.findUnique', '$transaction', 'user.update', 'refreshToken.deleteMany'],
+      // un SUPER_ADMIN n'a pas de cabinet : l'audit s'écrit dans la même transaction
+      changePassword: [
+        'user.findUnique',
+        '$transaction',
+        'user.update',
+        'refreshToken.deleteMany',
+        'auditLog.create',
+      ],
     });
   });
 

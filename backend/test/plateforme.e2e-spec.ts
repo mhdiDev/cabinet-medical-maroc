@@ -94,6 +94,16 @@ describe('Plateforme (e2e)', () => {
         nouveauMdp: 'Atlas2026!',
       });
       expect(changement.status).toBe(201);
+      const auditChangement = await prisma.auditLog.findMany({
+        where: { userId: compte!.id, action: 'CHANGE_PASSWORD' },
+      });
+      expect(auditChangement).toHaveLength(1);
+      expect(auditChangement[0]).toMatchObject({
+        entite: 'User',
+        entiteId: compte!.id,
+        cabinetId: res.body.cabinet.id,
+        details: null,
+      });
       const patients = await appel('get', '/patients', changement.body.accessToken);
       expect(patients.status).toBe(200);
       expect(patients.body.data).toEqual([]);
@@ -312,6 +322,17 @@ describe('Plateforme (e2e)', () => {
         nouveauMdp: 'Plateforme2026!',
       });
       expect(res.status).toBe(201);
+      // Sans cabinet, l'audit ne peut pas passer par le client filtré
+      const logs = await prisma.auditLog.findMany({
+        where: { userId: 'super-admin', action: 'CHANGE_PASSWORD' },
+      });
+      expect(logs).toHaveLength(1);
+      expect(logs[0]).toMatchObject({
+        entite: 'User',
+        entiteId: 'super-admin',
+        cabinetId: null,
+        details: null,
+      });
     });
   });
 });

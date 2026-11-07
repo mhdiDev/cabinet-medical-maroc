@@ -4,7 +4,8 @@ import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@
 export class SuperAdminGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const { user } = context.switchToHttp().getRequest();
-    if (user?.role !== 'SUPER_ADMIN') {
+    // Défense en profondeur : un SUPER_ADMIN n'est rattaché à aucun cabinet
+    if (user?.role !== 'SUPER_ADMIN' || user.cabinetId != null) {
       throw new ForbiddenException("Accès réservé à l'administrateur de la plateforme");
     }
     return true;

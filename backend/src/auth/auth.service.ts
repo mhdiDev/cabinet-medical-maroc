@@ -178,9 +178,17 @@ export class AuthService {
       }),
       // Révoque toutes les sessions (une nouvelle est ouverte pour l'appelant ci-dessous)
       this.prismaSansFiltre.refreshToken.deleteMany({ where: { userId } }),
+      // Sans filtre et dans la transaction : AuditService lèverait 403 pour un SUPER_ADMIN
+      this.prismaSansFiltre.auditLog.create({
+        data: {
+          userId,
+          action: 'CHANGE_PASSWORD',
+          entite: 'User',
+          entiteId: userId,
+          cabinetId: user.cabinetId,
+        },
+      }),
     ]);
-
-    await this.audit.log(userId, 'CHANGE_PASSWORD', 'User', userId);
 
     return this.generateTokens(user.id, user.email, user.role);
   }

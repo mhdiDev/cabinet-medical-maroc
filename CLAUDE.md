@@ -172,7 +172,7 @@ Relations clés :
 - Chaque requête ouvre un contexte (`prisma/contexte-cabinet.ts`) ; `JwtAuthGuard` y écrit le `cabinetId` de l'utilisateur, relu en base.
 - `PrismaService` est un client filtré (`prisma/client-filtre.ts`) : il ajoute le cabinet à toutes les opérations des modèles cloisonnés et répond 403 sans cabinet, y compris pour un `SUPER_ADMIN`.
 - Le client filtré refuse le SQL brut (`$queryRaw`, `$executeRaw` et variantes `Unsafe`) : il lèverait le filtre.
-- `PrismaSansFiltre` contourne le filtre : réservé à la connexion, à `JwtStrategy`, au contrôle d'unicité de l'email et au module `plateforme/`. Un test bloque tout autre usage.
+- `PrismaSansFiltre` contourne le filtre : réservé à la connexion, à `JwtStrategy`, au contrôle d'unicité de l'email, au changement de mot de passe (un `SUPER_ADMIN` n'a pas de cabinet ; l'audit `CHANGE_PASSWORD` y est écrit dans la même transaction) et au module `plateforme/`. Un test bloque tout autre usage.
 - Nouveau modèle avec `cabinetId` : l'ajouter à `MODELES_CLOISONNES` (un test le vérifie). Un `create` passe `cabinetId: cabinetCourant()`.
 - Écriture citant l'identifiant d'une autre donnée : appeler `ReferencesService.verifier()`, car le filtre ne contrôle pas ces identifiants. Il contrôle aussi les chaînes vides (seuls `undefined` et `null` sont ignorés).
 - Une ressource d'un autre cabinet répond 404, jamais 403.

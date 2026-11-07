@@ -24,6 +24,7 @@ const mockPrisma = {
     delete: jest.fn(),
     deleteMany: jest.fn(),
   },
+  auditLog: { create: jest.fn() },
   $transaction: jest.fn((ops: Promise<unknown>[]) => Promise.all(ops)),
 };
 
@@ -198,6 +199,7 @@ describe('AuthService', () => {
       id: 'u1',
       email: 'test@ma',
       role: Role.SECRETAIRE,
+      cabinetId: 'cab1',
       motDePasse: await argon2.hash(mdp),
       doitChangerMdp: true,
     });
@@ -236,7 +238,17 @@ describe('AuthService', () => {
       expect(await argon2.verify(updateArg.data.motDePasse, 'Nouveau123!')).toBe(true);
       expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1);
       expect(mockPrisma.refreshToken.deleteMany).toHaveBeenCalledWith({ where: { userId: 'u1' } });
-      expect(mockAudit.log).toHaveBeenCalledWith('u1', 'CHANGE_PASSWORD', 'User', 'u1');
+      // Audit écrit dans la transaction, sans filtre : un SUPER_ADMIN n'a pas de cabinet
+      expect(mockPrisma.auditLog.create).toHaveBeenCalledWith({
+        data: {
+          userId: 'u1',
+          action: 'CHANGE_PASSWORD',
+          entite: 'User',
+          entiteId: 'u1',
+          cabinetId: 'cab1',
+        },
+      });
+      expect(mockAudit.log).not.toHaveBeenCalled();
       expect(res.accessToken).toBe('mock-token');
       expect(res.refreshToken).toBeDefined();
     });
