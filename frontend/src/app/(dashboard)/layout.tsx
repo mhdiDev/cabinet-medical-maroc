@@ -12,6 +12,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const mdpAChanger = !!user?.doitChangerMdp && pathname !== '/mon-compte';
+  // Le SUPER_ADMIN n'a accès qu'à la liste des cabinets et à son compte
+  const pagePlateforme = pathname === '/cabinets' || pathname === '/mon-compte';
+  const horsEspacePlateforme = user?.role === 'SUPER_ADMIN' && !pagePlateforme && !mdpAChanger;
 
   useEffect(() => {
     // Attendre la fin de la réhydratation avant de juger l'état d'auth
@@ -45,6 +48,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (_hasHydrated && token && mdpAChanger) router.replace('/mon-compte');
   }, [_hasHydrated, token, mdpAChanger, router]);
 
+  useEffect(() => {
+    if (_hasHydrated && token && horsEspacePlateforme) router.replace('/cabinets');
+  }, [_hasHydrated, token, horsEspacePlateforme, router]);
+
   // Pendant la réhydratation : écran de chargement neutre (évite le flash de redirection)
   if (!_hasHydrated) {
     return (
@@ -57,7 +64,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   }
 
-  if (!token || mdpAChanger) return null;
+  if (!token || mdpAChanger || horsEspacePlateforme) return null;
 
   return (
     <div className="flex h-screen bg-gray-50">
