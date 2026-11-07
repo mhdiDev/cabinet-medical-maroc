@@ -9,13 +9,17 @@ import { useAuthStore } from '@/store/auth';
 async function ouvrirDocument(id: string) {
   // Ouvert avant l'appel réseau, sinon le navigateur bloque l'onglet
   const onglet = window.open('', '_blank');
+  if (!onglet) {
+    toast.error('Autorisez les fenêtres pop-up pour ouvrir le document');
+    return;
+  }
   try {
     const { data } = await apiClient.get<Blob>(`/documents/${id}/fichier`, { responseType: 'blob' });
     const url = URL.createObjectURL(data);
-    if (onglet) onglet.location.href = url;
+    onglet.location.href = url;
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
   } catch {
-    onglet?.close();
+    onglet.close();
     toast.error("Impossible d'ouvrir le document");
   }
 }
