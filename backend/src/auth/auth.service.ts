@@ -8,7 +8,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Prisma } from '@prisma/client';
+import { Prisma, StatutRDV } from '@prisma/client';
 import * as argon2 from 'argon2';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaSansFiltre, PrismaService } from '../prisma/prisma.service';
@@ -33,6 +33,32 @@ function obtenirHashFactice(): Promise<string> {
     throw e;
   });
   return hashFactice;
+}
+
+function selectUtilisateur() {
+  return {
+    id: true,
+    nom: true,
+    prenom: true,
+    email: true,
+    telephone: true,
+    role: true,
+    actif: true,
+    doitChangerMdp: true,
+    estTitulaire: true,
+    createdAt: true,
+    _count: {
+      select: {
+        rendezVous: {
+          where: { dateHeure: { gte: new Date() }, statut: { not: StatutRDV.ANNULE } },
+        },
+      },
+    },
+  } satisfies Prisma.UserSelect;
+}
+
+function versUtilisateur<T extends { _count: { rendezVous: number } }>({ _count, ...u }: T) {
+  return { ...u, rdvAVenir: _count.rendezVous };
 }
 
 @Injectable()
@@ -194,20 +220,11 @@ export class AuthService {
   }
 
   async listUsers() {
-    return this.prisma.user.findMany({
-      select: {
-        id: true,
-        nom: true,
-        prenom: true,
-        email: true,
-        role: true,
-        actif: true,
-        doitChangerMdp: true,
-        estTitulaire: true,
-        createdAt: true,
-      },
+    const users = await this.prisma.user.findMany({
+      select: selectUtilisateur(),
       orderBy: [{ nom: 'asc' }, { prenom: 'asc' }],
     });
+    return users.map(versUtilisateur);
   }
 
   async resetPassword(adminId: string, userId: string) {
@@ -219,6 +236,11 @@ export class AuthService {
 
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('Utilisateur non trouvé');
+    if (!user.actif) {
+      throw new ConflictException(
+        'Le compte est désactivé : réactivez-le avant de réinitialiser son mot de passe.',
+      );
+    }
 
     const motDePasseTemporaire = genererMotDePasse();
     await this.prisma.$transaction([
