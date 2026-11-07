@@ -11,7 +11,7 @@ Application web de gestion de cabinet médical, adaptée au Maroc (CIN, téléph
 | Frontend | Next.js 14, TypeScript, Tailwind CSS, React Query, React Hook Form, Zod |
 | Backend | NestJS, TypeScript, Prisma ORM |
 | Base de données | PostgreSQL 16 |
-| Auth | JWT (15min) + Refresh Token (7j), Argon2, RBAC (ADMIN / MEDECIN / SECRETAIRE) |
+| Auth | JWT (15min) + Refresh Token (7j), Argon2, RBAC (SUPER_ADMIN / MEDECIN / SECRETAIRE, médecin titulaire) |
 | Export | xlsx (Excel), PDFKit (ordonnances) |
 | Stockage fichiers | MinIO (S3-compatible) |
 
@@ -44,7 +44,7 @@ Vercel et Render ne sont plus utilisés (la base Render a été supprimée).
 | Application | http://149.56.209.147 |
 | API | http://149.56.209.147/api |
 | Swagger | http://149.56.209.147/api/docs |
-| Documents patients | http://149.56.209.147/files/ (MinIO, lecture seule) |
+| Documents patients | Privés : `GET /api/documents/:id/fichier` (MinIO n'est plus lisible publiquement) |
 | Serveur | VPS-1 OVH, Canada (Beauharnois), Ubuntu 24.04, 2 vCPU / 4 Go + 2 Go swap |
 | SSH | `ssh ubuntu@149.56.209.147` |
 | Dossier de l'appli | `/opt/cabinet-medical-maroc` (secrets dans `.env`, jamais commité) |
@@ -52,8 +52,7 @@ Vercel et Render ne sont plus utilisés (la base Render a été supprimée).
 ```
 Internet ─▶ Nginx :80 (host)
              ├─ /        ▶ frontend  (127.0.0.1:3000)
-             ├─ /api     ▶ backend   (127.0.0.1:3001) ─▶ postgres (réseau Docker interne)
-             └─ /files/  ▶ minio     (127.0.0.1:9000, bucket cabinet-medical)
+             └─ /api     ▶ backend   (127.0.0.1:3001) ─▶ postgres (réseau Docker interne)
 ```
 
 Serveur temporaire : à déplacer vers un VPS en Europe dès qu'il y en a en stock.
@@ -61,11 +60,11 @@ Pas de vraies données patients d'ici là (données de santé, loi 09-08 / CNDP)
 
 ## Comptes de démo
 
-Le seed crée ces comptes s'ils n'existent pas. Mots de passe valables en local uniquement : en production, ils doivent être changés après le premier déploiement (page « Mon compte » pour chacun, ou réinitialisation par l'admin depuis « Utilisateurs »).
+Le seed crée ces comptes s'ils n'existent pas. Mots de passe valables en local uniquement : en production, ils doivent être changés après le premier déploiement (page « Mon compte » pour chacun, ou réinitialisation par le titulaire depuis « Utilisateurs »).
 
 | Rôle | Email | Mot de passe (local) |
 |------|-------|----------------------|
-| Admin | admin@cabinet.ma | Admin123! |
+| Médecin titulaire | admin@cabinet.ma | Admin123! |
 | Médecin | dr.benali@cabinet.ma | Medecin123! |
 | Secrétaire | secretaire@cabinet.ma | Secretaire123! |
 
@@ -118,8 +117,8 @@ cd /opt/cabinet-medical-maroc && git pull && docker compose up -d --build
 ```
 
 Automatique : `.github/workflows/deploy.yml` se lance après une CI verte sur master et fait la même chose
-en SSH. Il est ignoré tant que les secrets GitHub `OVH_HOST`, `OVH_USER` (`ubuntu`) et `OVH_SSH_KEY`
-ne sont pas configurés.
+en SSH (secrets GitHub `OVH_HOST`, `OVH_USER`, `OVH_SSH_KEY`). **Tout merge sur master part donc en production.**
+Juste après un déploiement, l'API répond 502 pendant que le backend applique les migrations et le seed.
 
 > Au démarrage, le backend exécute :
 > `npx prisma migrate deploy && node prisma/seed.js && node prisma/import-medicaments.js && node dist/main`
@@ -129,9 +128,9 @@ MinIO ne publie plus d'image Docker).
 
 Sauvegardes : `scripts/backup.sh` (dump Postgres + archive MinIO vers OVH Object Storage via rclone, cron à 02h00).
 
-## Modèles Prisma (14 modèles)
+## Modèles Prisma (15 modèles)
 
-`User` · `RefreshToken` · `Patient` · `RendezVous` · `Consultation` · `Ordonnance` · `Medicament` · `OrdonnanceMedicament` · `Paiement` · `StockArticle` · `StockMouvement` · `Document` · `AuditLog` · `Parametre`
+`Cabinet` · `User` · `RefreshToken` · `Patient` · `RendezVous` · `Consultation` · `Ordonnance` · `Medicament` · `OrdonnanceMedicament` · `Paiement` · `StockArticle` · `StockMouvement` · `Document` · `AuditLog` · `Parametre`
 
 Relations clés :
 - `Paiement` → `Consultation` (consultationId, optionnel)
@@ -156,9 +155,20 @@ Relations clés :
 /health              health check (UptimeRobot)
 ```
 
+## Multi-cabinet : isolation
+
+- Chaque requête ouvre un contexte (`prisma/contexte-cabinet.ts`) ; `JwtAuthGuard` y écrit le `cabinetId` de l'utilisateur, relu en base.
+- `PrismaService` est un client filtré (`prisma/client-filtre.ts`) : il ajoute le cabinet à toutes les opérations des modèles cloisonnés et répond 403 sans cabinet, y compris pour un `SUPER_ADMIN`.
+- Le client filtré refuse le SQL brut (`$queryRaw`, `$executeRaw` et variantes `Unsafe`) : il lèverait le filtre.
+- `PrismaSansFiltre` contourne le filtre : réservé à la connexion, à `JwtStrategy` et au contrôle d'unicité de l'email. Un test bloque tout autre usage.
+- Nouveau modèle avec `cabinetId` : l'ajouter à `MODELES_CLOISONNES` (un test le vérifie). Un `create` passe `cabinetId: cabinetCourant()`.
+- Écriture citant l'identifiant d'une autre donnée : appeler `ReferencesService.verifier()`, car le filtre ne contrôle pas ces identifiants. Il contrôle aussi les chaînes vides (seuls `undefined` et `null` sont ignorés).
+- Une ressource d'un autre cabinet répond 404, jamais 403.
+- `MEDECIN` + `estTitulaire` gère le cabinet : `@TitulaireSeulement()` protège ses routes.
+
 ## Auth : changement de mot de passe forcé
 
-- Les mots de passe initiaux (`POST /auth/users`) et temporaires (`POST /auth/users/:id/reset-password`) sont **générés par le serveur** (`auth/generer-mot-de-passe.ts`) et renvoyés une seule fois à l'admin ; l'admin ne choisit jamais le mot de passe d'un autre. Le compte a alors `User.doitChangerMdp = true`.
+- Les mots de passe initiaux (`POST /auth/users`) et temporaires (`POST /auth/users/:id/reset-password`) sont **générés par le serveur** (`auth/generer-mot-de-passe.ts`) et renvoyés une seule fois au titulaire ; le titulaire ne choisit jamais le mot de passe d'un autre. Le compte a alors `User.doitChangerMdp = true`.
 - Emails normalisés (trim + minuscules) à la création et au login (`@NormaliserEmail()`).
 - Seul l'utilisateur choisit son mot de passe (« Mon compte ») : 8 caractères minimum, avec majuscule, minuscule et chiffre.
 - Tant qu'il est vrai, `JwtAuthGuard` répond 403 `{ code: 'MUST_CHANGE_PASSWORD' }` sur toute route qui n'a pas le décorateur `@AutoriseSiMdpAChanger()` (aujourd'hui : `me`, `change-password`, `logout`).
@@ -174,6 +184,7 @@ Relations clés :
 - **Dates** : format ISO string côté DTO, `fr-MA` locale pour l'affichage
 - **Responsive** : Tailwind breakpoints `sm:` (640px) / `lg:` (1024px)
 - **Routes protégées** : tout contrôleur utilise `JwtAuthGuard` (c'est lui qui applique le changement forcé). Une route qui doit rester accessible pendant un changement forcé prend `@AutoriseSiMdpAChanger()`.
+- **DTO de modification** : une vraie classe (`PartialType`). Un type `Partial<Dto>` n'existe pas à l'exécution : le corps de la requête ne serait pas validé.
 - **Erreurs métier côté formulaire** : ne pas renvoyer 401 (l'intercepteur axios le traite comme un token expiré → refresh/déconnexion) ; utiliser 400.
 
 ## Pièges connus
@@ -188,6 +199,8 @@ Relations clés :
 | `backend: npm run lint` reformate des dizaines de fichiers | Le script lance `eslint --fix` : pour vérifier sans modifier, `npx eslint <fichiers>` |
 | `frontend: npx tsc --noEmit` en erreur | 4 erreurs déjà présentes (`stock/page.tsx`, `NouveauRdvModal.tsx`) : vérifier qu'on n'en ajoute pas |
 | `NEXT_PUBLIC_API_URL` | Intégrée au build Next.js : la changer impose `docker compose up -d --build` |
+| Création d'un patient depuis le formulaire : 500 | `dateNaissance` arrive en `AAAA-MM-JJ`, que Prisma refuse (bug antérieur, à corriger) |
+| Upload de documents en local : 503 | `MINIO_ENDPOINT` doit avoir schéma et port (`http://localhost:9000`) et le bucket `cabinet-medical` doit exister : `docker-compose.dev.yml` ne le crée pas |
 | `/api/health` | Répond « ok » sans interroger la base : ne prouve pas que la base fonctionne |
 
 ## Variables d'environnement production
@@ -201,4 +214,4 @@ Fichier `/opt/cabinet-medical-maroc/.env` sur le serveur (modèle : `.env.produc
 1. Nouvelle feature → brainstorming (`superpowers:brainstorming`)
 2. Plan → `docs/superpowers/plans/YYYY-MM-DD-<feature>.md`
 3. Implémentation → `superpowers:subagent-driven-development`
-4. Deploy → merge sur master (déploiement auto une fois l'étape 7 faite, sinon manuel sur le VPS)
+4. Deploy → merge sur master (déploiement automatique après une CI verte)

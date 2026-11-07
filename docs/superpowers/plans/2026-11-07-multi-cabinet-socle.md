@@ -1,6 +1,8 @@
 # Multi-cabinet, étape 1 (socle) — Plan d'implémentation
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+**Statut :** réalisé le 2026-11-07 sur la branche feat/multi-cabinet-socle, non mergé.
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Rattacher toutes les données à un cabinet, isoler strictement les cabinets entre eux et rendre les documents patients privés, sans changer l'usage du cabinet existant.
 
@@ -60,7 +62,7 @@ L'état du shell ne persiste pas entre deux commandes : relancer ces `export` à
 - Create: `backend/src/prisma/client-filtre.ts`
 - Test: `backend/src/prisma/client-filtre.spec.ts`
 
-- [ ] **Step 1 : Écrire les tests**
+- [x] **Step 1 : Écrire les tests**
 
 `backend/src/prisma/client-filtre.spec.ts` :
 
@@ -178,12 +180,12 @@ describe('contexte de cabinet', () => {
 });
 ```
 
-- [ ] **Step 2 : Vérifier l'échec**
+- [x] **Step 2 : Vérifier l'échec**
 
 Run: `cd $REPO/backend && npx jest src/prisma/client-filtre.spec.ts`
 Expected: FAIL, modules `./client-filtre` et `./contexte-cabinet` introuvables.
 
-- [ ] **Step 3 : Écrire le contexte**
+- [x] **Step 3 : Écrire le contexte**
 
 `backend/src/prisma/contexte-cabinet.ts` :
 
@@ -212,7 +214,7 @@ export function cabinetCourant(): string {
 }
 ```
 
-- [ ] **Step 4 : Écrire le filtre**
+- [x] **Step 4 : Écrire le filtre**
 
 `backend/src/prisma/client-filtre.ts` :
 
@@ -302,12 +304,12 @@ export function creerClientFiltre(base: PrismaClient) {
 }
 ```
 
-- [ ] **Step 5 : Vérifier le succès**
+- [x] **Step 5 : Vérifier le succès**
 
 Run: `cd $REPO/backend && npx jest src/prisma/client-filtre.spec.ts`
 Expected: PASS.
 
-- [ ] **Step 6 : Commit**
+- [x] **Step 6 : Commit**
 
 ```bash
 cd $REPO && git add backend/src/prisma/contexte-cabinet.ts backend/src/prisma/client-filtre.ts backend/src/prisma/client-filtre.spec.ts
@@ -325,7 +327,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Create: `backend/prisma/migrations/20261107120000_multi_cabinet_socle/migration.sql`
 - Modify: `backend/prisma/seed.ts`
 
-- [ ] **Step 1 : Modifier le schéma**
+- [x] **Step 1 : Modifier le schéma**
 
 Dans `backend/prisma/schema.prisma` :
 
@@ -417,7 +419,7 @@ model Parametre {
 
 Dans `AuditLog`, ajouter `cabinetId String?`, `cabinet Cabinet? @relation(fields: [cabinetId], references: [id])` et `@@index([cabinetId])`.
 
-- [ ] **Step 2 : Écrire la migration**
+- [x] **Step 2 : Écrire la migration**
 
 `backend/prisma/migrations/20261107120000_multi_cabinet_socle/migration.sql` :
 
@@ -526,7 +528,7 @@ ALTER TABLE "notifications" ADD CONSTRAINT "notifications_cabinetId_fkey" FOREIG
 ALTER TABLE "parametres" ADD CONSTRAINT "parametres_cabinetId_fkey" FOREIGN KEY ("cabinetId") REFERENCES "cabinets"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 ```
 
-- [ ] **Step 3 : Adapter le seed**
+- [x] **Step 3 : Adapter le seed**
 
 Dans `backend/prisma/seed.ts` :
 
@@ -600,7 +602,7 @@ Remplacer `console.log('  Admin:      admin@cabinet.ma / Admin123!');` par :
   console.log('  Titulaire:  admin@cabinet.ma / Admin123!');
 ```
 
-- [ ] **Step 4 : Appliquer et vérifier**
+- [x] **Step 4 : Appliquer et vérifier**
 
 ```bash
 cd $REPO/backend
@@ -614,7 +616,7 @@ DATABASE_URL="$TEST_DB" npx ts-node prisma/seed.ts
 
 Expected : migration appliquée ; `diff` affiche « No difference detected » (code 0) ; les deux exécutions du seed se terminent sans erreur. Si `diff` signale un écart, corriger la migration ou le schéma avant de continuer. Si `migrate deploy` échoue parce que la migration a déjà été tentée, recréer `cabinet_test` puis recommencer.
 
-- [ ] **Step 5 : Commit**
+- [x] **Step 5 : Commit**
 
 ```bash
 cd $REPO && git add backend/prisma
@@ -640,7 +642,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Modify: contrôleurs patients, consultations, ordonnances
 - Modify: `backend/test/helpers.ts`, les 5 `*.e2e-spec.ts`, les specs `auth`, `patients`, `consultations`, `ordonnances`, `paiements`
 
-- [ ] **Step 1 : Adapter les helpers de test**
+- [x] **Step 1 : Adapter les helpers de test**
 
 Dans `backend/test/helpers.ts` :
 
@@ -739,7 +741,7 @@ Dans les 5 fichiers `backend/test/*.e2e-spec.ts`, remplacer `PrismaService` par 
 cd $REPO/backend && sed -i '' 's/PrismaService/PrismaSansFiltre/g' test/auth.e2e-spec.ts test/consultations.e2e-spec.ts test/ordonnances.e2e-spec.ts test/paiements.e2e-spec.ts test/patients.e2e-spec.ts
 ```
 
-- [ ] **Step 2 : Écrire le test d'isolation**
+- [x] **Step 2 : Écrire le test d'isolation**
 
 `backend/test/isolation.e2e-spec.ts` :
 
@@ -1153,7 +1155,7 @@ describe('Isolation entre cabinets (e2e)', () => {
 });
 ```
 
-- [ ] **Step 3 : Écrire les clients Prisma**
+- [x] **Step 3 : Écrire les clients Prisma**
 
 Remplacer `backend/src/prisma/prisma.service.ts` :
 
@@ -1204,7 +1206,7 @@ import { creerClientFiltre } from './client-filtre';
 export class PrismaModule {}
 ```
 
-- [ ] **Step 4 : Ouvrir le contexte à chaque requête**
+- [x] **Step 4 : Ouvrir le contexte à chaque requête**
 
 `backend/src/prisma/contexte-cabinet.middleware.ts` :
 
@@ -1261,7 +1263,7 @@ Dans `backend/src/auth/strategies/jwt.strategy.ts` : remplacer l'import par `imp
       },
 ```
 
-- [ ] **Step 5 : Écrire le contrôle du titulaire**
+- [x] **Step 5 : Écrire le contrôle du titulaire**
 
 `backend/src/common/guards/titulaire.guard.ts` :
 
@@ -1291,7 +1293,7 @@ import { TitulaireGuard } from '../guards/titulaire.guard';
 export const TitulaireSeulement = () => UseGuards(JwtAuthGuard, TitulaireGuard);
 ```
 
-- [ ] **Step 6 : Adapter l'authentification**
+- [x] **Step 6 : Adapter l'authentification**
 
 Dans `backend/src/auth/auth.controller.ts` : retirer les imports `RolesGuard`, `Roles` et `Role`, ajouter `import { TitulaireSeulement } from '../common/decorators/titulaire-seulement.decorator';`. Sur `createUser`, `listUsers` et `resetPassword`, remplacer les deux lignes
 
@@ -1363,7 +1365,7 @@ et `data` devient :
 
 Ajouter `estTitulaire: true,` dans le `select` de `createUser` et de `listUsers`.
 
-- [ ] **Step 7 : Passer le cabinet aux créations et retirer ADMIN**
+- [x] **Step 7 : Passer le cabinet aux créations et retirer ADMIN**
 
 Ajouter dans chaque service ci-dessous `import { cabinetCourant } from '../prisma/contexte-cabinet';`, puis :
 
@@ -1388,7 +1390,7 @@ grep -rn "Role.ADMIN" src test
 
 Expected : aucune ligne.
 
-- [ ] **Step 8 : Adapter les tests unitaires**
+- [x] **Step 8 : Adapter les tests unitaires**
 
 Dans `src/patients/patients.service.spec.ts`, `src/consultations/consultations.service.spec.ts`, `src/ordonnances/ordonnances.service.spec.ts`, `src/paiements/paiements.service.spec.ts` et `src/auth/auth.service.spec.ts`, ajouter après les imports :
 
@@ -1422,7 +1424,7 @@ et dans le test « crée le compte avec un mot de passe généré » :
       expect(arg.data.cabinetId).toBe('cabinet-test');
 ```
 
-- [ ] **Step 9 : Écrire les garde-fous du client non filtré**
+- [x] **Step 9 : Écrire les garde-fous du client non filtré**
 
 `backend/src/prisma/prisma-sans-filtre.spec.ts` :
 
@@ -1470,7 +1472,7 @@ describe('garde-fous du cloisonnement', () => {
 });
 ```
 
-- [ ] **Step 10 : Lancer tous les tests**
+- [x] **Step 10 : Lancer tous les tests**
 
 ```bash
 cd $REPO/backend
@@ -1483,7 +1485,7 @@ Expected : aucune erreur `tsc`, unitaires et e2e verts. Si un corps de test ne c
 
 `AuthService.refreshToken` et `generateTokens` ne changent pas : `RefreshToken` n'est pas cloisonné.
 
-- [ ] **Step 11 : Vérifier le lint**
+- [x] **Step 11 : Vérifier le lint**
 
 ```bash
 cd $REPO/backend && npx eslint src/prisma src/auth src/common test/helpers.ts test/isolation.e2e-spec.ts
@@ -1491,7 +1493,7 @@ cd $REPO/backend && npx eslint src/prisma src/auth src/common test/helpers.ts te
 
 Expected : aucune erreur nouvelle.
 
-- [ ] **Step 12 : Commit**
+- [x] **Step 12 : Commit**
 
 ```bash
 cd $REPO && git add backend
@@ -1512,7 +1514,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Modify: specs `consultations`, `ordonnances`, `paiements`
 - Test: `backend/test/isolation.e2e-spec.ts`
 
-- [ ] **Step 1 : Écrire les tests**
+- [x] **Step 1 : Écrire les tests**
 
 Dans `backend/test/isolation.e2e-spec.ts`, ajouter ce bloc avant `describe('SUPER_ADMIN', ...)` :
 
@@ -1587,12 +1589,12 @@ Dans `backend/test/isolation.e2e-spec.ts`, ajouter ce bloc avant `describe('SUPE
   });
 ```
 
-- [ ] **Step 2 : Vérifier l'échec**
+- [x] **Step 2 : Vérifier l'échec**
 
 Run: `cd $REPO/backend && DATABASE_URL="$TEST_DB" npx jest --config ./test/jest-e2e.json --runInBand --forceExit test/isolation.e2e-spec.ts -t "références vers un autre cabinet"`
 Expected : FAIL. Les créations croisées répondent 201 ou 500, le `cabinetId` n'est pas refusé.
 
-- [ ] **Step 3 : Écrire le service**
+- [x] **Step 3 : Écrire le service**
 
 `backend/src/prisma/references.service.ts` :
 
@@ -1648,7 +1650,7 @@ export class ReferencesService {
 
 Dans `backend/src/prisma/prisma.module.ts` : importer `ReferencesService`, l'ajouter à `providers` et à `exports`.
 
-- [ ] **Step 4 : Valider la modification d'une consultation**
+- [x] **Step 4 : Valider la modification d'une consultation**
 
 `backend/src/consultations/dto/update-consultation.dto.ts` :
 
@@ -1661,7 +1663,7 @@ export class UpdateConsultationDto extends PartialType(CreateConsultationDto) {}
 
 Dans `backend/src/consultations/consultations.controller.ts`, importer `UpdateConsultationDto` et remplacer `@Body() dto: Partial<CreateConsultationDto>` par `@Body() dto: UpdateConsultationDto`.
 
-- [ ] **Step 5 : Appeler les vérifications**
+- [x] **Step 5 : Appeler les vérifications**
 
 Dans chaque service : importer `ReferencesService` depuis `'../prisma/references.service'` et ajouter `private references: ReferencesService` au constructeur.
 
@@ -1697,7 +1699,7 @@ Dans chaque service : importer `ReferencesService` depuis `'../prisma/references
 
 Le `findUnique` existant de `mouvement` couvre déjà `articleId`.
 
-- [ ] **Step 6 : Adapter les tests unitaires**
+- [x] **Step 6 : Adapter les tests unitaires**
 
 Dans `consultations.service.spec.ts`, `ordonnances.service.spec.ts` et `paiements.service.spec.ts`, importer `ReferencesService` depuis `'../prisma/references.service'` et ajouter dans `providers` :
 
@@ -1705,7 +1707,7 @@ Dans `consultations.service.spec.ts`, `ordonnances.service.spec.ts` et `paiement
         { provide: ReferencesService, useValue: { verifier: jest.fn() } },
 ```
 
-- [ ] **Step 7 : Vérifier le succès**
+- [x] **Step 7 : Vérifier le succès**
 
 ```bash
 cd $REPO/backend
@@ -1715,7 +1717,7 @@ DATABASE_URL="$TEST_DB" npm run test:e2e
 
 Expected : tout est vert.
 
-- [ ] **Step 8 : Commit**
+- [x] **Step 8 : Commit**
 
 ```bash
 cd $REPO && git add backend
@@ -1734,7 +1736,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Modify: `backend/src/patients/patients.service.ts`, `backend/src/consultations/consultations.service.ts`
 - Test: `backend/test/isolation.e2e-spec.ts`
 
-- [ ] **Step 1 : Écrire les tests**
+- [x] **Step 1 : Écrire les tests**
 
 Dans `backend/test/isolation.e2e-spec.ts`, ajouter avant `describe('SUPER_ADMIN', ...)` :
 
@@ -1794,12 +1796,12 @@ Dans `backend/test/isolation.e2e-spec.ts`, ajouter avant `describe('SUPER_ADMIN'
   });
 ```
 
-- [ ] **Step 2 : Vérifier l'échec**
+- [x] **Step 2 : Vérifier l'échec**
 
 Run: `cd $REPO/backend && DATABASE_URL="$TEST_DB" npx jest --config ./test/jest-e2e.json --runInBand --forceExit test/isolation.e2e-spec.ts -t "documents"`
 Expected : FAIL, la route `/fichier` répond 404 et `url` est présent.
 
-- [ ] **Step 3 : Définir les champs publics**
+- [x] **Step 3 : Définir les champs publics**
 
 `backend/src/documents/document-public.ts` :
 
@@ -1816,7 +1818,7 @@ export const DOCUMENT_PUBLIC = {
 } as const;
 ```
 
-- [ ] **Step 4 : Lire un fichier dans MinIO**
+- [x] **Step 4 : Lire un fichier dans MinIO**
 
 Dans `backend/src/documents/minio.service.ts`, ajouter `NotFoundException` à l'import `@nestjs/common` et, avant `deleteFile` :
 
@@ -1833,7 +1835,7 @@ Dans `backend/src/documents/minio.service.ts`, ajouter `NotFoundException` à l'
   }
 ```
 
-- [ ] **Step 5 : Adapter le service**
+- [x] **Step 5 : Adapter le service**
 
 Remplacer les méthodes de `backend/src/documents/documents.service.ts` et compléter les imports (`ReferencesService`, `DOCUMENT_PUBLIC`, `cabinetCourant` déjà présent) :
 
@@ -1900,7 +1902,7 @@ Remplacer les méthodes de `backend/src/documents/documents.service.ts` et compl
   }
 ```
 
-- [ ] **Step 6 : Ajouter la route**
+- [x] **Step 6 : Ajouter la route**
 
 Dans `backend/src/documents/documents.controller.ts` : ajouter `Res` et `StreamableFile` à l'import `@nestjs/common`, ajouter `import { Response } from 'express';`, puis avant `@Delete(':id')` :
 
@@ -1917,7 +1919,7 @@ Dans `backend/src/documents/documents.controller.ts` : ajouter `Res` et `Streama
   }
 ```
 
-- [ ] **Step 7 : Masquer l'adresse dans les autres réponses**
+- [x] **Step 7 : Masquer l'adresse dans les autres réponses**
 
 Dans `backend/src/patients/patients.service.ts`, importer `DOCUMENT_PUBLIC` et dans `findOne` :
 
@@ -1931,7 +1933,7 @@ Dans `backend/src/consultations/consultations.service.ts`, importer `DOCUMENT_PU
         documents: { select: DOCUMENT_PUBLIC },
 ```
 
-- [ ] **Step 8 : Vérifier le succès**
+- [x] **Step 8 : Vérifier le succès**
 
 ```bash
 cd $REPO/backend
@@ -1943,7 +1945,7 @@ npx eslint src/documents src/patients src/consultations test/isolation.e2e-spec.
 
 Expected : tout est vert.
 
-- [ ] **Step 9 : Commit**
+- [x] **Step 9 : Commit**
 
 ```bash
 cd $REPO && git add backend
@@ -1960,7 +1962,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Modify: `docker-compose.yml`, `nginx/cabinet.conf`
 - Delete: `minio/public-read-policy.json`
 
-- [ ] **Step 1 : Modifier l'initialisation MinIO**
+- [x] **Step 1 : Modifier l'initialisation MinIO**
 
 Dans `docker-compose.yml`, service d'initialisation MinIO : retirer le bloc
 
@@ -1980,11 +1982,11 @@ et remplacer le dernier `entrypoint` par :
 
 Le `|| true` est obligatoire : le backend attend la fin de ce conteneur.
 
-- [ ] **Step 2 : Retirer le bloc Nginx**
+- [x] **Step 2 : Retirer le bloc Nginx**
 
 Dans `nginx/cabinet.conf`, supprimer le commentaire `# Documents patients stockés dans MinIO ...` et tout le bloc `location /files/ { ... }`.
 
-- [ ] **Step 3 : Supprimer la politique et vérifier**
+- [x] **Step 3 : Supprimer la politique et vérifier**
 
 ```bash
 cd $REPO
@@ -1995,7 +1997,7 @@ grep -rn "public-read-policy\|/files/" docker-compose.yml nginx minio
 
 Expected : `grep` ne trouve rien. `docker compose config` peut signaler les variables manquantes du `.env` de production : seule une erreur de syntaxe YAML compte.
 
-- [ ] **Step 4 : Commit**
+- [x] **Step 4 : Commit**
 
 ```bash
 cd $REPO && git add docker-compose.yml nginx/cabinet.conf
@@ -2015,7 +2017,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Modify: `frontend/src/components/utilisateurs/types.ts`, `CreateUserModal.tsx`
 - Modify: `frontend/src/app/(dashboard)/utilisateurs/page.tsx`
 
-- [ ] **Step 1 : Store**
+- [x] **Step 1 : Store**
 
 Dans `frontend/src/store/auth.ts`, l'interface `User` devient :
 
@@ -2038,7 +2040,7 @@ Ajouter `setUser: (user: User) => void;` dans `AuthState` et, après `setAuth` :
       setUser: (user) => set({ user }),
 ```
 
-- [ ] **Step 2 : Rafraîchir le compte à l'ouverture**
+- [x] **Step 2 : Rafraîchir le compte à l'ouverture**
 
 Dans `frontend/src/app/(dashboard)/layout.tsx`, ajouter l'import `import { apiClient } from '@/lib/api';`, ajouter `setUser` à la lecture du store (`const { token, user, _hasHydrated, setUser } = useAuthStore();`), et après le premier `useEffect` :
 
@@ -2066,7 +2068,7 @@ Dans `frontend/src/app/(dashboard)/layout.tsx`, ajouter l'import `import { apiCl
   }, [_hasHydrated, token, setUser]);
 ```
 
-- [ ] **Step 3 : Menu**
+- [x] **Step 3 : Menu**
 
 Dans `frontend/src/components/layout/Sidebar.tsx`, remplacer `nav` et le filtre :
 
@@ -2100,7 +2102,7 @@ const nav: EntreeNav[] = [
       );
 ```
 
-- [ ] **Step 4 : Notifications**
+- [x] **Step 4 : Notifications**
 
 Dans `frontend/src/components/layout/NotificationBell.tsx`, après `const { user } = useAuthStore();` :
 
@@ -2110,7 +2112,7 @@ Dans `frontend/src/components/layout/NotificationBell.tsx`, après `const { user
 
 Remplacer la ligne `enabled` par `enabled: concerne && !user?.doitChangerMdp,` et la ligne de retour par `if (!concerne) return null;`.
 
-- [ ] **Step 5 : Page Utilisateurs**
+- [x] **Step 5 : Page Utilisateurs**
 
 `frontend/src/components/utilisateurs/types.ts` :
 
@@ -2143,7 +2145,7 @@ Dans `frontend/src/app/(dashboard)/utilisateurs/page.tsx` : remplacer toutes les
                     <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell">{u.role}{u.estTitulaire ? ' · Titulaire' : ''}</td>
 ```
 
-- [ ] **Step 6 : Vérifier**
+- [x] **Step 6 : Vérifier**
 
 ```bash
 cd $REPO/frontend
@@ -2154,7 +2156,7 @@ npm run lint
 
 Expected : `grep` ne trouve rien ; `tsc` affiche uniquement les 4 erreurs déjà connues (`stock/page.tsx`, `NouveauRdvModal.tsx`) ; lint sans erreur.
 
-- [ ] **Step 7 : Commit**
+- [x] **Step 7 : Commit**
 
 ```bash
 cd $REPO && git add frontend
@@ -2170,7 +2172,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 **Files:**
 - Modify: `frontend/src/app/(dashboard)/patients/[id]/page.tsx`
 
-- [ ] **Step 1 : Ajouter la fonction**
+- [x] **Step 1 : Ajouter la fonction**
 
 Dans `frontend/src/app/(dashboard)/patients/[id]/page.tsx`, après les imports :
 
@@ -2190,7 +2192,7 @@ async function ouvrirDocument(id: string) {
 }
 ```
 
-- [ ] **Step 2 : Remplacer le lien**
+- [x] **Step 2 : Remplacer le lien**
 
 Remplacer le bloc `<a href={d.url} ...>Ouvrir</a>` par :
 
@@ -2204,7 +2206,7 @@ Remplacer le bloc `<a href={d.url} ...>Ouvrir</a>` par :
                 </button>
 ```
 
-- [ ] **Step 3 : Vérifier**
+- [x] **Step 3 : Vérifier**
 
 ```bash
 cd $REPO/frontend
@@ -2215,7 +2217,7 @@ npm run lint
 
 Expected : `grep` ne trouve aucun usage d'une adresse de document ; `tsc` affiche uniquement les 4 erreurs connues.
 
-- [ ] **Step 4 : Commit**
+- [x] **Step 4 : Commit**
 
 ```bash
 cd $REPO && git add frontend
@@ -2230,7 +2232,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 **Files:** aucun fichier du dépôt, sauf correctif si un contrôle échoue.
 
-- [ ] **Step 1 : Copier la base locale et compter**
+- [x] **Step 1 : Copier la base locale et compter**
 
 Docker doit tourner. La base `cabinet_medical` locale est encore sur l'ancien schéma.
 
@@ -2250,7 +2252,7 @@ SQL
 docker compose -f docker-compose.dev.yml exec -T postgres psql -U postgres -d cabinet_copie < $SCRATCH/compte.sql > $SCRATCH/avant.txt
 ```
 
-- [ ] **Step 2 : Migrer la copie et comparer**
+- [x] **Step 2 : Migrer la copie et comparer**
 
 ```bash
 cd $REPO/backend
@@ -2264,7 +2266,7 @@ docker compose -f docker-compose.dev.yml exec -T postgres psql -U postgres -d ca
 
 Expected : `COMPTES IDENTIQUES` ; `admin@cabinet.ma` est `MEDECIN`, `estTitulaire = t` ; `sans_cabinet = 0`.
 
-- [ ] **Step 3 : Relancer le seed deux fois sur la copie**
+- [x] **Step 3 : Relancer le seed deux fois sur la copie**
 
 ```bash
 cd $REPO/backend
@@ -2280,7 +2282,7 @@ diff $SCRATCH/seed1.txt $SCRATCH/seed2.txt && echo "SEED IDEMPOTENT"
 
 Expected : `SEED IDEMPOTENT`. Le premier passage peut ajouter des données de démonstration absentes de la base locale ; le second ne doit rien ajouter.
 
-- [ ] **Step 4 : Migrer la base locale et relancer**
+- [x] **Step 4 : Migrer la base locale et relancer**
 
 ```bash
 cd $REPO/backend
@@ -2289,7 +2291,7 @@ DATABASE_URL="postgresql://postgres:password@localhost:5432/cabinet_medical" npx
 
 Arrêter puis relancer le backend et le frontend locaux pour charger le nouveau client Prisma (`rm -rf backend/dist/src` si des routes répondent 404).
 
-- [ ] **Step 5 : Parcours Playwright sur http://localhost:3000**
+- [x] **Step 5 : Parcours Playwright sur http://localhost:3000**
 
 Pour simuler une session ouverte avant le déploiement : se connecter avec `admin@cabinet.ma`, remplacer `"role":"MEDECIN"` par `"role":"ADMIN"` dans `localStorage['cabinet-auth']`, puis recharger. Vérifier :
 
@@ -2303,7 +2305,7 @@ Pour simuler une session ouverte avant le déploiement : se connecter avec `admi
 
 Supprimer ensuite le compte de test de la base locale.
 
-- [ ] **Step 6 : Build et e2e complets**
+- [x] **Step 6 : Build et e2e complets**
 
 ```bash
 cd $REPO/backend && npx jest && DATABASE_URL="$TEST_DB" npm run test:e2e
@@ -2321,7 +2323,7 @@ Expected : tout est vert. Noter les nombres de tests pour la PR.
 - Modify: `CLAUDE.md`
 - Modify: `docs/superpowers/plans/2026-11-07-multi-cabinet-socle.md`
 
-- [ ] **Step 1 : Mettre à jour `CLAUDE.md`**
+- [x] **Step 1 : Mettre à jour `CLAUDE.md`**
 
 Stack : remplacer `RBAC (ADMIN / MEDECIN / SECRETAIRE)` par `RBAC (SUPER_ADMIN / MEDECIN / SECRETAIRE, médecin titulaire)`.
 
@@ -2377,11 +2379,11 @@ Workflow, remplacer l'étape 4 par :
 4. Deploy → merge sur master (déploiement automatique après une CI verte)
 ```
 
-- [ ] **Step 2 : Marquer le plan**
+- [x] **Step 2 : Marquer le plan**
 
 Cocher les étapes réalisées dans ce fichier et indiquer le statut en tête.
 
-- [ ] **Step 3 : Commit**
+- [x] **Step 3 : Commit**
 
 ```bash
 cd $REPO && git add CLAUDE.md docs/superpowers/plans/2026-11-07-multi-cabinet-socle.md
