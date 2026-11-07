@@ -79,6 +79,11 @@ export function creerClientFiltre(base: PrismaClient) {
       // Niveau client et non $allModels : le SQL brut passe ici, avec model indéfini
       $allOperations({ model, operation, args, query }) {
         if (!model) throw new Error(`SQL brut interdit sur le client filtré : ${operation}`);
+        // Les services d'un cabinet ne listent jamais les cabinets : seule une relation
+        // depuis une ligne déjà filtrée peut atteindre son propre cabinet
+        if (model === 'Cabinet') {
+          throw new Error('Accès direct aux cabinets interdit sur le client filtré');
+        }
         if (!MODELES_CLOISONNES.has(model)) return query(args);
         return query(appliquerCabinet(operation, args, cabinetCourant()) as typeof args);
       },

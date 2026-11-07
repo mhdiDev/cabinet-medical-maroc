@@ -35,6 +35,8 @@ export default function MonComptePage() {
   const { user, setTokens, setDoitChangerMdp } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const force = !!user?.doitChangerMdp;
+  // Le SUPER_ADMIN n'a pas de tableau de bord de cabinet
+  const accueil = user?.role === 'SUPER_ADMIN' ? '/cabinets' : '/dashboard';
 
   const { register, handleSubmit, reset, setError, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -48,11 +50,11 @@ export default function MonComptePage() {
       .then((res) => {
         if (res.data?.doitChangerMdp === false) {
           setDoitChangerMdp(false);
-          router.replace('/dashboard');
+          router.replace(accueil);
         }
       })
       .catch(() => {});
-  }, [force, setDoitChangerMdp, router]);
+  }, [force, setDoitChangerMdp, router, accueil]);
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
@@ -65,7 +67,7 @@ export default function MonComptePage() {
       setDoitChangerMdp(false);
       reset();
       toast.success('Mot de passe modifié');
-      if (force) router.replace('/dashboard');
+      if (force) router.replace(accueil);
     } catch (err: any) {
       const message = err.response?.data?.message;
       if (message === 'Ancien mot de passe incorrect') {

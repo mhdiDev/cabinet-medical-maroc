@@ -4,6 +4,7 @@ import {
   ConflictException,
   BadRequestException,
   NotFoundException,
+  ForbiddenException,
   Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -16,6 +17,23 @@ import { AuditService } from '../audit/audit.service';
 import { LoginDto } from './dto/login.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { genererMotDePasse } from './generer-mot-de-passe';
+import {
+  CODE_CABINET_SUSPENDU,
+  MESSAGE_CABINET_SUSPENDU,
+  cabinetSuspendu,
+} from './cabinet-suspendu';
+
+// Hash vérifié quand le compte n'existe pas, pour que la réponse prenne le même temps
+// qu'avec un vrai compte. Calculé une seule fois, avec les options par défaut d'argon2.hash,
+// les mêmes que pour les vrais mots de passe
+let hashFactice: Promise<string> | undefined;
+function obtenirHashFactice(): Promise<string> {
+  hashFactice ??= argon2.hash(uuidv4()).catch((e) => {
+    hashFactice = undefined; // réessayé à la prochaine connexion
+    throw e;
+  });
+  return hashFactice;
+}
 
 @Injectable()
 export class AuthService {
@@ -26,18 +44,34 @@ export class AuthService {
     private prismaSansFiltre: PrismaSansFiltre,
     private jwt: JwtService,
     private audit: AuditService,
-  ) {}
+  ) {
+    // Calculé dès le démarrage : la première tentative ne doit pas être plus lente
+    obtenirHashFactice().catch(() => undefined);
+  }
 
   async validateUser(email: string, motDePasse: string) {
     // Le cabinet n'est pas encore connu à la connexion
-    const user = await this.prismaSansFiltre.user.findUnique({ where: { email } });
-    if (!user || !user.actif) return null;
+    const user = await this.prismaSansFiltre.user.findUnique({
+      where: { email },
+      include: { cabinet: { select: { actif: true } } },
+    });
 
-    // Vérification sécurisée avec argon2 (résistant timing attacks)
-    const valid = await argon2.verify(user.motDePasse, motDePasse);
-    if (!valid) return null;
+    // Toujours vérifier un hash : sinon un compte inexistant ou inactif répondrait plus vite
+    const motDePasseValide = await argon2.verify(
+      user?.motDePasse ?? (await obtenirHashFactice()),
+      motDePasse,
+    );
+    if (!user || !user.actif || !motDePasseValide) return null;
 
-    const { motDePasse: _, ...result } = user;
+    // Vérifiée après le mot de passe : la suspension n'est révélée qu'au titulaire du compte
+    if (cabinetSuspendu(user.cabinet)) {
+      throw new ForbiddenException({
+        code: CODE_CABINET_SUSPENDU,
+        message: MESSAGE_CABINET_SUSPENDU,
+      });
+    }
+
+    const { motDePasse: _, cabinet: _cabinet, ...result } = user;
     return result;
   }
 
@@ -56,16 +90,23 @@ export class AuthService {
   async refreshToken(refreshToken: string) {
     const stored = await this.prisma.refreshToken.findUnique({
       where: { token: refreshToken },
-      include: { user: true },
+      include: { user: { include: { cabinet: { select: { actif: true } } } } },
     });
 
-    if (!stored || stored.expiresAt < new Date()) {
-      // Suppression du token expiré
-      if (stored) await this.prisma.refreshToken.delete({ where: { token: refreshToken } });
+    if (!stored) {
       throw new UnauthorizedException('Token de rafraîchissement invalide ou expiré');
     }
 
     const { user } = stored;
+    if (stored.expiresAt < new Date() || !user.actif || cabinetSuspendu(user.cabinet)) {
+      await this.prisma.refreshToken.delete({ where: { token: refreshToken } });
+      throw new UnauthorizedException(
+        cabinetSuspendu(user.cabinet)
+          ? MESSAGE_CABINET_SUSPENDU
+          : 'Token de rafraîchissement invalide ou expiré',
+      );
+    }
+
     await this.prisma.refreshToken.delete({ where: { token: refreshToken } });
 
     return this.generateTokens(user.id, user.email, user.role);
@@ -116,7 +157,9 @@ export class AuthService {
   }
 
   async changePassword(userId: string, ancienMdp: string, nouveauMdp: string) {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    // Sans filtre : un SUPER_ADMIN n'a pas de cabinet. L'identifiant vient du token,
+    // l'appelant ne modifie donc que son propre compte
+    const user = await this.prismaSansFiltre.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('Utilisateur non trouvé');
 
     // 400 et non 401 : un 401 déclencherait le refresh/déconnexion côté frontend
@@ -128,16 +171,24 @@ export class AuthService {
     }
 
     const hash = await argon2.hash(nouveauMdp);
-    await this.prisma.$transaction([
-      this.prisma.user.update({
+    await this.prismaSansFiltre.$transaction([
+      this.prismaSansFiltre.user.update({
         where: { id: userId },
         data: { motDePasse: hash, doitChangerMdp: false },
       }),
       // Révoque toutes les sessions (une nouvelle est ouverte pour l'appelant ci-dessous)
-      this.prisma.refreshToken.deleteMany({ where: { userId } }),
+      this.prismaSansFiltre.refreshToken.deleteMany({ where: { userId } }),
+      // Sans filtre et dans la transaction : AuditService lèverait 403 pour un SUPER_ADMIN
+      this.prismaSansFiltre.auditLog.create({
+        data: {
+          userId,
+          action: 'CHANGE_PASSWORD',
+          entite: 'User',
+          entiteId: userId,
+          cabinetId: user.cabinetId,
+        },
+      }),
     ]);
-
-    await this.audit.log(userId, 'CHANGE_PASSWORD', 'User', userId);
 
     return this.generateTokens(user.id, user.email, user.role);
   }

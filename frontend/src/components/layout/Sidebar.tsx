@@ -13,6 +13,7 @@ interface EntreeNav {
 }
 
 const nav: EntreeNav[] = [
+  { href: '/cabinets', icon: '🏥', label: 'Cabinets', roles: ['SUPER_ADMIN'] },
   { href: '/dashboard', icon: '🏠', label: 'Tableau de bord', roles: ['MEDECIN', 'SECRETAIRE'] },
   { href: '/agenda', icon: '📅', label: 'Agenda', roles: ['MEDECIN', 'SECRETAIRE'] },
   { href: '/patients', icon: '👥', label: 'Patients', roles: ['MEDECIN', 'SECRETAIRE'] },
@@ -20,7 +21,7 @@ const nav: EntreeNav[] = [
   { href: '/paiements', icon: '💰', label: 'Caisse', roles: ['SECRETAIRE'], titulaire: true },
   { href: '/stock', icon: '📦', label: 'Stock', roles: ['SECRETAIRE'], titulaire: true },
   { href: '/utilisateurs', icon: '👤', label: 'Utilisateurs', roles: [], titulaire: true },
-  { href: '/mon-compte', icon: '🔑', label: 'Mon compte', roles: ['MEDECIN', 'SECRETAIRE'] },
+  { href: '/mon-compte', icon: '🔑', label: 'Mon compte', roles: ['MEDECIN', 'SECRETAIRE', 'SUPER_ADMIN'] },
 ];
 
 interface SidebarProps {

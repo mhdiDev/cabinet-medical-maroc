@@ -68,6 +68,16 @@ Le seed crée ces comptes s'ils n'existent pas. Mots de passe valables en local 
 | Médecin | dr.benali@cabinet.ma | Medecin123! |
 | Secrétaire | secretaire@cabinet.ma | Secretaire123! |
 
+## Super Admin
+
+Aucun compte n'est créé par le seed. Sur le serveur :
+
+```bash
+docker exec cabinet_backend node dist/prisma/creer-super-admin.js <email> <prénom> <nom>
+```
+
+Exactement 3 arguments : un prénom ou un nom composé se met entre guillemets (`"El Idrissi"`). Le compte et sa ligne d'audit sont créés dans une même transaction. La commande affiche un mot de passe généré, à changer à la première connexion. Le Super Admin gère les cabinets sur la page « Cabinets » : création (avec le titulaire), modification, suspension, réactivation, réinitialisation du mot de passe du titulaire (409 si le titulaire est désactivé).
+
 ## Commandes courantes
 
 ### Développement local
@@ -154,6 +164,7 @@ Relations clés :
 /documents           upload + /patient/:id + /:id/fichier (fichier servi par l'API) + DELETE
 /rapports/dashboard  tableau de bord
 /health              health check (UptimeRobot)
+/plateforme/cabinets liste, création, modification, statut, titulaire/reset-password  (SUPER_ADMIN)
 ```
 
 ## Multi-cabinet : isolation
@@ -161,11 +172,14 @@ Relations clés :
 - Chaque requête ouvre un contexte (`prisma/contexte-cabinet.ts`) ; `JwtAuthGuard` y écrit le `cabinetId` de l'utilisateur, relu en base.
 - `PrismaService` est un client filtré (`prisma/client-filtre.ts`) : il ajoute le cabinet à toutes les opérations des modèles cloisonnés et répond 403 sans cabinet, y compris pour un `SUPER_ADMIN`.
 - Le client filtré refuse le SQL brut (`$queryRaw`, `$executeRaw` et variantes `Unsafe`) : il lèverait le filtre.
-- `PrismaSansFiltre` contourne le filtre : réservé à la connexion, à `JwtStrategy` et au contrôle d'unicité de l'email. Un test bloque tout autre usage.
+- `PrismaSansFiltre` contourne le filtre : réservé à la connexion, à `JwtStrategy`, au contrôle d'unicité de l'email, au changement de mot de passe (un `SUPER_ADMIN` n'a pas de cabinet ; l'audit `CHANGE_PASSWORD` y est écrit dans la même transaction) et au module `plateforme/`. Un test bloque tout autre usage.
 - Nouveau modèle avec `cabinetId` : l'ajouter à `MODELES_CLOISONNES` (un test le vérifie). Un `create` passe `cabinetId: cabinetCourant()`.
 - Écriture citant l'identifiant d'une autre donnée : appeler `ReferencesService.verifier()`, car le filtre ne contrôle pas ces identifiants. Il contrôle aussi les chaînes vides (seuls `undefined` et `null` sont ignorés).
 - Une ressource d'un autre cabinet répond 404, jamais 403.
 - `MEDECIN` + `estTitulaire` gère le cabinet : `@TitulaireSeulement()` protège ses routes.
+- Le client filtré refuse aussi le modèle `Cabinet` : un service d'un cabinet n'atteint son cabinet que par une relation (ex. `ordonnance.cabinet`).
+- Le module `plateforme/` (rôle `SUPER_ADMIN`, `@SuperAdminSeulement()`) utilise `PrismaSansFiltre`, limité par test aux modèles `Cabinet`, `User`, `AuditLog` et `RefreshToken` : jamais de données de patients. Son client est typé `Pick<PrismaSansFiltre, 'cabinet' | 'user' | 'auditLog' | 'refreshToken' | '$transaction'>`, et le test n'y permet de l'audit que `auditLog.create` (`AuditLog.details` peut contenir des données patients).
+- Un cabinet suspendu (`Cabinet.actif = false`) bloque la connexion (403 `CABINET_SUSPENDU`), les sessions ouvertes (`JwtStrategy`) et le renouvellement.
 
 ## Auth : changement de mot de passe forcé
 
@@ -203,6 +217,9 @@ Relations clés :
 | Création d'un patient depuis le formulaire : 500 | `dateNaissance` arrive en `AAAA-MM-JJ`, que Prisma refuse (bug antérieur, à corriger) |
 | Upload de documents en local : 503 | `MINIO_ENDPOINT` doit avoir schéma et port (`http://localhost:9000`) et le bucket `cabinet-medical` doit exister : `docker-compose.dev.yml` ne le crée pas |
 | `/api/health` | Répond « ok » sans interroger la base : ne prouve pas que la base fonctionne |
+| Identifiant de cabinet refusé par `@IsUUID` | Le premier cabinet a l'identifiant fixe `00000000-0000-0000-0000-000000000001` (hors v4) : ne pas valider les `:id` de cabinet comme UUID |
+| `PATCH /plateforme/cabinets/:id` répond 400 | Corps vide (`{}`) refusé (« Aucune modification ») ; un champ à `null` aussi : n'envoyer que les champs modifiés |
+| Variable non utilisée signalée par eslint | `no-unused-vars` ignore les frères d'un rest (`const { motDePasse, ...reste } = user`) et les arguments préfixés `_` |
 
 ## Variables d'environnement production
 

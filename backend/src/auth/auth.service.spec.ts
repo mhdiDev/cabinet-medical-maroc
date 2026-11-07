@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import {
+  ForbiddenException,
   UnauthorizedException,
   ConflictException,
   BadRequestException,
@@ -23,6 +24,7 @@ const mockPrisma = {
     delete: jest.fn(),
     deleteMany: jest.fn(),
   },
+  auditLog: { create: jest.fn() },
   $transaction: jest.fn((ops: Promise<unknown>[]) => Promise.all(ops)),
 };
 
@@ -80,10 +82,106 @@ describe('AuthService', () => {
       expect(result).toBeNull();
     });
 
+    it("vérifie un hash même si l'utilisateur n'existe pas (temps de réponse égal)", async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      const verify = jest.spyOn(argon2, 'verify');
+      try {
+        await expect(service.validateUser('inconnu@ma', 'Password123!')).resolves.toBeNull();
+        expect(verify).toHaveBeenCalledTimes(1);
+        expect(verify).toHaveBeenCalledWith(expect.stringMatching(/^\$argon2id\$/), 'Password123!');
+      } finally {
+        verify.mockRestore();
+      }
+    });
+
+    it('vérifie le hash même si le compte est inactif', async () => {
+      const hash = await argon2.hash('Password123!');
+      mockPrisma.user.findUnique.mockResolvedValue({ id: 'u1', motDePasse: hash, actif: false });
+      const verify = jest.spyOn(argon2, 'verify');
+      try {
+        await expect(service.validateUser('test@ma', 'Password123!')).resolves.toBeNull();
+        expect(verify).toHaveBeenCalledWith(hash, 'Password123!');
+      } finally {
+        verify.mockRestore();
+      }
+    });
+
     it('retourne null si utilisateur inactif', async () => {
       mockPrisma.user.findUnique.mockResolvedValue({ id: 'u1', actif: false });
       const result = await service.validateUser('test@ma', 'any');
       expect(result).toBeNull();
+    });
+
+    it('refuse avec CABINET_SUSPENDU un bon mot de passe si le cabinet est suspendu', async () => {
+      const hash = await argon2.hash('Password123!');
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'u1',
+        email: 'a@b.ma',
+        motDePasse: hash,
+        actif: true,
+        cabinet: { actif: false },
+      });
+      const erreur = await service.validateUser('a@b.ma', 'Password123!').catch((e) => e);
+      expect(erreur).toBeInstanceOf(ForbiddenException);
+      expect(erreur.getResponse()).toMatchObject({ code: 'CABINET_SUSPENDU' });
+    });
+
+    it("ne révèle pas la suspension à qui n'a pas le bon mot de passe", async () => {
+      const hash = await argon2.hash('Password123!');
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'u1',
+        motDePasse: hash,
+        actif: true,
+        cabinet: { actif: false },
+      });
+      await expect(service.validateUser('a@b.ma', 'Mauvais123!')).resolves.toBeNull();
+    });
+
+    it("ne renvoie pas l'objet cabinet avec l'utilisateur", async () => {
+      const hash = await argon2.hash('Password123!');
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'u1',
+        motDePasse: hash,
+        actif: true,
+        cabinet: { actif: true },
+      });
+      const user = await service.validateUser('a@b.ma', 'Password123!');
+      expect(user).not.toHaveProperty('cabinet');
+      expect(user).not.toHaveProperty('motDePasse');
+    });
+  });
+
+  describe('refreshToken', () => {
+    const futur = () => new Date(Date.now() + 3600_000);
+
+    it('refuse et supprime le token si le compte est désactivé', async () => {
+      mockPrisma.refreshToken.findUnique.mockResolvedValue({
+        token: 't',
+        expiresAt: futur(),
+        user: { id: 'u1', actif: false, cabinet: { actif: true } },
+      });
+      await expect(service.refreshToken('t')).rejects.toThrow(UnauthorizedException);
+      expect(mockPrisma.refreshToken.delete).toHaveBeenCalledWith({ where: { token: 't' } });
+    });
+
+    it('refuse et supprime le token si le cabinet est suspendu', async () => {
+      mockPrisma.refreshToken.findUnique.mockResolvedValue({
+        token: 't',
+        expiresAt: futur(),
+        user: { id: 'u1', actif: true, cabinet: { actif: false } },
+      });
+      await expect(service.refreshToken('t')).rejects.toThrow(UnauthorizedException);
+      expect(mockPrisma.refreshToken.delete).toHaveBeenCalledWith({ where: { token: 't' } });
+    });
+
+    it('renouvelle la session d’un SUPER_ADMIN, qui n’a pas de cabinet', async () => {
+      mockPrisma.refreshToken.findUnique.mockResolvedValue({
+        token: 't',
+        expiresAt: futur(),
+        user: { id: 'sa', email: 's@p.ma', role: Role.SUPER_ADMIN, actif: true, cabinet: null },
+      });
+      const res = await service.refreshToken('t');
+      expect(res.accessToken).toBe('mock-token');
     });
   });
 
@@ -101,6 +199,7 @@ describe('AuthService', () => {
       id: 'u1',
       email: 'test@ma',
       role: Role.SECRETAIRE,
+      cabinetId: 'cab1',
       motDePasse: await argon2.hash(mdp),
       doitChangerMdp: true,
     });
@@ -139,7 +238,17 @@ describe('AuthService', () => {
       expect(await argon2.verify(updateArg.data.motDePasse, 'Nouveau123!')).toBe(true);
       expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1);
       expect(mockPrisma.refreshToken.deleteMany).toHaveBeenCalledWith({ where: { userId: 'u1' } });
-      expect(mockAudit.log).toHaveBeenCalledWith('u1', 'CHANGE_PASSWORD', 'User', 'u1');
+      // Audit écrit dans la transaction, sans filtre : un SUPER_ADMIN n'a pas de cabinet
+      expect(mockPrisma.auditLog.create).toHaveBeenCalledWith({
+        data: {
+          userId: 'u1',
+          action: 'CHANGE_PASSWORD',
+          entite: 'User',
+          entiteId: 'u1',
+          cabinetId: 'cab1',
+        },
+      });
+      expect(mockAudit.log).not.toHaveBeenCalled();
       expect(res.accessToken).toBe('mock-token');
       expect(res.refreshToken).toBeDefined();
     });

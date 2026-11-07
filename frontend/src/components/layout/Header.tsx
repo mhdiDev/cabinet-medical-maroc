@@ -11,6 +11,7 @@ interface HeaderProps {
 export function Header({ onMenuClick }: HeaderProps) {
   const { user, clearAuth } = useAuthStore();
   const router = useRouter();
+  const estSuperAdmin = user?.role === 'SUPER_ADMIN';
 
   const logout = async () => {
     try { await apiClient.post('/auth/logout'); } catch {}
@@ -35,9 +36,11 @@ export function Header({ onMenuClick }: HeaderProps) {
         </h2>
       </div>
       <div className="flex items-center gap-3">
-        <NotificationBell />
+        {/* Les notifications concernent un cabinet : le SUPER_ADMIN n'en a pas */}
+        {!estSuperAdmin && <NotificationBell />}
         <span className="text-sm text-gray-600">
-          {user?.prenom} {user?.nom} — <span className="text-blue-600">{user?.role}</span>
+          {user?.prenom} {user?.nom} —{' '}
+          <span className="text-blue-600">{estSuperAdmin ? 'Super Admin' : user?.role}</span>
         </span>
         <button onClick={logout} className="text-sm text-gray-500 hover:text-red-600 transition">
           Déconnexion

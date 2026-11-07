@@ -3,6 +3,7 @@ import * as PDFDocument from 'pdfkit';
 import { PrismaService } from '../prisma/prisma.service';
 import { ReferencesService } from '../prisma/references.service';
 import { cabinetCourant } from '../prisma/contexte-cabinet';
+import { lieuEtDate } from './lieu-et-date';
 import { AuditService } from '../audit/audit.service';
 import { CreateOrdonnanceDto } from './dto/create-ordonnance.dto';
 
@@ -86,6 +87,7 @@ export class OrdonnancesService {
       include: {
         patient: true,
         medicaments: { include: { medicament: true } },
+        cabinet: { select: { ville: true } },
       },
     });
     if (!ord) throw new NotFoundException(`Ordonnance ${id} introuvable`);
@@ -118,7 +120,7 @@ export class OrdonnancesService {
 
       // Date
       doc.fontSize(10).font('Helvetica')
-        .text(`Casablanca, le ${new Date(ord.createdAt).toLocaleDateString('fr-MA')}`, { align: 'right' });
+        .text(lieuEtDate(ord.cabinet.ville, new Date(ord.createdAt)), { align: 'right' });
 
       // Patient
       doc.moveDown();

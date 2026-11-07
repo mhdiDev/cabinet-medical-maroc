@@ -30,7 +30,7 @@ export default function LoginPage() {
       const res = await api.post('/auth/login', data);
       setAuth(res.data.user, res.data.accessToken, res.data.refreshToken);
       toast.success(`Bienvenue, ${res.data.user.prenom} !`);
-      router.push('/dashboard');
+      router.push(res.data.user.role === 'SUPER_ADMIN' ? '/cabinets' : '/dashboard');
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Identifiants incorrects');
     } finally {
