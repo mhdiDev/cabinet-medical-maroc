@@ -27,7 +27,7 @@ cabinet-medical-maroc/
 │   └── superpowers/
 │       ├── specs/    Design docs
 │       └── plans/    Plans d'implémentation
-├── minio/        Dockerfile MinIO (compilé depuis les sources) + policy du bucket
+├── minio/        Dockerfile MinIO (compilé depuis les sources)
 ├── nginx/        cabinet.conf (reverse proxy du VPS)
 ├── scripts/      backup.sh (sauvegarde nocturne)
 ├── docker-compose.yml      production (VPS OVH, secrets via .env)
@@ -142,7 +142,7 @@ Relations clés :
 
 ```
 /auth                login, refresh, logout, me, change-password
-                     users (GET liste / POST création) + users/:id/reset-password  (ADMIN)
+                     users (GET liste / POST création) + users/:id/reset-password  (titulaire)
 /patients            CRUD + export CSV + stats + /cin/:cin
 /rendez-vous         CRUD + agenda + today + statut
 /consultations       CRUD + /patient/:id  (filtre ?date= disponible)
@@ -151,6 +151,7 @@ Relations clés :
 /paiements           CRUD + caisse + rapport + export Excel (?debut=&fin=&assurance=)
 /stock/articles      CRUD + alertes
 /stock/mouvements    entrées/sorties
+/documents           upload + /patient/:id + /:id/fichier (fichier servi par l'API) + DELETE
 /rapports/dashboard  tableau de bord
 /health              health check (UptimeRobot)
 ```
