@@ -1,4 +1,10 @@
-import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma, Role } from '@prisma/client';
 import * as argon2 from 'argon2';
 import { PrismaSansFiltre } from '../prisma/prisma.service';
@@ -6,12 +12,21 @@ import { genererMotDePasse } from '../auth/generer-mot-de-passe';
 import { CreateCabinetDto, UpdateCabinetDto } from './dto/cabinet.dto';
 
 // Le SUPER_ADMIN n'a pas de cabinet : ce service lit sans filtre, mais uniquement
-// les cabinets, les comptes, les sessions et l'audit (garde-fou dans prisma-sans-filtre.spec.ts).
+// les cabinets, les comptes, les sessions et l'écriture de l'audit (garde-fou dans
+// prisma-sans-filtre.spec.ts). Le type restreint fait refuser les autres modèles à TypeScript.
+type ClientPlateforme = Pick<
+  PrismaSansFiltre,
+  'cabinet' | 'user' | 'auditLog' | 'refreshToken' | '$transaction'
+>;
+
 @Injectable()
 export class PlateformeService {
   private readonly logger = new Logger(PlateformeService.name);
+  private readonly prismaSansFiltre: ClientPlateforme;
 
-  constructor(private prismaSansFiltre: PrismaSansFiltre) {}
+  constructor(prismaSansFiltre: PrismaSansFiltre) {
+    this.prismaSansFiltre = prismaSansFiltre;
+  }
 
   async lister() {
     const cabinets = await this.prismaSansFiltre.cabinet.findMany({
@@ -73,9 +88,13 @@ export class PlateformeService {
   }
 
   async modifier(superAdminId: string, id: string, dto: UpdateCabinetDto) {
+    const data = Object.fromEntries(
+      Object.entries(dto).filter(([, valeur]) => valeur !== undefined),
+    ) as UpdateCabinetDto;
+    if (Object.keys(data).length === 0) throw new BadRequestException('Aucune modification');
     await this.trouver(id);
-    const cabinet = await this.prismaSansFiltre.cabinet.update({ where: { id }, data: dto });
-    await this.auditer(superAdminId, 'UPDATE_CABINET', 'Cabinet', id, dto);
+    const cabinet = await this.prismaSansFiltre.cabinet.update({ where: { id }, data });
+    await this.auditer(superAdminId, 'UPDATE_CABINET', 'Cabinet', id, data);
     return cabinet;
   }
 
@@ -106,6 +125,11 @@ export class PlateformeService {
       orderBy: { createdAt: 'asc' },
     });
     if (!titulaire) throw new NotFoundException('Aucun titulaire pour ce cabinet');
+    if (!titulaire.actif) {
+      throw new ConflictException(
+        'Le compte du titulaire est désactivé : réactivez-le avant de réinitialiser son mot de passe.',
+      );
+    }
 
     const motDePasseTemporaire = genererMotDePasse();
     await this.prismaSansFiltre.$transaction([

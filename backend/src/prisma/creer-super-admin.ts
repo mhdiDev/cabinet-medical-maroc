@@ -1,15 +1,20 @@
 // Crée un compte SUPER_ADMIN. Sur le serveur :
 //   docker exec cabinet_backend node dist/prisma/creer-super-admin.js <email> <prénom> <nom>
+// Un prénom ou un nom composé se met entre guillemets : "El Idrissi"
 import { PrismaClient, Role } from '@prisma/client';
 import * as argon2 from 'argon2';
 import { isEmail } from 'class-validator';
 import { genererMotDePasse } from '../auth/generer-mot-de-passe';
 
-const USAGE = 'Usage : node dist/prisma/creer-super-admin.js <email> <prénom> <nom>';
+const USAGE =
+  'Usage : node dist/prisma/creer-super-admin.js <email> <prénom> <nom>' +
+  ' (prénom ou nom composé entre guillemets, ex. "El Idrissi")';
 
-type Client = Pick<PrismaClient, 'user' | 'auditLog'>;
+type Client = Pick<PrismaClient, 'user' | '$transaction'>;
 
 export async function creerSuperAdmin(prisma: Client, args: string[]) {
+  // Exactement 3 arguments : un nom composé sans guillemets serait tronqué
+  if (args.length !== 3) throw new Error(USAGE);
   const [emailBrut, prenomBrut, nomBrut] = args;
   const email = (emailBrut ?? '').trim().toLowerCase();
   const prenom = (prenomBrut ?? '').trim();
@@ -21,20 +26,25 @@ export async function creerSuperAdmin(prisma: Client, args: string[]) {
   }
 
   const motDePasse = genererMotDePasse();
-  const user = await prisma.user.create({
-    data: {
-      email,
-      prenom,
-      nom,
-      role: Role.SUPER_ADMIN,
-      cabinetId: null,
-      estTitulaire: false,
-      doitChangerMdp: true,
-      motDePasse: await argon2.hash(motDePasse),
-    },
-  });
-  await prisma.auditLog.create({
-    data: { userId: null, action: 'CREATE_SUPER_ADMIN', entite: 'User', entiteId: user.id },
+  const hash = await argon2.hash(motDePasse);
+  // Compte et audit ensemble : pas de SUPER_ADMIN créé sans trace
+  const user = await prisma.$transaction(async (tx) => {
+    const cree = await tx.user.create({
+      data: {
+        email,
+        prenom,
+        nom,
+        role: Role.SUPER_ADMIN,
+        cabinetId: null,
+        estTitulaire: false,
+        doitChangerMdp: true,
+        motDePasse: hash,
+      },
+    });
+    await tx.auditLog.create({
+      data: { userId: null, action: 'CREATE_SUPER_ADMIN', entite: 'User', entiteId: cree.id },
+    });
+    return cree;
   });
 
   return { id: user.id, email, motDePasse };

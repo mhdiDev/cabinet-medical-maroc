@@ -32,19 +32,52 @@ describe('garde-fous du cloisonnement', () => {
     expect(utilisateurs).toEqual([...AUTORISES].sort());
   });
 
-  it("plateforme.service.ts n'atteint que les cabinets, comptes, sessions et audit", () => {
+  // Accès « modèle.opération » (ou $transaction) au client sans filtre, y compris coupés par
+  // un saut de ligne (Prettier : this.prismaSansFiltre\n  .$transaction(…))
+  const accesSansFiltre = (source: string) =>
+    [...source.matchAll(/\b(?:prismaSansFiltre|tx)\s*\.\s*(\$?\w+)(?:\s*\.\s*(\w+))?/g)].map((m) =>
+      m[1].startsWith('$') ? m[1] : `${m[1]}.${m[2]}`,
+    );
+
+  it("plateforme.service.ts n'atteint que les cabinets, comptes, sessions et l'écriture de l'audit", () => {
     const source = readFileSync(join(RACINE, 'plateforme/plateforme.service.ts'), 'utf8');
-    const acces = [...source.matchAll(/\b(?:prismaSansFiltre|tx)\.(\$?\w+)/g)].map((m) => m[1]);
-    const permis = new Set(['cabinet', 'user', 'auditLog', 'refreshToken', '$transaction']);
-    expect(acces.filter((a) => !permis.has(a))).toEqual([]);
-    expect(acces.length).toBeGreaterThan(0);
+    const acces = accesSansFiltre(source);
+    // AuditLog.details contient des données patients : l'audit ne s'écrit qu'en création
+    const permis =
+      /^(?:cabinet\.\w+|user\.\w+|refreshToken\.deleteMany|auditLog\.create|\$transaction)$/;
+    expect(acces.filter((a) => !permis.test(a))).toEqual([]);
+    expect([...new Set(acces)].sort()).toEqual(
+      [
+        '$transaction',
+        'auditLog.create',
+        'cabinet.create',
+        'cabinet.findMany',
+        'cabinet.findUnique',
+        'cabinet.update',
+        'refreshToken.deleteMany',
+        'user.create',
+        'user.findFirst',
+        'user.findUnique',
+        'user.update',
+      ].sort(),
+    );
   });
 
-  it('plateforme.service.ts ne cite aucune relation vers les données des patients', () => {
+  it("plateforme.service.ts ne cite aucune relation vers les données des patients ni vers l'audit", () => {
     const source = readFileSync(join(RACINE, 'plateforme/plateforme.service.ts'), 'utf8');
     const relations =
-      /\b(patients|rendezVous|consultations|ordonnances|paiements|stockArticles|stockMouvements|documents|notifications|parametres)\s*:/;
+      /\b(patients|rendezVous|consultations|ordonnances|paiements|stockArticles|stockMouvements|documents|notifications|parametres|auditLogs)\s*:/;
     expect(source).not.toMatch(relations);
+  });
+
+  it("aucun fichier autorisé n'accède au client sans filtre par crochets ni ne l'aliase", () => {
+    const fautifs = AUTORISES.filter((f) => f !== 'prisma/prisma-sans-filtre.spec.ts').filter(
+      (f) => {
+        const source = readFileSync(join(RACINE, f), 'utf8');
+        return /prismaSansFiltre\s*\[/.test(source) || /=\s*this\.prismaSansFiltre\b/.test(source);
+      },
+    );
+    expect(fautifs).toEqual([]);
   });
 
   it('tout modèle ayant un cabinetId est cloisonné', () => {
@@ -60,7 +93,9 @@ describe('garde-fous du cloisonnement', () => {
       .filter((f) => f.endsWith('.ts'))
       .map((f) => relative(RACINE, f))
       .filter((f) => !f.startsWith('prisma/'))
-      .filter((f) => /new PrismaClient|extends PrismaClient/.test(readFileSync(join(RACINE, f), 'utf8')));
+      .filter((f) =>
+        /new PrismaClient|extends PrismaClient/.test(readFileSync(join(RACINE, f), 'utf8')),
+      );
     expect(fautifs).toEqual([]);
   });
 
@@ -78,9 +113,9 @@ describe('garde-fous du cloisonnement', () => {
     ];
     for (const { nom, texte } of blocs) {
       // Toute mention compte, pas seulement les appels : un alias (const db = this.prismaSansFiltre) aussi
-      const mentions = [...texte.matchAll(/prismaSansFiltre\b(?:\.(\$?\w+(?:\.\w+)?))?/g)].map(
-        (m) => m[1] ?? '(mention)',
-      );
+      const mentions = [
+        ...texte.matchAll(/\bprismaSansFiltre\b(?:\s*\.\s*(\$?\w+(?:\s*\.\s*\w+)?))?/g),
+      ].map((m) => (m[1] ? m[1].replace(/\s/g, '') : '(mention)'));
       if (mentions.length) parMethode[nom] = mentions;
     }
     expect(parMethode).toEqual({

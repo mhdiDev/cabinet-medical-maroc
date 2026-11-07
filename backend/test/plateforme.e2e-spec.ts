@@ -113,6 +113,7 @@ describe('Plateforme (e2e)', () => {
       [{ nom: '' }],
       [{ pirate: 1 }],
       [{ titulaire: undefined }],
+      [{ titulaire: [] }],
       [{ titulaire: { email: 'pas-un-email', prenom: 'A', nom: 'B' } }],
     ])('refuse des données invalides %j', async (modif) => {
       const res = await appel('post', '/plateforme/cabinets', tokenSA, {
@@ -147,6 +148,25 @@ describe('Plateforme (e2e)', () => {
       const res = await appel('patch', '/plateforme/cabinets/cab-existant', tokenSA, { ville: 'Fès' });
       expect(res.status).toBe(200);
       expect(res.body.ville).toBe('Fès');
+    });
+
+    it.each([[{ nom: null }], [{ ville: null }], [{ adresse: null }], [{ telephone: null }], [{ telephone: '123' }], [{ nom: '  ' }]])(
+      'refuse des données invalides %j sans rien modifier',
+      async (modif) => {
+        const avant = await prisma.cabinet.findUnique({ where: { id: 'cab-existant' } });
+        const res = await appel('patch', '/plateforme/cabinets/cab-existant', tokenSA, modif);
+        expect(res.status).toBe(400);
+        expect(await prisma.cabinet.findUnique({ where: { id: 'cab-existant' } })).toEqual(avant);
+      },
+    );
+
+    it('refuse une modification vide, sans audit', async () => {
+      const audits = () => prisma.auditLog.count({ where: { action: 'UPDATE_CABINET' } });
+      const avant = await audits();
+      const res = await appel('patch', '/plateforme/cabinets/cab-existant', tokenSA, {});
+      expect(res.status).toBe(400);
+      expect(res.body.message).toBe('Aucune modification');
+      expect(await audits()).toBe(avant);
     });
 
     it('répond 404 pour un cabinet inconnu', async () => {
@@ -208,6 +228,23 @@ describe('Plateforme (e2e)', () => {
       const apres = await login(app, 'ex.titulaire@cabinet.ma', res.body.motDePasseTemporaire);
       expect(apres.user.doitChangerMdp).toBe(true);
       expect((await appel('post', '/auth/refresh', undefined, { refreshToken: avant.refreshToken })).status).toBe(401);
+    });
+
+    it('répond 409 sans rien modifier si le compte du titulaire est désactivé', async () => {
+      await prisma.user.update({ where: { id: 'ex-titulaire' }, data: { actif: false } });
+      try {
+        const avant = await prisma.user.findUnique({ where: { id: 'ex-titulaire' } });
+        const audits = await prisma.auditLog.count({ where: { action: 'RESET_PASSWORD' } });
+        const res = await appel('post', '/plateforme/cabinets/cab-existant/titulaire/reset-password', tokenSA);
+        expect(res.status).toBe(409);
+        expect(res.body.message).toBe(
+          'Le compte du titulaire est désactivé : réactivez-le avant de réinitialiser son mot de passe.',
+        );
+        expect(await prisma.user.findUnique({ where: { id: 'ex-titulaire' } })).toEqual(avant);
+        expect(await prisma.auditLog.count({ where: { action: 'RESET_PASSWORD' } })).toBe(audits);
+      } finally {
+        await prisma.user.update({ where: { id: 'ex-titulaire' }, data: { actif: true } });
+      }
     });
 
     it("répond 404 pour un cabinet sans titulaire", async () => {
