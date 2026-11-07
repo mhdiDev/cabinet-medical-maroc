@@ -13,7 +13,7 @@ const schema = z.object({
   prenom: z.string().trim().min(1, 'Prénom requis'),
   nom: z.string().trim().min(1, 'Nom requis'),
   email: z.string().trim().email('Email invalide'),
-  role: z.enum(['ADMIN', 'MEDECIN', 'SECRETAIRE'], {
+  role: z.enum(['MEDECIN', 'SECRETAIRE'], {
     errorMap: () => ({ message: 'Choisissez un rôle' }),
   }),
   telephone: z

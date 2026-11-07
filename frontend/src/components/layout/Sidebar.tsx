@@ -3,15 +3,24 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
 
-const nav = [
-  { href: '/dashboard', icon: '🏠', label: 'Tableau de bord', roles: ['ADMIN', 'MEDECIN', 'SECRETAIRE'] },
-  { href: '/agenda', icon: '📅', label: 'Agenda', roles: ['ADMIN', 'MEDECIN', 'SECRETAIRE'] },
-  { href: '/patients', icon: '👥', label: 'Patients', roles: ['ADMIN', 'MEDECIN', 'SECRETAIRE'] },
-  { href: '/consultations', icon: '🩺', label: 'Consultations', roles: ['ADMIN', 'MEDECIN'] },
-  { href: '/paiements', icon: '💰', label: 'Caisse', roles: ['ADMIN', 'SECRETAIRE'] },
-  { href: '/stock', icon: '📦', label: 'Stock', roles: ['ADMIN', 'SECRETAIRE'] },
-  { href: '/utilisateurs', icon: '👤', label: 'Utilisateurs', roles: ['ADMIN'] },
-  { href: '/mon-compte', icon: '🔑', label: 'Mon compte', roles: ['ADMIN', 'MEDECIN', 'SECRETAIRE'] },
+interface EntreeNav {
+  href: string;
+  icon: string;
+  label: string;
+  roles: string[];
+  // Entrée aussi visible par le médecin titulaire
+  titulaire?: boolean;
+}
+
+const nav: EntreeNav[] = [
+  { href: '/dashboard', icon: '🏠', label: 'Tableau de bord', roles: ['MEDECIN', 'SECRETAIRE'] },
+  { href: '/agenda', icon: '📅', label: 'Agenda', roles: ['MEDECIN', 'SECRETAIRE'] },
+  { href: '/patients', icon: '👥', label: 'Patients', roles: ['MEDECIN', 'SECRETAIRE'] },
+  { href: '/consultations', icon: '🩺', label: 'Consultations', roles: ['MEDECIN'] },
+  { href: '/paiements', icon: '💰', label: 'Caisse', roles: ['SECRETAIRE'], titulaire: true },
+  { href: '/stock', icon: '📦', label: 'Stock', roles: ['SECRETAIRE'], titulaire: true },
+  { href: '/utilisateurs', icon: '👤', label: 'Utilisateurs', roles: [], titulaire: true },
+  { href: '/mon-compte', icon: '🔑', label: 'Mon compte', roles: ['MEDECIN', 'SECRETAIRE'] },
 ];
 
 interface SidebarProps {
@@ -25,7 +34,9 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
   const items = user?.doitChangerMdp
     ? nav.filter(n => n.href === '/mon-compte')
-    : nav.filter(n => !user?.role || n.roles.includes(user.role));
+    : nav.filter(n =>
+        !user?.role || n.roles.includes(user.role) || (n.titulaire && user.estTitulaire),
+      );
 
   return (
     <aside className={`

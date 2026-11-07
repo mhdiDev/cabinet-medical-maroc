@@ -17,6 +17,7 @@ interface Notification {
 
 export function NotificationBell() {
   const { user } = useAuthStore();
+  const concerne = user?.role === 'SECRETAIRE' || !!user?.estTitulaire;
   const [open, setOpen] = useState(false);
   const dropRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
@@ -25,7 +26,7 @@ export function NotificationBell() {
     queryKey: ['notifications'],
     queryFn: () => apiClient.get('/notifications').then((r) => r.data),
     refetchInterval: 30_000,
-    enabled: (user?.role === 'SECRETAIRE' || user?.role === 'ADMIN') && !user?.doitChangerMdp,
+    enabled: concerne && !user?.doitChangerMdp,
   });
 
   const unread = notifications.filter((n) => !n.lu).length;
@@ -50,7 +51,7 @@ export function NotificationBell() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  if (user?.role !== 'SECRETAIRE' && user?.role !== 'ADMIN') return null;
+  if (!concerne) return null;
 
   return (
     <div ref={dropRef} className="relative">

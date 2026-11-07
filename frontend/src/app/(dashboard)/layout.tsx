@@ -2,11 +2,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
+import { apiClient } from '@/lib/api';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { token, user, _hasHydrated } = useAuthStore();
+  const { token, user, _hasHydrated, setUser } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -16,6 +17,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     // Attendre la fin de la réhydratation avant de juger l'état d'auth
     if (_hasHydrated && !token) router.push('/login');
   }, [_hasHydrated, token, router]);
+
+  useEffect(() => {
+    // Une session ouverte avant une mise à jour peut garder un rôle périmé en local
+    if (!_hasHydrated || !token) return;
+    apiClient
+      .get('/auth/me')
+      .then(({ data }) =>
+        setUser({
+          id: data.id,
+          email: data.email,
+          nom: data.nom,
+          prenom: data.prenom,
+          role: data.role,
+          cabinetId: data.cabinetId,
+          estTitulaire: data.estTitulaire,
+          doitChangerMdp: data.doitChangerMdp,
+        }),
+      )
+      .catch(() => {
+        // L'intercepteur axios gère déjà la session expirée
+      });
+  }, [_hasHydrated, token, setUser]);
 
   useEffect(() => {
     // Mot de passe réinitialisé par l'admin : seule la page Mon compte est accessible
