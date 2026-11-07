@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { apiClient } from '@/lib/api';
 import type { Cabinet } from './types';
-import { useModale } from './useModale';
+import { useModale } from '@/components/commun/useModale';
 
 export function StatutCabinetModal({ cabinet, onClose }: { cabinet: Cabinet; onClose: () => void }) {
   const queryClient = useQueryClient();

@@ -7,7 +7,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { apiClient } from '@/lib/api';
 import { TELEPHONE, type Cabinet } from './types';
-import { useModale } from './useModale';
+import { useModale } from '@/components/commun/useModale';
 
 const schema = z.object({
   nom: z.string().trim().min(1, 'Nom requis'),
