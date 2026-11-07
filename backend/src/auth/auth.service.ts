@@ -16,6 +16,7 @@ import { cabinetCourant } from '../prisma/contexte-cabinet';
 import { AuditService } from '../audit/audit.service';
 import { LoginDto } from './dto/login.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { genererMotDePasse } from './generer-mot-de-passe';
 import {
   CODE_CABINET_SUSPENDU,
@@ -225,6 +226,48 @@ export class AuthService {
       orderBy: [{ nom: 'asc' }, { prenom: 'asc' }],
     });
     return users.map(versUtilisateur);
+  }
+
+  async modifierUser(titulaireId: string, id: string, dto: UpdateUserDto) {
+    const champs = Object.fromEntries(
+      Object.entries(dto).filter(([, v]) => v !== undefined),
+    ) as UpdateUserDto;
+    if (Object.keys(champs).length === 0) throw new BadRequestException('Aucune modification');
+
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException('Utilisateur non trouvé');
+
+    const emailChange = champs.email !== undefined && champs.email !== user.email;
+    if (emailChange && id === titulaireId) {
+      throw new BadRequestException('Vous ne pouvez pas modifier votre propre email');
+    }
+
+    const data = {
+      ...champs,
+      ...(champs.telephone !== undefined && { telephone: champs.telephone || null }),
+    };
+
+    const [modifie] = await this.prisma
+      .$transaction([
+        this.prisma.user.update({ where: { id }, data, select: selectUtilisateur() }),
+        // Nouvel identifiant de connexion : les sessions ouvertes avec l'ancien sont fermées
+        ...(emailChange ? [this.prisma.refreshToken.deleteMany({ where: { userId: id } })] : []),
+      ])
+      .catch((e) => {
+        // L'email est unique sur toute la plateforme : la contrainte de la base le garantit
+        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+          throw new ConflictException('Email déjà utilisé');
+        }
+        throw e;
+      });
+
+    await this.audit.log(titulaireId, 'UPDATE_USER', 'User', id, {
+      champs: Object.keys(champs),
+      ...(emailChange && { email: champs.email }),
+    });
+    return versUtilisateur(
+      modifie as Prisma.UserGetPayload<{ select: ReturnType<typeof selectUtilisateur> }>,
+    );
   }
 
   async resetPassword(adminId: string, userId: string) {
