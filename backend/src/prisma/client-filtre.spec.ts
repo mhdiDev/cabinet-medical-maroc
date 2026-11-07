@@ -126,6 +126,18 @@ describe('creerClientFiltre', () => {
   it('un modèle cloisonné sans contexte répond 403', async () => {
     await expect(client.patient.findMany()).rejects.toThrow(ForbiddenException);
   });
+
+  it('refuse toute opération directe sur Cabinet, même avec un cabinet connu', async () => {
+    await ouvrirContexte(async () => {
+      definirCabinet('c1');
+      await expect(client.cabinet.findMany()).rejects.toThrow(
+        'Accès direct aux cabinets interdit sur le client filtré',
+      );
+      await expect(client.cabinet.findUnique({ where: { id: 'c1' } })).rejects.toThrow(
+        'Accès direct aux cabinets interdit sur le client filtré',
+      );
+    });
+  });
 });
 
 describe('contexte de cabinet', () => {
