@@ -6,6 +6,20 @@ import toast from 'react-hot-toast';
 import { apiClient } from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 
+async function ouvrirDocument(id: string) {
+  // Ouvert avant l'appel réseau, sinon le navigateur bloque l'onglet
+  const onglet = window.open('', '_blank');
+  try {
+    const { data } = await apiClient.get<Blob>(`/documents/${id}/fichier`, { responseType: 'blob' });
+    const url = URL.createObjectURL(data);
+    if (onglet) onglet.location.href = url;
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  } catch {
+    onglet?.close();
+    toast.error("Impossible d'ouvrir le document");
+  }
+}
+
 const TABS = ['Profil', 'Consultations', 'Ordonnances', 'Documents', 'RDV'];
 
 export default function PatientDetailPage({ params }: { params: { id: string } }) {
@@ -286,14 +300,13 @@ function DocumentsTab({ patientId }: { patientId: string }) {
                 </p>
               </div>
               <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition">
-                <a
-                  href={d.url}
-                  target="_blank"
-                  rel="noreferrer"
+                <button
+                  type="button"
+                  onClick={() => ouvrirDocument(d.id)}
                   className="text-blue-600 text-xs hover:underline px-2 py-1 rounded hover:bg-blue-50"
                 >
                   Ouvrir
-                </a>
+                </button>
                 <button
                   onClick={() => {
                     if (confirm(`Supprimer "${d.nom}" ?`)) deleteMutation.mutate(d.id);
