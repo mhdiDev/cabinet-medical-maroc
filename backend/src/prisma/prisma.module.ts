@@ -1,9 +1,17 @@
 import { Global, Module } from '@nestjs/common';
-import { PrismaService } from './prisma.service';
+import { PrismaSansFiltre, PrismaService } from './prisma.service';
+import { creerClientFiltre } from './client-filtre';
 
 @Global()
 @Module({
-  providers: [PrismaService],
-  exports: [PrismaService],
+  providers: [
+    PrismaSansFiltre,
+    {
+      provide: PrismaService,
+      useFactory: (base: PrismaSansFiltre) => creerClientFiltre(base),
+      inject: [PrismaSansFiltre],
+    },
+  ],
+  exports: [PrismaSansFiltre, PrismaService],
 })
 export class PrismaModule {}

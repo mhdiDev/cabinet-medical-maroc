@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { cabinetCourant } from '../prisma/contexte-cabinet';
 import { AuditService } from '../audit/audit.service';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
@@ -21,7 +22,9 @@ export class PatientsService {
   ) {}
 
   async create(dto: CreatePatientDto, userId: string) {
-    const patient = await this.prisma.patient.create({ data: dto });
+    const patient = await this.prisma.patient.create({
+      data: { ...dto, cabinetId: cabinetCourant() },
+    });
 
     await this.audit.log(userId, 'CREATE', 'Patient', patient.id, {
       nom: patient.nom,

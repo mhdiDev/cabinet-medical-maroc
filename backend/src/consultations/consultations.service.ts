@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { cabinetCourant } from '../prisma/contexte-cabinet';
 import { AuditService } from '../audit/audit.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CreateConsultationDto } from './dto/create-consultation.dto';
@@ -52,7 +53,7 @@ export class ConsultationsService {
 
   async create(dto: CreateConsultationDto, userId: string) {
     const consultation = await this.prisma.consultation.create({
-      data: dto,
+      data: { ...dto, cabinetId: cabinetCourant() },
       include: {
         patient: { select: { nom: true, prenom: true } },
         medecin: { select: { nom: true, prenom: true } },

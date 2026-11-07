@@ -6,12 +6,10 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { AutoriseSiMdpAChanger } from '../common/decorators/autorise-si-mdp-a-changer.decorator';
-import { Role } from '@prisma/client';
+import { TitulaireSeulement } from '../common/decorators/titulaire-seulement.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -49,28 +47,25 @@ export class AuthController {
   }
 
   @Post('users')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @TitulaireSeulement()
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Créer un utilisateur (admin)' })
+  @ApiOperation({ summary: 'Créer un utilisateur (titulaire)' })
   createUser(@CurrentUser('sub') adminId: string, @Body() dto: CreateUserDto) {
     return this.authService.createUser(adminId, dto);
   }
 
   @Get('users')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @TitulaireSeulement()
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Lister les utilisateurs (admin)' })
+  @ApiOperation({ summary: 'Lister les utilisateurs (titulaire)' })
   listUsers() {
     return this.authService.listUsers();
   }
 
   @Post('users/:id/reset-password')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @TitulaireSeulement()
   @ApiBearerAuth()
-  @ApiOperation({ summary: "Réinitialiser le mot de passe d'un utilisateur (admin)" })
+  @ApiOperation({ summary: "Réinitialiser le mot de passe d'un utilisateur (titulaire)" })
   resetPassword(
     @CurrentUser('sub') adminId: string,
     @Param('id') userId: string,

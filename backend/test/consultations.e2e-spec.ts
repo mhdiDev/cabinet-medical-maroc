@@ -1,11 +1,11 @@
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { PrismaService } from '../src/prisma/prisma.service';
+import { PrismaSansFiltre } from '../src/prisma/prisma.service';
 import { createApp, loginAdmin, resetDb, seedTestMedecin, seedTestPatient, seedTestUser } from './helpers';
 
 describe('Consultations (e2e)', () => {
   let app: INestApplication;
-  let prisma: PrismaService;
+  let prisma: PrismaSansFiltre;
   let token: string;
   let patientId: string;
   let medecinId: string;
@@ -13,7 +13,7 @@ describe('Consultations (e2e)', () => {
 
   beforeAll(async () => {
     app = await createApp();
-    prisma = app.get(PrismaService);
+    prisma = app.get(PrismaSansFiltre);
     await resetDb(prisma);
     await seedTestUser(prisma);
     medecinId = await seedTestMedecin(prisma);

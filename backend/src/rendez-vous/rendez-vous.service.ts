@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { StatutRDV } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { cabinetCourant } from '../prisma/contexte-cabinet';
 import { AuditService } from '../audit/audit.service';
 import { CreateRendezVousDto } from './dto/create-rendez-vous.dto';
 import { UpdateRendezVousDto } from './dto/update-rendez-vous.dto';
@@ -34,7 +35,7 @@ export class RendezVousService {
     }
 
     const rdv = await this.prisma.rendezVous.create({
-      data: { ...dto, dateHeure: debut },
+      data: { ...dto, dateHeure: debut, cabinetId: cabinetCourant() },
       include: {
         patient: { select: { nom: true, prenom: true, telephone: true } },
         medecin: { select: { nom: true, prenom: true } },

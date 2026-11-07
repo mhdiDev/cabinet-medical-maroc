@@ -1,15 +1,21 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
+import { Test, TestingModuleBuilder } from '@nestjs/testing';
 import * as request from 'supertest';
 import * as argon2 from 'argon2';
 import { AppModule } from '../src/app.module';
-import { PrismaService } from '../src/prisma/prisma.service';
+import { PrismaSansFiltre } from '../src/prisma/prisma.service';
 import { Role } from '@prisma/client';
 
-export async function createApp(): Promise<INestApplication> {
-  const module = await Test.createTestingModule({
-    imports: [AppModule],
-  }).compile();
+export const CABINET_TEST_ID = 'cabinet-test-a';
+
+export async function createApp(
+  configurer: (builder: TestingModuleBuilder) => TestingModuleBuilder = (builder) => builder,
+): Promise<INestApplication> {
+  const module = await configurer(
+    Test.createTestingModule({
+      imports: [AppModule],
+    }),
+  ).compile();
 
   const app = module.createNestApplication();
   app.setGlobalPrefix('api');
@@ -25,7 +31,7 @@ export async function createApp(): Promise<INestApplication> {
   return app;
 }
 
-export async function resetDb(prisma: PrismaService): Promise<void> {
+export async function resetDb(prisma: PrismaSansFiltre): Promise<void> {
   const tables = [
     'ordonnance_medicaments',
     'ordonnances',
@@ -36,15 +42,32 @@ export async function resetDb(prisma: PrismaService): Promise<void> {
     'notifications',
     'audit_logs',
     'refresh_tokens',
+    'stock_mouvements',
+    'stock_articles',
+    'parametres',
     'patients',
     'users',
+    'cabinets',
   ];
   for (const table of tables) {
     await prisma.$executeRawUnsafe(`DELETE FROM "${table}"`);
   }
 }
 
-export async function seedTestUser(prisma: PrismaService): Promise<void> {
+export async function seedCabinet(
+  prisma: PrismaSansFiltre,
+  id: string = CABINET_TEST_ID,
+): Promise<string> {
+  await prisma.cabinet.upsert({
+    where: { id },
+    update: {},
+    create: { id, nom: `Cabinet ${id}`, adresse: 'Adresse', ville: 'Rabat', telephone: '0522000000' },
+  });
+  return id;
+}
+
+export async function seedTestUser(prisma: PrismaSansFiltre): Promise<void> {
+  await seedCabinet(prisma);
   const hash = await argon2.hash('Admin123!');
   await prisma.user.create({
     data: {
@@ -53,12 +76,15 @@ export async function seedTestUser(prisma: PrismaService): Promise<void> {
       motDePasse: hash,
       nom: 'Admin',
       prenom: 'Test',
-      role: Role.ADMIN,
+      role: Role.MEDECIN,
+      estTitulaire: true,
+      cabinetId: CABINET_TEST_ID,
     },
   });
 }
 
-export async function seedTestMedecin(prisma: PrismaService): Promise<string> {
+export async function seedTestMedecin(prisma: PrismaSansFiltre): Promise<string> {
+  await seedCabinet(prisma);
   const hash = await argon2.hash('Medecin123!');
   const user = await prisma.user.create({
     data: {
@@ -68,15 +94,18 @@ export async function seedTestMedecin(prisma: PrismaService): Promise<string> {
       nom: 'Benali',
       prenom: 'Hassan',
       role: Role.MEDECIN,
+      cabinetId: CABINET_TEST_ID,
     },
   });
   return user.id;
 }
 
-export async function seedTestPatient(prisma: PrismaService): Promise<string> {
+export async function seedTestPatient(prisma: PrismaSansFiltre): Promise<string> {
+  await seedCabinet(prisma);
   const patient = await prisma.patient.create({
     data: {
       id: 'test-patient-id',
+      cabinetId: CABINET_TEST_ID,
       nom: 'Tazi',
       prenom: 'Ahmed',
       dateNaissance: new Date('1985-03-15'),
@@ -94,7 +123,8 @@ export async function loginAdmin(app: INestApplication): Promise<string> {
   return res.body.accessToken;
 }
 
-export async function seedTestSecretaire(prisma: PrismaService): Promise<string> {
+export async function seedTestSecretaire(prisma: PrismaSansFiltre): Promise<string> {
+  await seedCabinet(prisma);
   const hash = await argon2.hash('Secretaire123!');
   const user = await prisma.user.create({
     data: {
@@ -104,6 +134,7 @@ export async function seedTestSecretaire(prisma: PrismaService): Promise<string>
       nom: 'Alaoui',
       prenom: 'Fatima',
       role: Role.SECRETAIRE,
+      cabinetId: CABINET_TEST_ID,
     },
   });
   return user.id;

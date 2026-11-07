@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import * as PDFDocument from 'pdfkit';
 import { PrismaService } from '../prisma/prisma.service';
+import { cabinetCourant } from '../prisma/contexte-cabinet';
 import { AuditService } from '../audit/audit.service';
 import { CreateOrdonnanceDto } from './dto/create-ordonnance.dto';
 
@@ -43,6 +44,7 @@ export class OrdonnancesService {
     const ordonnance = await this.prisma.ordonnance.create({
       data: {
         ...rest,
+        cabinetId: cabinetCourant(),
         contenu: medicaments as any,
         medicaments: {
           create: medicaments.map((m) => ({

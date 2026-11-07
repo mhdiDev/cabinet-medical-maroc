@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { cabinetCourant } from '../prisma/contexte-cabinet';
 import { MinioService } from './minio.service';
 
 const ALLOWED_MIME_TYPES = [
@@ -24,6 +25,7 @@ export class DocumentsService {
 
     return this.prisma.document.create({
       data: {
+        cabinetId: cabinetCourant(),
         patientId,
         consultationId: consultationId || null,
         nom: file.originalname,

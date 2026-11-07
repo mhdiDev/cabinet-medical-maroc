@@ -4,6 +4,8 @@ import { OrdonnancesService } from './ordonnances.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 
+jest.mock('../prisma/contexte-cabinet', () => ({ cabinetCourant: () => 'cabinet-test' }));
+
 const mockPrisma = {
   ordonnance: {
     create: jest.fn(),

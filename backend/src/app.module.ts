@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module';
+import { ContexteCabinetMiddleware } from './prisma/contexte-cabinet.middleware';
 import { AuthModule } from './auth/auth.module';
 import { PatientsModule } from './patients/patients.module';
 import { RendezVousModule } from './rendez-vous/rendez-vous.module';
@@ -34,4 +35,8 @@ import { DocumentsModule } from './documents/documents.module';
     DocumentsModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(ContexteCabinetMiddleware).forRoutes('*');
+  }
+}

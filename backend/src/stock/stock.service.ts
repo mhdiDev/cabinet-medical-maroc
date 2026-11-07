@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { TypeMouvement } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { cabinetCourant } from '../prisma/contexte-cabinet';
 import { AuditService } from '../audit/audit.service';
 import { CreateStockArticleDto } from './dto/create-stock-article.dto';
 import { CreateMouvementDto } from './dto/create-mouvement.dto';
@@ -10,7 +11,7 @@ export class StockService {
   constructor(private prisma: PrismaService, private audit: AuditService) {}
 
   async createArticle(dto: CreateStockArticleDto) {
-    return this.prisma.stockArticle.create({ data: dto });
+    return this.prisma.stockArticle.create({ data: { ...dto, cabinetId: cabinetCourant() } });
   }
 
   async findAll() {
@@ -52,7 +53,7 @@ export class StockService {
 
     const [mouvement] = await this.prisma.$transaction([
       this.prisma.stockMouvement.create({
-        data: { ...dto, createdById: userId },
+        data: { ...dto, createdById: userId, cabinetId: cabinetCourant() },
       }),
       this.prisma.stockArticle.update({
         where: { id: dto.articleId },

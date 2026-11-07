@@ -32,8 +32,8 @@ export class ConsultationsController {
 
   @Post()
   @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN, Role.MEDECIN)
-  @ApiOperation({ summary: 'Créer une consultation (ADMIN, MEDECIN uniquement)' })
+  @Roles(Role.MEDECIN)
+  @ApiOperation({ summary: 'Créer une consultation (MEDECIN uniquement)' })
   create(@Body() dto: CreateConsultationDto, @CurrentUser('id') userId: string) {
     return this.service.create(dto, userId);
   }
@@ -50,8 +50,8 @@ export class ConsultationsController {
 
   @Patch(':id')
   @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN, Role.MEDECIN)
-  @ApiOperation({ summary: 'Modifier une consultation (ADMIN, MEDECIN uniquement)' })
+  @Roles(Role.MEDECIN)
+  @ApiOperation({ summary: 'Modifier une consultation (MEDECIN uniquement)' })
   update(@Param('id') id: string, @Body() dto: Partial<CreateConsultationDto>, @CurrentUser('id') userId: string) {
     return this.service.update(id, dto, userId);
   }

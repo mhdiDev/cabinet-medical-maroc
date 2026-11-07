@@ -5,6 +5,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { Sexe } from '@prisma/client';
 
+jest.mock('../prisma/contexte-cabinet', () => ({ cabinetCourant: () => 'cabinet-test' }));
+
 const mockPrisma = {
   patient: {
     create: jest.fn(),
@@ -48,7 +50,9 @@ describe('PatientsService', () => {
 
       const result = await service.create(dto as any, 'user-1');
 
-      expect(mockPrisma.patient.create).toHaveBeenCalledWith({ data: dto });
+      expect(mockPrisma.patient.create).toHaveBeenCalledWith({
+        data: { ...dto, cabinetId: 'cabinet-test' },
+      });
       expect(mockAudit.log).toHaveBeenCalledWith(
         'user-1', 'CREATE', 'Patient', 'uuid-1',
         { nom: 'Tazi', prenom: 'Ahmed' },
