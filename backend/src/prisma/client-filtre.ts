@@ -27,6 +27,7 @@ const avecWhere = (args: Args, cabinetId: string): Args => ({
 const sansCabinet = (data: Args): Args => {
   const copie = { ...data };
   delete copie.cabinetId;
+  delete copie.cabinet;
   return copie;
 };
 
@@ -73,11 +74,11 @@ export function appliquerCabinet(
 export function creerClientFiltre(base: PrismaClient) {
   return base.$extends({
     query: {
-      $allModels: {
-        $allOperations({ model, operation, args, query }) {
-          if (!MODELES_CLOISONNES.has(model)) return query(args);
-          return query(appliquerCabinet(operation, args, cabinetCourant()) as typeof args);
-        },
+      // Niveau client et non $allModels : le SQL brut passe ici, avec model indéfini
+      $allOperations({ model, operation, args, query }) {
+        if (!model) throw new Error(`SQL brut interdit sur le client filtré : ${operation}`);
+        if (!MODELES_CLOISONNES.has(model)) return query(args);
+        return query(appliquerCabinet(operation, args, cabinetCourant()) as typeof args);
       },
     },
   });
