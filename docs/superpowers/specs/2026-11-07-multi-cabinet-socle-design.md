@@ -122,7 +122,7 @@ Le seed s'exécute à chaque démarrage de la production : il doit rester idempo
 
 ### Client filtré
 
-`PrismaService` fournit un client Prisma avec une extension (`$extends`, `query.$allModels.$allOperations`) qui s'applique aux modèles cloisonnés : ceux de la liste ci-dessus, `AuditLog` et `User`.
+`PrismaService` fournit un client Prisma avec une extension (`$extends`, `query.$allOperations`) qui s'applique aux modèles cloisonnés : ceux de la liste ci-dessus, `AuditLog` et `User`. Ce client refuse aussi tout SQL brut.
 
 | Opération | Effet |
 |-----------|-------|
