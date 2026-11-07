@@ -53,8 +53,8 @@ export class AuthController {
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Créer un utilisateur (admin)' })
-  createUser(@Body() dto: CreateUserDto) {
-    return this.authService.createUser(dto);
+  createUser(@CurrentUser('sub') adminId: string, @Body() dto: CreateUserDto) {
+    return this.authService.createUser(adminId, dto);
   }
 
   @Get('users')
@@ -70,13 +70,14 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Réinitialiser le mot de passe d\'un utilisateur (admin)' })
+  @ApiOperation({ summary: "Réinitialiser le mot de passe d'un utilisateur (admin)" })
   resetPassword(
     @CurrentUser('sub') adminId: string,
     @Param('id') userId: string,
-    @Body() dto: ResetPasswordDto,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @Body() _dto: ResetPasswordDto,
   ) {
-    return this.authService.resetPassword(adminId, userId, dto.nouveauMdp);
+    return this.authService.resetPassword(adminId, userId);
   }
 
   @Post('change-password')

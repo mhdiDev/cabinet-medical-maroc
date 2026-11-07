@@ -1,27 +1,34 @@
-import { IsEmail, IsString, IsEnum, IsOptional, MinLength, Matches } from 'class-validator';
+import { IsEmail, IsString, IsNotEmpty, IsEnum, IsOptional, Matches } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
+import { NormaliserEmail } from '../../common/transforms/normaliser-email';
 
+// Le mot de passe initial est généré par le serveur : il n'est pas fourni par l'admin
 export class CreateUserDto {
-  @ApiProperty() @IsEmail() email: string;
+  @ApiProperty()
+  @NormaliserEmail()
+  @IsEmail({}, { message: 'Email invalide' })
+  email: string;
 
   @ApiProperty()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
-  @MinLength(8)
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
-    message: 'Le mot de passe doit contenir majuscule, minuscule et chiffre',
-  })
-  motDePasse: string;
+  @IsNotEmpty()
+  nom: string;
 
-  @ApiProperty() @IsString() nom: string;
-  @ApiProperty() @IsString() prenom: string;
+  @ApiProperty()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @IsString()
+  @IsNotEmpty()
+  prenom: string;
 
   @ApiProperty({ enum: Role })
-  @IsEnum(Role)
+  @IsEnum(Role, { message: 'Rôle invalide' })
   role: Role;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, example: '0612345678' })
   @IsOptional()
-  @IsString()
+  @Matches(/^0[5-7][0-9]{8}$/, { message: 'Téléphone marocain invalide' })
   telephone?: string;
 }

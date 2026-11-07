@@ -122,23 +122,122 @@ describe('Auth (e2e)', () => {
     });
   });
 
+  describe('POST /api/auth/users', () => {
+    const nouveau = { email: 'Nouveau.Medecin@Cabinet.ma', nom: 'Idrissi', prenom: 'Karim', role: 'MEDECIN' };
+
+    it('403 pour une secrétaire', async () => {
+      const { accessToken } = await login(app, 'secretaire@cabinet.ma', 'Secretaire123!');
+      const res = await request(app.getHttpServer())
+        .post('/api/auth/users')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ ...nouveau, email: 'refuse@cabinet.ma' });
+
+      expect(res.status).toBe(403);
+    });
+
+    it('201 : mot de passe généré, email normalisé, changement forcé à la première connexion', async () => {
+      const server = app.getHttpServer();
+      const token = await loginAdmin(app);
+
+      const res = await request(server)
+        .post('/api/auth/users')
+        .set('Authorization', `Bearer ${token}`)
+        .send(nouveau);
+
+      expect(res.status).toBe(201);
+      expect(res.body.user.email).toBe('nouveau.medecin@cabinet.ma');
+      expect(res.body.user.doitChangerMdp).toBe(true);
+      expect(res.body.user.motDePasse).toBeUndefined();
+      expect(res.body.motDePasseInitial).toHaveLength(12);
+
+      // Connexion insensible à la casse, avec le mot de passe généré
+      const session = await login(app, 'NOUVEAU.medecin@CABINET.ma', res.body.motDePasseInitial);
+      expect(session.user.doitChangerMdp).toBe(true);
+      const auth = { Authorization: `Bearer ${session.accessToken}` };
+
+      const bloque = await request(server).get('/api/patients').set(auth);
+      expect(bloque.status).toBe(403);
+      expect(bloque.body.code).toBe('MUST_CHANGE_PASSWORD');
+
+      const change = await request(server)
+        .post('/api/auth/change-password').set(auth)
+        .send({ ancienMdp: res.body.motDePasseInitial, nouveauMdp: 'Medecin789!' });
+      expect(change.status).toBe(201);
+
+      const ok = await request(server)
+        .get('/api/patients')
+        .set('Authorization', `Bearer ${change.body.accessToken}`);
+      expect(ok.status).toBe(200);
+    });
+
+    it('409 si l\'email existe déjà, quelle que soit la casse', async () => {
+      const token = await loginAdmin(app);
+      const res = await request(app.getHttpServer())
+        .post('/api/auth/users')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ ...nouveau, email: 'NOUVEAU.MEDECIN@cabinet.ma' });
+
+      expect(res.status).toBe(409);
+    });
+
+    it('400 si un mot de passe est envoyé', async () => {
+      const token = await loginAdmin(app);
+      const res = await request(app.getHttpServer())
+        .post('/api/auth/users')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ ...nouveau, email: 'avec-mdp@cabinet.ma', motDePasse: 'Admin123!' });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('400 si le téléphone est invalide', async () => {
+      const token = await loginAdmin(app);
+      const res = await request(app.getHttpServer())
+        .post('/api/auth/users')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ ...nouveau, email: 'tel@cabinet.ma', telephone: '12345' });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('201 avec un téléphone marocain valide', async () => {
+      const token = await loginAdmin(app);
+      const res = await request(app.getHttpServer())
+        .post('/api/auth/users')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ ...nouveau, email: 'tel-ok@cabinet.ma', telephone: '0612345678' });
+
+      expect(res.status).toBe(201);
+      expect(res.body.user.telephone).toBe('0612345678');
+    });
+
+    it('400 si le nom ne contient que des espaces', async () => {
+      const token = await loginAdmin(app);
+      const res = await request(app.getHttpServer())
+        .post('/api/auth/users')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ email: 'espaces@cabinet.ma', nom: '   ', prenom: 'Karim', role: 'MEDECIN' });
+
+      expect(res.status).toBe(400);
+    });
+  });
+
   describe('POST /api/auth/users/:id/reset-password — validations', () => {
     it('403 pour une secrétaire', async () => {
       const { accessToken } = await login(app, 'secretaire@cabinet.ma', 'Secretaire123!');
       const res = await request(app.getHttpServer())
         .post('/api/auth/users/test-admin-id/reset-password')
-        .set('Authorization', `Bearer ${accessToken}`)
-        .send({ nouveauMdp: 'Temp1234!' });
+        .set('Authorization', `Bearer ${accessToken}`);
 
       expect(res.status).toBe(403);
     });
 
-    it('400 si mot de passe trop court', async () => {
+    it('400 si un mot de passe est envoyé', async () => {
       const token = await loginAdmin(app);
       const res = await request(app.getHttpServer())
         .post(`/api/auth/users/${secretaireId}/reset-password`)
         .set('Authorization', `Bearer ${token}`)
-        .send({ nouveauMdp: 'court' });
+        .send({ nouveauMdp: 'Temp1234!' });
 
       expect(res.status).toBe(400);
     });
@@ -147,8 +246,7 @@ describe('Auth (e2e)', () => {
       const token = await loginAdmin(app);
       const res = await request(app.getHttpServer())
         .post('/api/auth/users/test-admin-id/reset-password')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ nouveauMdp: 'Temp1234!' });
+        .set('Authorization', `Bearer ${token}`);
 
       expect(res.status).toBe(400);
     });
@@ -157,8 +255,7 @@ describe('Auth (e2e)', () => {
       const token = await loginAdmin(app);
       const res = await request(app.getHttpServer())
         .post('/api/auth/users/inexistant/reset-password')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ nouveauMdp: 'Temp1234!' });
+        .set('Authorization', `Bearer ${token}`);
 
       expect(res.status).toBe(404);
     });
@@ -169,15 +266,16 @@ describe('Auth (e2e)', () => {
       const server = app.getHttpServer();
       const adminToken = await loginAdmin(app);
 
-      // 1. L'admin réinitialise le mot de passe de la secrétaire
+      // 1. L'admin réinitialise le mot de passe de la secrétaire (généré par le serveur)
       const reset = await request(server)
         .post(`/api/auth/users/${secretaireId}/reset-password`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .send({ nouveauMdp: 'Temp1234!' });
+        .set('Authorization', `Bearer ${adminToken}`);
       expect(reset.status).toBe(201);
+      const temporaire: string = reset.body.motDePasseTemporaire;
+      expect(temporaire).toHaveLength(12);
 
       // 2. Connexion avec le mot de passe temporaire
-      const session = await login(app, 'secretaire@cabinet.ma', 'Temp1234!');
+      const session = await login(app, 'secretaire@cabinet.ma', temporaire);
       expect(session.user.doitChangerMdp).toBe(true);
       const auth = { Authorization: `Bearer ${session.accessToken}` };
 
@@ -192,13 +290,13 @@ describe('Auth (e2e)', () => {
       // 3b. Le nouveau mot de passe ne peut pas être le temporaire
       const identique = await request(server)
         .post('/api/auth/change-password').set(auth)
-        .send({ ancienMdp: 'Temp1234!', nouveauMdp: 'Temp1234!' });
+        .send({ ancienMdp: temporaire, nouveauMdp: temporaire });
       expect(identique.status).toBe(400);
 
       // 4. Changement du mot de passe → nouveaux tokens
       const change = await request(server)
         .post('/api/auth/change-password').set(auth)
-        .send({ ancienMdp: 'Temp1234!', nouveauMdp: 'Secretaire456!' });
+        .send({ ancienMdp: temporaire, nouveauMdp: 'Secretaire456!' });
       expect(change.status).toBe(201);
       expect(change.body.accessToken).toBeDefined();
       expect(change.body.refreshToken).toBeDefined();
@@ -224,6 +322,18 @@ describe('Auth (e2e)', () => {
         .send({ ancienMdp: 'Faux1234!', nouveauMdp: 'Autre1234!' });
 
       expect(res.status).toBe(400);
+    });
+
+    it('400 si le nouveau mot de passe est faible', async () => {
+      const { accessToken } = await login(app, 'secretaire@cabinet.ma', 'Secretaire456!');
+      for (const faible of ['faible123', 'SansChiffre', 'SANSMINUSCULE1']) {
+        const res = await request(app.getHttpServer())
+          .post('/api/auth/change-password')
+          .set('Authorization', `Bearer ${accessToken}`)
+          .send({ ancienMdp: 'Secretaire456!', nouveauMdp: faible });
+
+        expect(res.status).toBe(400);
+      }
     });
   });
 });

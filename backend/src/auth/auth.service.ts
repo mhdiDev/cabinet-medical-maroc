@@ -7,12 +7,14 @@ import {
   Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { Prisma } from '@prisma/client';
 import * as argon2 from 'argon2';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { LoginDto } from './dto/login.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { genererMotDePasse } from './generer-mot-de-passe';
 
 @Injectable()
 export class AuthService {
@@ -70,17 +72,37 @@ export class AuthService {
     await this.prisma.refreshToken.deleteMany({ where: { userId } });
   }
 
-  async createUser(dto: CreateUserDto) {
+  async createUser(adminId: string, dto: CreateUserDto) {
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (existing) throw new ConflictException('Email déjà utilisé');
 
-    const hash = await argon2.hash(dto.motDePasse);
-    const user = await this.prisma.user.create({
-      data: { ...dto, motDePasse: hash },
-      select: { id: true, email: true, nom: true, prenom: true, role: true, createdAt: true },
-    });
+    const motDePasseInitial = genererMotDePasse();
+    const user = await this.prisma.user
+      .create({
+        data: { ...dto, motDePasse: await argon2.hash(motDePasseInitial), doitChangerMdp: true },
+        select: {
+          id: true,
+          email: true,
+          nom: true,
+          prenom: true,
+          role: true,
+          telephone: true,
+          actif: true,
+          doitChangerMdp: true,
+          createdAt: true,
+        },
+      })
+      .catch((e) => {
+        // Deux créations simultanées : la contrainte unique l'emporte sur le pré-contrôle
+        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+          throw new ConflictException('Email déjà utilisé');
+        }
+        throw e;
+      });
+    await this.audit.log(adminId, 'CREATE_USER', 'User', user.id);
 
-    return user;
+    // Renvoyé une seule fois à l'admin : seul le hash est stocké
+    return { user, motDePasseInitial };
   }
 
   async changePassword(userId: string, ancienMdp: string, nouveauMdp: string) {
@@ -92,7 +114,7 @@ export class AuthService {
     if (!valid) throw new BadRequestException('Ancien mot de passe incorrect');
 
     if (ancienMdp === nouveauMdp) {
-      throw new BadRequestException('Le nouveau mot de passe doit être différent de l\'ancien');
+      throw new BadRequestException("Le nouveau mot de passe doit être différent de l'ancien");
     }
 
     const hash = await argon2.hash(nouveauMdp);
@@ -113,33 +135,42 @@ export class AuthService {
   async listUsers() {
     return this.prisma.user.findMany({
       select: {
-        id: true, nom: true, prenom: true, email: true, role: true,
-        actif: true, doitChangerMdp: true, createdAt: true,
+        id: true,
+        nom: true,
+        prenom: true,
+        email: true,
+        role: true,
+        actif: true,
+        doitChangerMdp: true,
+        createdAt: true,
       },
       orderBy: [{ nom: 'asc' }, { prenom: 'asc' }],
     });
   }
 
-  async resetPassword(adminId: string, userId: string, nouveauMdp: string) {
+  async resetPassword(adminId: string, userId: string) {
     if (adminId === userId) {
-      throw new BadRequestException('Utilisez « Mon compte » pour changer votre propre mot de passe');
+      throw new BadRequestException(
+        'Utilisez « Mon compte » pour changer votre propre mot de passe',
+      );
     }
 
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('Utilisateur non trouvé');
 
-    const hash = await argon2.hash(nouveauMdp);
+    const motDePasseTemporaire = genererMotDePasse();
     await this.prisma.$transaction([
       this.prisma.user.update({
         where: { id: userId },
-        data: { motDePasse: hash, doitChangerMdp: true },
+        data: { motDePasse: await argon2.hash(motDePasseTemporaire), doitChangerMdp: true },
       }),
       // Révoque toutes les sessions
       this.prisma.refreshToken.deleteMany({ where: { userId } }),
     ]);
     await this.audit.log(adminId, 'RESET_PASSWORD', 'User', userId);
 
-    return { success: true };
+    // Renvoyé une seule fois à l'admin : seul le hash est stocké
+    return { motDePasseTemporaire };
   }
 
   private async generateTokens(userId: string, email: string, role: string) {

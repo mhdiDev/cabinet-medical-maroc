@@ -1,28 +1,18 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/auth';
 import { apiClient } from '@/lib/api';
-import toast from 'react-hot-toast';
-
-interface Utilisateur {
-  id: string;
-  nom: string;
-  prenom: string;
-  email: string;
-  role: 'ADMIN' | 'MEDECIN' | 'SECRETAIRE';
-  actif: boolean;
-  doitChangerMdp: boolean;
-}
+import { ResetModal } from '@/components/utilisateurs/ResetModal';
+import { CreateUserModal } from '@/components/utilisateurs/CreateUserModal';
+import type { Utilisateur } from '@/components/utilisateurs/types';
 
 export default function UtilisateursPage() {
   const router = useRouter();
   const { user } = useAuthStore();
   const [cible, setCible] = useState<Utilisateur | null>(null);
+  const [creation, setCreation] = useState(false);
   const estAdmin = user?.role === 'ADMIN';
 
   useEffect(() => {
@@ -39,7 +29,15 @@ export default function UtilisateursPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Utilisateurs</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h1 className="text-2xl font-bold text-gray-900">Utilisateurs</h1>
+        <button
+          onClick={() => setCreation(true)}
+          className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
+        >
+          + Nouvel utilisateur
+        </button>
+      </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {isLoading ? (
@@ -92,75 +90,7 @@ export default function UtilisateursPage() {
       </div>
 
       {cible && <ResetModal utilisateur={cible} onClose={() => setCible(null)} />}
-    </div>
-  );
-}
-
-const resetSchema = z
-  .object({
-    nouveauMdp: z.string().min(8, '8 caractères minimum'),
-    confirmation: z.string(),
-  })
-  .refine(d => d.nouveauMdp === d.confirmation, {
-    message: 'Les mots de passe ne correspondent pas',
-    path: ['confirmation'],
-  });
-
-type ResetForm = z.infer<typeof resetSchema>;
-
-function ResetModal({ utilisateur, onClose }: { utilisateur: Utilisateur; onClose: () => void }) {
-  const queryClient = useQueryClient();
-  const { register, handleSubmit, formState: { errors } } = useForm<ResetForm>({
-    resolver: zodResolver(resetSchema),
-  });
-
-  const mutation = useMutation({
-    mutationFn: (data: ResetForm) =>
-      apiClient.post(`/auth/users/${utilisateur.id}/reset-password`, { nouveauMdp: data.nouveauMdp }),
-    onSuccess: () => {
-      toast.success(
-        'Mot de passe réinitialisé. Communiquez-le à l’utilisateur : il devra le changer à sa prochaine connexion.',
-        { duration: 6000 },
-      );
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      onClose();
-    },
-    onError: (err: any) =>
-      toast.error(err.response?.data?.message || 'Erreur lors de la réinitialisation'),
-  });
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
-        <h2 className="font-bold text-lg mb-1">Réinitialiser le mot de passe</h2>
-        <p className="text-sm text-gray-500 mb-4">{utilisateur.prenom} {utilisateur.nom} — {utilisateur.email}</p>
-        <form onSubmit={handleSubmit(d => mutation.mutate(d))} className="space-y-3">
-          <div>
-            <label className="text-sm font-medium text-gray-700">Mot de passe temporaire</label>
-            <input type="password" autoComplete="new-password" {...register('nouveauMdp')}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mt-1" />
-            {errors.nouveauMdp && <p className="text-xs text-red-600 mt-1">{errors.nouveauMdp.message}</p>}
-          </div>
-          <div>
-            <label className="text-sm font-medium text-gray-700">Confirmation</label>
-            <input type="password" autoComplete="new-password" {...register('confirmation')}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mt-1" />
-            {errors.confirmation && <p className="text-xs text-red-600 mt-1">{errors.confirmation.message}</p>}
-          </div>
-          <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-lg text-sm">
-              Annuler
-            </button>
-            <button
-              type="submit"
-              disabled={mutation.isPending}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm disabled:opacity-50"
-            >
-              {mutation.isPending ? '...' : 'Réinitialiser'}
-            </button>
-          </div>
-        </form>
-      </div>
+      {creation && <CreateUserModal onClose={() => setCreation(false)} />}
     </div>
   );
 }
