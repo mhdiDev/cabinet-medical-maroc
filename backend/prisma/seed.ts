@@ -3,8 +3,23 @@ import * as argon2 from 'argon2';
 
 const prisma = new PrismaClient();
 
+// Même identifiant que dans la migration multi_cabinet_socle
+const CABINET_DEMO_ID = '00000000-0000-0000-0000-000000000001';
+
 async function main() {
   console.log('🌱 Initialisation des données de démo...');
+
+  await prisma.cabinet.upsert({
+    where: { id: CABINET_DEMO_ID },
+    update: {},
+    create: {
+      id: CABINET_DEMO_ID,
+      nom: 'Cabinet de démonstration',
+      adresse: 'À renseigner',
+      ville: 'Casablanca',
+      telephone: 'À renseigner',
+    },
+  });
 
   // Utilisateurs
   const adminPassword = await argon2.hash('Admin123!');
@@ -19,7 +34,9 @@ async function main() {
       motDePasse: adminPassword,
       nom: 'Administrateur',
       prenom: 'Système',
-      role: Role.ADMIN,
+      role: Role.MEDECIN,
+      estTitulaire: true,
+      cabinetId: CABINET_DEMO_ID,
       telephone: '0600000000',
     },
   });
@@ -33,6 +50,7 @@ async function main() {
       nom: 'Benali',
       prenom: 'Mohammed',
       role: Role.MEDECIN,
+      cabinetId: CABINET_DEMO_ID,
       telephone: '0661234567',
     },
   });
@@ -46,6 +64,7 @@ async function main() {
       nom: 'Alami',
       prenom: 'Fatima',
       role: Role.SECRETAIRE,
+      cabinetId: CABINET_DEMO_ID,
       telephone: '0662345678',
     },
   });
@@ -57,6 +76,7 @@ async function main() {
       update: {},
       create: {
         id: 'seed-patient-001-tazi-ahmed-000000000',
+        cabinetId: CABINET_DEMO_ID,
         nom: 'Tazi',
         prenom: 'Ahmed',
         dateNaissance: new Date('1985-03-15'),
@@ -75,6 +95,7 @@ async function main() {
       update: {},
       create: {
         id: 'seed-patient-002-bennani-khadija-0000',
+        cabinetId: CABINET_DEMO_ID,
         nom: 'Bennani',
         prenom: 'Khadija',
         dateNaissance: new Date('1992-07-22'),
@@ -92,6 +113,7 @@ async function main() {
       update: {},
       create: {
         id: 'seed-patient-003-idrissi-omar-000000',
+        cabinetId: CABINET_DEMO_ID,
         nom: 'Idrissi',
         prenom: 'Omar',
         dateNaissance: new Date('1978-11-30'),
@@ -146,9 +168,10 @@ async function main() {
   // Stock articles
   await Promise.all([
     prisma.stockArticle.upsert({
-      where: { reference: 'COMP-01' },
+      where: { cabinetId_reference: { cabinetId: CABINET_DEMO_ID, reference: 'COMP-01' } },
       update: {},
       create: {
+        cabinetId: CABINET_DEMO_ID,
         nom: 'Compresses stériles 10x10',
         reference: 'COMP-01',
         quantite: 150,
@@ -159,9 +182,10 @@ async function main() {
       },
     }),
     prisma.stockArticle.upsert({
-      where: { reference: 'GAZ-01' },
+      where: { cabinetId_reference: { cabinetId: CABINET_DEMO_ID, reference: 'GAZ-01' } },
       update: {},
       create: {
+        cabinetId: CABINET_DEMO_ID,
         nom: 'Gants d\'examen latex M',
         reference: 'GAZ-01',
         quantite: 8,
@@ -172,9 +196,10 @@ async function main() {
       },
     }),
     prisma.stockArticle.upsert({
-      where: { reference: 'SER-01' },
+      where: { cabinetId_reference: { cabinetId: CABINET_DEMO_ID, reference: 'SER-01' } },
       update: {},
       create: {
+        cabinetId: CABINET_DEMO_ID,
         nom: 'Seringues 5ml',
         reference: 'SER-01',
         quantite: 200,
@@ -187,53 +212,30 @@ async function main() {
   ]);
 
   // Paramètres cabinet
-  await Promise.all([
-    prisma.parametre.upsert({
-      where: { cle: 'cabinet_nom' },
-      update: {},
-      create: { cle: 'cabinet_nom', valeur: 'Cabinet Dr. Benali' },
-    }),
-    prisma.parametre.upsert({
-      where: { cle: 'cabinet_adresse' },
-      update: {},
-      create: { cle: 'cabinet_adresse', valeur: '23 Rue Ibn Battouta, Casablanca 20000' },
-    }),
-    prisma.parametre.upsert({
-      where: { cle: 'cabinet_telephone' },
-      update: {},
-      create: { cle: 'cabinet_telephone', valeur: '0522-123456' },
-    }),
-    prisma.parametre.upsert({
-      where: { cle: 'medecin_specialite' },
-      update: {},
-      create: { cle: 'medecin_specialite', valeur: 'Médecine Générale' },
-    }),
-    prisma.parametre.upsert({
-      where: { cle: 'medecin_rppm' },
-      update: {},
-      create: { cle: 'medecin_rppm', valeur: 'RPPM-12345' },
-    }),
-    prisma.parametre.upsert({
-      where: { cle: 'duree_rdv_defaut' },
-      update: {},
-      create: { cle: 'duree_rdv_defaut', valeur: '30' },
-    }),
-    prisma.parametre.upsert({
-      where: { cle: 'heure_debut' },
-      update: {},
-      create: { cle: 'heure_debut', valeur: '08:00' },
-    }),
-    prisma.parametre.upsert({
-      where: { cle: 'heure_fin' },
-      update: {},
-      create: { cle: 'heure_fin', valeur: '18:00' },
-    }),
-  ]);
+  const parametres: Record<string, string> = {
+    cabinet_nom: 'Cabinet Dr. Benali',
+    cabinet_adresse: '23 Rue Ibn Battouta, Casablanca 20000',
+    cabinet_telephone: '0522-123456',
+    medecin_specialite: 'Médecine Générale',
+    medecin_rppm: 'RPPM-12345',
+    duree_rdv_defaut: '30',
+    heure_debut: '08:00',
+    heure_fin: '18:00',
+  };
+  await Promise.all(
+    Object.entries(parametres).map(([cle, valeur]) =>
+      prisma.parametre.upsert({
+        where: { cabinetId_cle: { cabinetId: CABINET_DEMO_ID, cle } },
+        update: {},
+        create: { cabinetId: CABINET_DEMO_ID, cle, valeur },
+      }),
+    ),
+  );
 
   console.log('✅ Données de démo créées avec succès!');
   console.log('');
   console.log('Comptes de démo:');
-  console.log('  Admin:      admin@cabinet.ma / Admin123!');
+  console.log('  Titulaire:  admin@cabinet.ma / Admin123!');
   console.log('  Médecin:    dr.benali@cabinet.ma / Medecin123!');
   console.log('  Secrétaire: secretaire@cabinet.ma / Secretaire123!');
 }
