@@ -6,12 +6,16 @@ import { useAuthStore } from '@/store/auth';
 import { apiClient } from '@/lib/api';
 import { ResetModal } from '@/components/utilisateurs/ResetModal';
 import { CreateUserModal } from '@/components/utilisateurs/CreateUserModal';
+import { EditUserModal } from '@/components/utilisateurs/EditUserModal';
+import { StatutUserModal } from '@/components/utilisateurs/StatutUserModal';
 import type { Utilisateur } from '@/components/utilisateurs/types';
 
 export default function UtilisateursPage() {
   const router = useRouter();
   const { user } = useAuthStore();
-  const [cible, setCible] = useState<Utilisateur | null>(null);
+  const [aReinitialiser, setAReinitialiser] = useState<Utilisateur | null>(null);
+  const [aModifier, setAModifier] = useState<Utilisateur | null>(null);
+  const [aChangerStatut, setAChangerStatut] = useState<Utilisateur | null>(null);
   const [creation, setCreation] = useState(false);
   const estTitulaire = !!user?.estTitulaire;
 
@@ -56,10 +60,10 @@ export default function UtilisateursPage() {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {utilisateurs.map(u => (
-                  <tr key={u.id} className="hover:bg-gray-50 transition">
+                  <tr key={u.id} className={`hover:bg-gray-50 transition ${u.actif ? '' : 'opacity-60'}`}>
                     <td className="px-4 py-3">
                       <p className="font-medium text-gray-900">{u.prenom} {u.nom}</p>
-                      <p className="text-xs text-gray-400 sm:hidden">{u.email} · {u.role}{u.estTitulaire ? ' · Titulaire' : ''}</p>
+                      <p className="text-xs text-gray-400 sm:hidden">{u.email} · {u.role}{u.estTitulaire ? ' · Titulaire' : ''}{!u.actif && ' · Désactivé'}</p>
                       {u.doitChangerMdp && (
                         <span className="text-xs text-orange-600 font-medium">Changement requis</span>
                       )}
@@ -68,18 +72,31 @@ export default function UtilisateursPage() {
                     <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell">{u.role}{u.estTitulaire ? ' · Titulaire' : ''}</td>
                     <td className="px-4 py-3 hidden sm:table-cell">
                       <span className={`text-xs px-2 py-1 rounded-full ${u.actif ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                        {u.actif ? 'Actif' : 'Inactif'}
+                        {u.actif ? 'Actif' : 'Désactivé'}
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      {u.id !== user?.id && (
-                        <button
-                          onClick={() => setCible(u)}
-                          className="text-sm text-blue-600 hover:text-blue-800"
-                        >
-                          Réinitialiser le mot de passe
+                      <div className="flex flex-wrap gap-x-4 gap-y-1">
+                        <button onClick={() => setAModifier(u)} aria-label={`Modifier ${u.prenom} ${u.nom}`} className="text-sm text-blue-600 hover:text-blue-800">
+                          Modifier
                         </button>
-                      )}
+                        {u.id !== user?.id && (
+                          <>
+                            <button
+                              onClick={() => setAChangerStatut(u)}
+                              aria-label={`${u.actif ? 'Désactiver' : 'Réactiver'} ${u.prenom} ${u.nom}`}
+                              className={`text-sm ${u.actif ? 'text-red-600 hover:text-red-800' : 'text-blue-600 hover:text-blue-800'}`}
+                            >
+                              {u.actif ? 'Désactiver' : 'Réactiver'}
+                            </button>
+                            {u.actif && (
+                              <button onClick={() => setAReinitialiser(u)} aria-label={`Réinitialiser le mot de passe de ${u.prenom} ${u.nom}`} className="text-sm text-blue-600 hover:text-blue-800">
+                                Réinitialiser le mot de passe
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -89,7 +106,9 @@ export default function UtilisateursPage() {
         )}
       </div>
 
-      {cible && <ResetModal utilisateur={cible} onClose={() => setCible(null)} />}
+      {aReinitialiser && <ResetModal utilisateur={aReinitialiser} onClose={() => setAReinitialiser(null)} />}
+      {aModifier && <EditUserModal utilisateur={aModifier} onClose={() => setAModifier(null)} />}
+      {aChangerStatut && <StatutUserModal utilisateur={aChangerStatut} onClose={() => setAChangerStatut(null)} />}
       {creation && <CreateUserModal onClose={() => setCreation(false)} />}
     </div>
   );
