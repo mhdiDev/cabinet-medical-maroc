@@ -271,5 +271,8 @@ Puis `next build`, aucune nouvelle erreur `tsc` (4 erreurs déjà présentes), l
 
 - Merger sur `master` déclenche le déploiement : le merge exige l'accord de l'utilisateur.
 - Avant le merge, l'utilisateur lance une sauvegarde de la production (`scripts/backup.sh`) : la migration est difficile à annuler.
+- Avant le merge, l'utilisateur vérifie aussi sur le serveur la liste des comptes `ADMIN`, car chacun deviendra titulaire : `SELECT email, actif FROM users WHERE role = 'ADMIN';`. Il vérifie qu'aucune vue n'a été créée à la main, car elle pourrait bloquer la migration : `SELECT viewname FROM pg_views WHERE schemaname = 'public';`.
+- Un déploiement vert ne prouve pas que le backend a démarré : `docker compose up -d` n'attend pas la fin de la migration.
 - Après le déploiement, vérifier : connexion du titulaire, liste des patients, ouverture d'un document, et un ancien lien `/files/…` qui ne répond plus.
+- Si la migration échoue, elle s'annule entièrement, mais le backend reste bloqué à chaque démarrage (erreur P3009). Reprise, une fois la cause corrigée : `npx prisma migrate resolve --rolled-back 20261107120000_multi_cabinet_socle` dans le conteneur backend, puis redémarrage.
 - `CLAUDE.md` est mis à jour : rôles, isolation, règle du client non filtré, documents privés.

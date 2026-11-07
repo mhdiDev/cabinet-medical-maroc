@@ -26,7 +26,7 @@ Variables utilisées dans les commandes :
 export PATH="/Users/Mehdi/.nvm/versions/node/v20.19.5/bin:$PATH"
 export REPO=/Users/Mehdi/Work/code/cabinet-medical-maroc
 export TEST_DB="postgresql://postgres:password@localhost:5432/cabinet_test"
-export export SCRATCH=/private$SCRATCH/claude-501/-Users-Mehdi-Work-code-cabinet-medical-maroc/e9b48988-592c-44c1-a054-0b55c5a00f61/scratchpad
+export SCRATCH=/private/tmp/claude-501/-Users-Mehdi-Work-code-cabinet-medical-maroc/e9b48988-592c-44c1-a054-0b55c5a00f61/scratchpad
 ```
 
 L'état du shell ne persiste pas entre deux commandes : relancer ces `export` à chaque fois.
