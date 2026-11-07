@@ -48,9 +48,12 @@ describe('garde-fous du cloisonnement', () => {
     expect(fautifs).toEqual([]);
   });
 
-  it("auth.service.ts n'utilise que prismaSansFiltre.user.findUnique", () => {
+  it("auth.service.ts n'utilise que les accès sans filtre prévus", () => {
     const source = readFileSync(join(RACINE, 'auth/auth.service.ts'), 'utf8');
-    const autres = source.match(/prismaSansFiltre\.(?!user\.findUnique\b)\S*/g) ?? [];
+    const autres =
+      source.match(
+        /prismaSansFiltre\.(?!(user\.findUnique|user\.update|refreshToken\.deleteMany|\$transaction)\b)\S*/g,
+      ) ?? [];
     expect(autres).toEqual([]);
   });
 

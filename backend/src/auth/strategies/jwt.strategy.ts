@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PrismaSansFiltre } from '../../prisma/prisma.service';
+import { MESSAGE_CABINET_SUSPENDU, cabinetSuspendu } from '../cabinet-suspendu';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -26,6 +27,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         doitChangerMdp: true,
         cabinetId: true,
         estTitulaire: true,
+        cabinet: { select: { actif: true } },
       },
     });
 
@@ -33,6 +35,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Compte désactivé ou inexistant');
     }
 
-    return { ...user, sub: user.id };
+    if (cabinetSuspendu(user.cabinet)) {
+      throw new UnauthorizedException(MESSAGE_CABINET_SUSPENDU);
+    }
+
+    const { cabinet: _cabinet, ...profil } = user;
+    return { ...profil, sub: user.id };
   }
 }
