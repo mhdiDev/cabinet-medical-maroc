@@ -128,9 +128,25 @@ describe('Équipe du cabinet (e2e)', () => {
       expect((await patch(secretaireId, { telephone: '' })).body.telephone).toBeNull();
     });
 
+    it('nettoie les espaces autour du téléphone', async () => {
+      const res = await patch(secretaireId, { telephone: ' 0611223344 ' });
+      expect(res.status).toBe(200);
+      expect(res.body.telephone).toBe('0611223344');
+    });
+
     it.each([
       [{}],
+      [[]],
       [{ nom: null }],
+      [{ nom: 123 }],
+      [{ nom: true }],
+      [{ nom: {} }],
+      [{ prenom: 123 }],
+      [{ prenom: ['Salma'] }],
+      [{ email: 123 }],
+      [{ email: ['salma@cabinet.ma'] }],
+      [{ telephone: 611223344 }],
+      [{ telephone: ['0611223344'] }],
       [{ prenom: '   ' }],
       [{ email: null }],
       [{ email: 'pas-un-email' }],
@@ -156,7 +172,15 @@ describe('Équipe du cabinet (e2e)', () => {
 
       const refresh = await request(server()).post('/api/auth/refresh').send({ refreshToken: session.refreshToken });
       expect(refresh.status).toBe(401);
-      expect((await login(app, 'salma@cabinet.ma', 'Secretaire123!')).accessToken).toBeDefined();
+      const nouvelle = await login(app, 'salma@cabinet.ma', 'Secretaire123!');
+      expect(nouvelle.accessToken).toBeDefined();
+
+      // L'ancien jeton d'accès porte l'ancien email : refusé sans attendre son expiration
+      const ancien = await request(server()).get('/api/auth/me').set({ Authorization: `Bearer ${session.accessToken}` });
+      expect(ancien.status).toBe(401);
+      const actuel = await request(server()).get('/api/auth/me').set({ Authorization: `Bearer ${nouvelle.accessToken}` });
+      expect(actuel.status).toBe(200);
+      expect(actuel.body.email).toBe('salma@cabinet.ma');
 
       await patch(secretaireId, { email: 'secretaire@cabinet.ma' });
     });
@@ -205,6 +229,7 @@ describe('Équipe du cabinet (e2e)', () => {
       const res = await statut(medecinId, { actif: false });
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({ id: medecinId, actif: false });
+      expect(res.body).not.toHaveProperty('motDePasse');
 
       const loginRes = await request(server()).post('/api/auth/login').send({ email: 'dr.test@cabinet.ma', motDePasse: 'Medecin123!' });
       expect(loginRes.status).toBe(401);
@@ -228,8 +253,18 @@ describe('Équipe du cabinet (e2e)', () => {
       const res = await statut(medecinId, { actif: true });
       expect(res.status).toBe(200);
       expect(res.body.actif).toBe(true);
+      expect(res.body).not.toHaveProperty('motDePasse');
       expect((await login(app, 'dr.test@cabinet.ma', 'Medecin123!')).accessToken).toBeDefined();
       expect(await prisma.auditLog.count({ where: { action: 'REACTIVATE_USER', entiteId: medecinId } })).toBe(1);
+    });
+
+    it('désactivations simultanées : toutes 200, un seul audit', async () => {
+      const reponses = await Promise.all(Array.from({ length: 10 }, () => statut(secretaireId, { actif: false })));
+      expect(reponses.map((r) => r.status)).toEqual(Array(10).fill(200));
+      reponses.forEach((r) => expect(r.body).toMatchObject({ id: secretaireId, actif: false }));
+      expect(await prisma.auditLog.count({ where: { action: 'DEACTIVATE_USER', entiteId: secretaireId } })).toBe(1);
+
+      expect((await statut(secretaireId, { actif: true })).status).toBe(200);
     });
 
     it('400 sur son propre compte', async () => {
@@ -253,6 +288,45 @@ describe('Équipe du cabinet (e2e)', () => {
       const secretaire = await login(app, 'secretaire@cabinet.ma', 'Secretaire123!');
       expect((await statut(secretaireId, { actif: false }, medecin.accessToken)).status).toBe(403);
       expect((await statut(medecinId, { actif: false }, secretaire.accessToken)).status).toBe(403);
+    });
+  });
+
+  describe('autre titulaire du cabinet', () => {
+    const MESSAGE = 'Ce compte ne peut pas être modifié ici';
+
+    it('403 sur la modification et le statut, sans rien changer', async () => {
+      await prisma.user.create({
+        data: {
+          id: 'second-titulaire-id',
+          email: 'titulaire2@cabinet.ma',
+          motDePasse: await argon2.hash('Titulaire123!'),
+          nom: 'Second',
+          prenom: 'Titulaire',
+          role: Role.MEDECIN,
+          estTitulaire: true,
+          cabinetId: CABINET_TEST_ID,
+        },
+      });
+      try {
+        const modif = await request(server())
+          .patch('/api/auth/users/second-titulaire-id')
+          .set(auth())
+          .send({ nom: 'Pirate' });
+        expect(modif.status).toBe(403);
+        expect(modif.body.message).toBe(MESSAGE);
+
+        const desactive = await request(server())
+          .patch('/api/auth/users/second-titulaire-id/statut')
+          .set(auth())
+          .send({ actif: false });
+        expect(desactive.status).toBe(403);
+        expect(desactive.body.message).toBe(MESSAGE);
+
+        const apres = await prisma.user.findUnique({ where: { id: 'second-titulaire-id' } });
+        expect(apres).toMatchObject({ nom: 'Second', actif: true });
+      } finally {
+        await prisma.user.delete({ where: { id: 'second-titulaire-id' } });
+      }
     });
   });
 });

@@ -36,6 +36,13 @@ function obtenirHashFactice(): Promise<string> {
   return hashFactice;
 }
 
+// Un titulaire ne gère pas un autre titulaire du cabinet depuis la page de l'équipe
+function refuserAutreTitulaire(user: { id: string; estTitulaire: boolean }, titulaireId: string) {
+  if (user.estTitulaire && user.id !== titulaireId) {
+    throw new ForbiddenException('Ce compte ne peut pas être modifié ici');
+  }
+}
+
 function selectUtilisateur() {
   return {
     id: true,
@@ -229,13 +236,16 @@ export class AuthService {
   }
 
   async modifierUser(titulaireId: string, id: string, dto: UpdateUserDto) {
+    // Champs nommés : un corps [] devient un tableau dont Object.entries garderait d'autres clés
+    const { nom, prenom, email, telephone } = dto;
     const champs = Object.fromEntries(
-      Object.entries(dto).filter(([, v]) => v !== undefined),
+      Object.entries({ nom, prenom, email, telephone }).filter(([, v]) => v !== undefined),
     ) as UpdateUserDto;
     if (Object.keys(champs).length === 0) throw new BadRequestException('Aucune modification');
 
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new NotFoundException('Utilisateur non trouvé');
+    refuserAutreTitulaire(user, titulaireId);
 
     const emailChange = champs.email !== undefined && champs.email !== user.email;
     if (emailChange && id === titulaireId) {
@@ -276,17 +286,36 @@ export class AuthService {
     }
     const user = await this.prisma.user.findUnique({ where: { id }, select: selectUtilisateur() });
     if (!user) throw new NotFoundException('Utilisateur non trouvé');
+    refuserAutreTitulaire(user, titulaireId);
     if (user.actif === actif) return versUtilisateur(user);
 
-    const [modifie] = await this.prisma.$transaction([
-      this.prisma.user.update({ where: { id }, data: { actif }, select: selectUtilisateur() }),
+    await this.prisma.$transaction(async (tx) => {
+      // Conditionnel : parmi des demandes simultanées, une seule change l'état
+      // (le client filtré ajoute le cabinet au where)
+      const { count } = await tx.user.updateMany({
+        where: { id, actif: !actif },
+        data: { actif },
+      });
+      if (count !== 1) return;
       // Désactivation : les sessions ouvertes sont fermées tout de suite
-      ...(actif ? [] : [this.prisma.refreshToken.deleteMany({ where: { userId: id } })]),
-    ]);
-    await this.audit.log(titulaireId, actif ? 'REACTIVATE_USER' : 'DEACTIVATE_USER', 'User', id);
-    return versUtilisateur(
-      modifie as Prisma.UserGetPayload<{ select: ReturnType<typeof selectUtilisateur> }>,
-    );
+      if (!actif) await tx.refreshToken.deleteMany({ where: { userId: id } });
+      await tx.auditLog.create({
+        data: {
+          userId: titulaireId,
+          action: actif ? 'REACTIVATE_USER' : 'DEACTIVATE_USER',
+          entite: 'User',
+          entiteId: id,
+          cabinetId: cabinetCourant(),
+        },
+      });
+    });
+
+    const modifie = await this.prisma.user.findUnique({
+      where: { id },
+      select: selectUtilisateur(),
+    });
+    if (!modifie) throw new NotFoundException('Utilisateur non trouvé');
+    return versUtilisateur(modifie);
   }
 
   async resetPassword(adminId: string, userId: string) {

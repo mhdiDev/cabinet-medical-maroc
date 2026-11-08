@@ -35,6 +35,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Compte désactivé ou inexistant');
     }
 
+    // Email modifié depuis l'émission du jeton : les sessions ouvertes avec l'ancien
+    // identifiant de connexion sont fermées sans attendre l'expiration
+    if (user.email !== payload.email) {
+      throw new UnauthorizedException('Session expirée');
+    }
+
     if (cabinetSuspendu(user.cabinet)) {
       throw new UnauthorizedException(MESSAGE_CABINET_SUSPENDU);
     }
