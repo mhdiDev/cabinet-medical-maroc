@@ -327,6 +327,7 @@ export class AuthService {
 
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('Utilisateur non trouvé');
+    refuserAutreTitulaire(user, adminId);
     if (!user.actif) {
       throw new ConflictException(
         'Le compte est désactivé : réactivez-le avant de réinitialiser son mot de passe.',

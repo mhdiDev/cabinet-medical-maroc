@@ -294,7 +294,7 @@ describe('Équipe du cabinet (e2e)', () => {
   describe('autre titulaire du cabinet', () => {
     const MESSAGE = 'Ce compte ne peut pas être modifié ici';
 
-    it('403 sur la modification et le statut, sans rien changer', async () => {
+    it('403 sur la modification, le statut et la réinitialisation, sans rien changer', async () => {
       await prisma.user.create({
         data: {
           id: 'second-titulaire-id',
@@ -322,8 +322,15 @@ describe('Équipe du cabinet (e2e)', () => {
         expect(desactive.status).toBe(403);
         expect(desactive.body.message).toBe(MESSAGE);
 
+        const reset = await request(server())
+          .post('/api/auth/users/second-titulaire-id/reset-password')
+          .set(auth());
+        expect(reset.status).toBe(403);
+        expect(reset.body.message).toBe(MESSAGE);
+        expect(reset.body).not.toHaveProperty('motDePasseTemporaire');
+
         const apres = await prisma.user.findUnique({ where: { id: 'second-titulaire-id' } });
-        expect(apres).toMatchObject({ nom: 'Second', actif: true });
+        expect(apres).toMatchObject({ nom: 'Second', actif: true, doitChangerMdp: false });
       } finally {
         await prisma.user.delete({ where: { id: 'second-titulaire-id' } });
       }

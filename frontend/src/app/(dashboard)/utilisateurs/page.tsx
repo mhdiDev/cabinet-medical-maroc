@@ -80,10 +80,13 @@ export default function UtilisateursPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-x-4 gap-y-1">
-                        <button onClick={() => setAModifier(u)} aria-label={`Modifier ${u.prenom} ${u.nom}`} className="text-sm text-blue-600 hover:text-blue-800">
-                          Modifier
-                        </button>
-                        {u.id !== user?.id && (
+                        {/* Un autre titulaire n'est géré que par la plateforme (le serveur répond 403) */}
+                        {(!u.estTitulaire || u.id === user?.id) && (
+                          <button onClick={() => setAModifier(u)} aria-label={`Modifier ${u.prenom} ${u.nom}`} className="text-sm text-blue-600 hover:text-blue-800">
+                            Modifier
+                          </button>
+                        )}
+                        {u.id !== user?.id && !u.estTitulaire && (
                           <>
                             <button
                               onClick={() => setAChangerStatut(u)}

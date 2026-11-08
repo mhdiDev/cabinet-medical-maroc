@@ -138,9 +138,9 @@ MinIO ne publie plus d'image Docker).
 
 Sauvegardes : `scripts/backup.sh` (dump Postgres + archive MinIO vers OVH Object Storage via rclone, cron à 02h00).
 
-## Modèles Prisma (15 modèles)
+## Modèles Prisma (16 modèles)
 
-`Cabinet` · `User` · `RefreshToken` · `Patient` · `RendezVous` · `Consultation` · `Ordonnance` · `Medicament` · `OrdonnanceMedicament` · `Paiement` · `StockArticle` · `StockMouvement` · `Document` · `AuditLog` · `Parametre`
+`Cabinet` · `User` · `RefreshToken` · `Patient` · `RendezVous` · `Consultation` · `Ordonnance` · `Medicament` · `OrdonnanceMedicament` · `Paiement` · `StockArticle` · `StockMouvement` · `Document` · `AuditLog` · `Notification` · `Parametre`
 
 Relations clés :
 - `Paiement` → `Consultation` (consultationId, optionnel)
@@ -181,7 +181,7 @@ Relations clés :
 - Le client filtré refuse aussi le modèle `Cabinet` : un service d'un cabinet n'atteint son cabinet que par une relation (ex. `ordonnance.cabinet`).
 - Le module `plateforme/` (rôle `SUPER_ADMIN`, `@SuperAdminSeulement()`) utilise `PrismaSansFiltre`, limité par test aux modèles `Cabinet`, `User`, `AuditLog` et `RefreshToken` : jamais de données de patients. Son client est typé `Pick<PrismaSansFiltre, 'cabinet' | 'user' | 'auditLog' | 'refreshToken' | '$transaction'>`, et le test n'y permet de l'audit que `auditLog.create` (`AuditLog.details` peut contenir des données patients).
 - Le titulaire modifie (nom, prénom, téléphone, email) et désactive / réactive les comptes de son cabinet. Changer l'email ou désactiver supprime les refresh tokens dans la même transaction ; il ne peut ni changer son propre email ni désactiver son propre compte. L'unicité de l'email à la modification repose sur la contrainte de la base (`P2002` → 409), sans `PrismaSansFiltre`.
-- Un autre titulaire du cabinet ne peut être ni modifié ni désactivé (403).
+- Un autre titulaire du cabinet ne peut être ni modifié, ni désactivé, ni réinitialisé (403) ; la page masque ces actions sur sa ligne.
 - Après un changement d'email, l'ancien jeton d'accès est refusé tout de suite : `JwtStrategy` compare l'email du jeton à celui en base (l'autre session revient à la connexion dès sa prochaine requête).
 - Le changement de statut est atomique (`updateMany` conditionnel dans une transaction interactive) : un seul audit même pour des demandes simultanées ; redemander l'état en place répond 200 sans audit.
 - Un compte désactivé ne peut pas être réinitialisé (409) ; ses données restent visibles par le cabinet.
