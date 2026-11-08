@@ -14,7 +14,7 @@ const schema = z.object({
   prenom: z.string().trim().min(1, 'Prénom requis'),
   nom: z.string().trim().min(1, 'Nom requis'),
   email: z.string().trim().email('Email invalide'),
-  telephone: z.string().trim().regex(TELEPHONE, 'Téléphone marocain invalide').or(z.literal('')),
+  telephone: z.string().trim().refine(v => v === '' || TELEPHONE.test(v), 'Téléphone marocain invalide'),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -59,12 +59,16 @@ export function EditUserModal({ utilisateur, onClose }: { utilisateur: Utilisate
   });
 
   const envoyer = (data: FormData) => {
-    // N'envoie que les champs modifiés ; son propre email n'est jamais envoyé
+    // N'envoie que les champs modifiés ; son propre email n'est jamais envoyé.
+    // L'email est comparé comme le serveur le stocke (minuscules) : un simple
+    // changement de casse n'est pas une modification
+    const normalise = (k: keyof FormData) =>
+      k === 'email' ? data.email.trim().toLowerCase() : data[k].trim();
     const changes = Object.fromEntries(
       (Object.keys(data) as (keyof FormData)[])
         .filter(k => !(soiMeme && k === 'email'))
-        .filter(k => data[k].trim() !== initial[k])
-        .map(k => [k, data[k].trim()]),
+        .filter(k => normalise(k) !== initial[k])
+        .map(k => [k, normalise(k)]),
     ) as Partial<FormData>;
     if (Object.keys(changes).length === 0) {
       onClose();

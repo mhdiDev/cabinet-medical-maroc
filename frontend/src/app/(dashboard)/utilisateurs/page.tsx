@@ -59,18 +59,21 @@ export default function UtilisateursPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {utilisateurs.map(u => (
-                  <tr key={u.id} className={`hover:bg-gray-50 transition ${u.actif ? '' : 'opacity-60'}`}>
-                    <td className="px-4 py-3">
+                {utilisateurs.map(u => {
+                  // Compte désactivé : seules les informations sont grisées, les actions restent lisibles
+                  const grise = u.actif ? '' : 'opacity-60';
+                  return (
+                  <tr key={u.id} className="hover:bg-gray-50 transition">
+                    <td className={`px-4 py-3 ${grise}`}>
                       <p className="font-medium text-gray-900">{u.prenom} {u.nom}</p>
                       <p className="text-xs text-gray-400 sm:hidden">{u.email} · {u.role}{u.estTitulaire ? ' · Titulaire' : ''}{!u.actif && ' · Désactivé'}</p>
                       {u.doitChangerMdp && (
                         <span className="text-xs text-orange-600 font-medium">Changement requis</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell">{u.email}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600 hidden sm:table-cell">{u.role}{u.estTitulaire ? ' · Titulaire' : ''}</td>
-                    <td className="px-4 py-3 hidden sm:table-cell">
+                    <td className={`px-4 py-3 text-sm text-gray-600 hidden sm:table-cell ${grise}`}>{u.email}</td>
+                    <td className={`px-4 py-3 text-sm text-gray-600 hidden sm:table-cell ${grise}`}>{u.role}{u.estTitulaire ? ' · Titulaire' : ''}</td>
+                    <td className={`px-4 py-3 hidden sm:table-cell ${grise}`}>
                       <span className={`text-xs px-2 py-1 rounded-full ${u.actif ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                         {u.actif ? 'Actif' : 'Désactivé'}
                       </span>
@@ -99,7 +102,8 @@ export default function UtilisateursPage() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
