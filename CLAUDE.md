@@ -152,7 +152,8 @@ Relations clés :
 
 ```
 /auth                login, refresh, logout, me, change-password
-                     users (GET liste / POST création) + users/:id/reset-password  (titulaire)
+                     users (GET liste / POST création / PATCH :id modification / PATCH :id/statut)
+                     + users/:id/reset-password  (titulaire)
 /patients            CRUD + export CSV + stats + /cin/:cin
 /rendez-vous         CRUD + agenda + today + statut
 /consultations       CRUD + /patient/:id  (filtre ?date= disponible)
@@ -179,6 +180,12 @@ Relations clés :
 - `MEDECIN` + `estTitulaire` gère le cabinet : `@TitulaireSeulement()` protège ses routes.
 - Le client filtré refuse aussi le modèle `Cabinet` : un service d'un cabinet n'atteint son cabinet que par une relation (ex. `ordonnance.cabinet`).
 - Le module `plateforme/` (rôle `SUPER_ADMIN`, `@SuperAdminSeulement()`) utilise `PrismaSansFiltre`, limité par test aux modèles `Cabinet`, `User`, `AuditLog` et `RefreshToken` : jamais de données de patients. Son client est typé `Pick<PrismaSansFiltre, 'cabinet' | 'user' | 'auditLog' | 'refreshToken' | '$transaction'>`, et le test n'y permet de l'audit que `auditLog.create` (`AuditLog.details` peut contenir des données patients).
+- Le titulaire modifie (nom, prénom, téléphone, email) et désactive / réactive les comptes de son cabinet. Changer l'email ou désactiver supprime les refresh tokens dans la même transaction ; il ne peut ni changer son propre email ni désactiver son propre compte. L'unicité de l'email à la modification repose sur la contrainte de la base (`P2002` → 409), sans `PrismaSansFiltre`.
+- Un autre titulaire du cabinet ne peut être ni modifié ni désactivé (403).
+- Après un changement d'email, l'ancien jeton d'accès est refusé tout de suite : `JwtStrategy` compare l'email du jeton à celui en base (l'autre session revient à la connexion dès sa prochaine requête).
+- Le changement de statut est atomique (`updateMany` conditionnel dans une transaction interactive) : un seul audit même pour des demandes simultanées ; redemander l'état en place répond 200 sans audit.
+- Un compte désactivé ne peut pas être réinitialisé (409) ; ses données restent visibles par le cabinet.
+- Frontend : les modales partagent `components/commun/useModale.ts` (Échap, focus initial sur `data-autofocus`).
 - Un cabinet suspendu (`Cabinet.actif = false`) bloque la connexion (403 `CABINET_SUSPENDU`), les sessions ouvertes (`JwtStrategy`) et le renouvellement.
 
 ## Auth : changement de mot de passe forcé
@@ -212,12 +219,14 @@ Relations clés :
 | Routes manquantes en local (404) alors qu'elles existent dans le code | `nest start --watch` lance un vieux `backend/dist/src/main.js` : `rm -rf backend/dist/src` puis relancer `npm run start:dev` |
 | Tests e2e qui effacent les données locales | Ils font `DELETE` sur toutes les tables : toujours `DATABASE_URL=…/cabinet_test` |
 | `backend: npm run lint` reformate des dizaines de fichiers | Le script lance `eslint --fix` : pour vérifier sans modifier, `npx eslint <fichiers>` |
-| `frontend: npx tsc --noEmit` en erreur | 4 erreurs déjà présentes (`stock/page.tsx`, `NouveauRdvModal.tsx`) : vérifier qu'on n'en ajoute pas |
+| `frontend: npx tsc --noEmit` en erreur | 4 erreurs déjà présentes (`stock/page.tsx`, `NouveauRdvModal.tsx`) : vérifier qu'on n'en ajoute pas. Les `*.test.ts(x)` sont exclus du `tsconfig` (pas de `@types/jest`) : `npx jest` les exécute |
 | `NEXT_PUBLIC_API_URL` | Intégrée au build Next.js : la changer impose `docker compose up -d --build` |
 | Upload de documents en local : 503 | `MINIO_ENDPOINT` doit avoir schéma et port (`http://localhost:9000`) et le bucket `cabinet-medical` doit exister : `docker-compose.dev.yml` ne le crée pas |
 | `/api/health` | Répond « ok » sans interroger la base : ne prouve pas que la base fonctionne |
 | Identifiant de cabinet refusé par `@IsUUID` | Le premier cabinet a l'identifiant fixe `00000000-0000-0000-0000-000000000001` (hors v4) : ne pas valider les `:id` de cabinet comme UUID |
 | `PATCH /plateforme/cabinets/:id` répond 400 | Corps vide (`{}`) refusé (« Aucune modification ») ; un champ à `null` aussi : n'envoyer que les champs modifiés |
+| Trim d'un champ texte dans un DTO | `@NettoyerTexte()` (`common/transforms/nettoyer-texte.ts`) et `@NormaliserEmail()` lisent la valeur brute (`obj[key]`) : avec `enableImplicitConversion`, `value` est déjà convertie (`123` → `'123'`) et `IsString` l'accepterait. Ne pas écrire `Transform(({ value }) => value?.trim())` |
+| `read ECONNRESET` au hasard dans les e2e | `createApp()` (`test/helpers.ts`) fait `app.listen(0)` : sans serveur à l'écoute, supertest ouvre et ferme un port par requête et l'agent keep-alive de Node 20 peut réutiliser une socket coupée |
 | Variable non utilisée signalée par eslint | `no-unused-vars` ignore les frères d'un rest (`const { motDePasse, ...reste } = user`) et les arguments préfixés `_` |
 
 ## Variables d'environnement production

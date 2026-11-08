@@ -1,5 +1,7 @@
 # Multi-cabinet étape 3 : gestion de l'équipe — Implementation Plan
 
+Statut : réalisé le 2026-11-08 sur la branche feat/multi-cabinet-equipe, non mergé.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Le médecin titulaire peut modifier (nom, prénom, téléphone, email) et désactiver / réactiver les comptes de son cabinet depuis la page « Utilisateurs ».
@@ -47,7 +49,7 @@
 - Create: `backend/test/equipe.e2e-spec.ts`
 - Modify: `backend/src/auth/auth.service.ts` (`listUsers`, `resetPassword`)
 
-- [ ] **Step 1 : Écrire les tests e2e (rouges)**
+- [x] **Step 1 : Écrire les tests e2e (rouges)**
 
 Créer `backend/test/equipe.e2e-spec.ts` :
 
@@ -161,12 +163,12 @@ describe('Équipe du cabinet (e2e)', () => {
 
 Si le modèle `RendezVous` exige d'autres champs obligatoires (vérifier `backend/prisma/schema.prisma`, modèle `RendezVous`), les ajouter à la fonction `rdv` avec des valeurs simples.
 
-- [ ] **Step 2 : Lancer, vérifier l'échec**
+- [x] **Step 2 : Lancer, vérifier l'échec**
 
 Run: `cd backend && DATABASE_URL="$TEST_DB" npx jest --config test/jest-e2e.json test/equipe.e2e-spec.ts --runInBand`
 Expected: 2 échecs (`rdvAVenir` indéfini ; reset répond 201 au lieu de 409).
 
-- [ ] **Step 3 : Implémenter**
+- [x] **Step 3 : Implémenter**
 
 Dans `backend/src/auth/auth.service.ts`, au-dessus de la classe (une fonction et non une constante : « maintenant » doit être recalculé à chaque appel) :
 
@@ -222,12 +224,12 @@ Dans `resetPassword`, juste après `if (!user) throw new NotFoundException(...)`
     }
 ```
 
-- [ ] **Step 4 : Lancer, vérifier le succès**
+- [x] **Step 4 : Lancer, vérifier le succès**
 
 Run: `cd backend && npx tsc --noEmit && DATABASE_URL="$TEST_DB" npx jest --config test/jest-e2e.json test/equipe.e2e-spec.ts test/auth.e2e-spec.ts --runInBand`
 Expected: tout vert.
 
-- [ ] **Step 5 : Commit**
+- [x] **Step 5 : Commit**
 
 ```bash
 git add backend/src/auth/auth.service.ts backend/test/equipe.e2e-spec.ts
@@ -243,7 +245,7 @@ git commit -m "feat: list team phone and upcoming appointments, refuse resetting
 - Modify: `backend/src/auth/auth.service.ts`, `backend/src/auth/auth.controller.ts`
 - Test: `backend/test/equipe.e2e-spec.ts`
 
-- [ ] **Step 1 : Tests e2e (rouges)**
+- [x] **Step 1 : Tests e2e (rouges)**
 
 Ajouter dans `equipe.e2e-spec.ts`, avant la dernière accolade du `describe` principal :
 
@@ -341,12 +343,12 @@ Ajouter dans `equipe.e2e-spec.ts`, avant la dernière accolade du `describe` pri
   });
 ```
 
-- [ ] **Step 2 : Lancer, vérifier l'échec**
+- [x] **Step 2 : Lancer, vérifier l'échec**
 
 Run: `cd backend && DATABASE_URL="$TEST_DB" npx jest --config test/jest-e2e.json test/equipe.e2e-spec.ts --runInBand`
 Expected: les tests `PATCH /api/auth/users/:id` échouent (404 : route absente).
 
-- [ ] **Step 3 : DTO**
+- [x] **Step 3 : DTO**
 
 Créer `backend/src/auth/dto/update-user.dto.ts` :
 
@@ -392,7 +394,7 @@ export class UpdateUserDto {
 
 Vérifier dans `backend/src/common/transforms/normaliser-email.ts` que `@NormaliserEmail()` laisse passer `null` tel quel (sinon `{ email: null }` planterait au lieu de répondre 400) ; le test `[{ email: null }]` le confirme.
 
-- [ ] **Step 4 : Service**
+- [x] **Step 4 : Service**
 
 Dans `auth.service.ts`, importer `UpdateUserDto` et ajouter :
 
@@ -440,7 +442,7 @@ Dans `auth.service.ts`, importer `UpdateUserDto` et ajouter :
 
 Si TypeScript refuse le tableau mixte de `$transaction`, séparer : `const modifie = await this.prisma.$transaction(async (tx) => { ... })` n'est **pas** possible si le client filtré ne propage pas le filtre dans `tx` ; garder la forme tableau et typer le résultat avec un cast comme ci-dessus. Vérifier aussi que `this.prisma.refreshToken` est bien permis par le client filtré (`resetPassword` l'utilise déjà).
 
-- [ ] **Step 5 : Route**
+- [x] **Step 5 : Route**
 
 Dans `auth.controller.ts`, importer `Patch` et `UpdateUserDto`, puis ajouter après `listUsers` :
 
@@ -458,12 +460,12 @@ Dans `auth.controller.ts`, importer `Patch` et `UpdateUserDto`, puis ajouter apr
   }
 ```
 
-- [ ] **Step 6 : Lancer, vérifier le succès**
+- [x] **Step 6 : Lancer, vérifier le succès**
 
 Run: `cd backend && npx tsc --noEmit && npx jest src/prisma && DATABASE_URL="$TEST_DB" npx jest --config test/jest-e2e.json test/equipe.e2e-spec.ts --runInBand`
 Expected: tout vert, y compris le garde-fou `prisma-sans-filtre.spec.ts` (aucun nouvel accès sans filtre).
 
-- [ ] **Step 7 : Lint et commit**
+- [x] **Step 7 : Lint et commit**
 
 ```bash
 cd backend && npx eslint src/auth/auth.service.ts src/auth/auth.controller.ts src/auth/dto/update-user.dto.ts
@@ -480,7 +482,7 @@ git commit -m "feat: let the cabinet owner edit team accounts"
 - Modify: `backend/src/auth/auth.service.ts`, `backend/src/auth/auth.controller.ts`
 - Test: `backend/test/equipe.e2e-spec.ts`
 
-- [ ] **Step 1 : Tests e2e (rouges)**
+- [x] **Step 1 : Tests e2e (rouges)**
 
 Ajouter dans `equipe.e2e-spec.ts` :
 
@@ -547,12 +549,12 @@ Ajouter dans `equipe.e2e-spec.ts` :
   });
 ```
 
-- [ ] **Step 2 : Lancer, vérifier l'échec**
+- [x] **Step 2 : Lancer, vérifier l'échec**
 
 Run: `cd backend && DATABASE_URL="$TEST_DB" npx jest --config test/jest-e2e.json test/equipe.e2e-spec.ts --runInBand`
 Expected: les tests `statut` échouent (404 : route absente).
 
-- [ ] **Step 3 : DTO**
+- [x] **Step 3 : DTO**
 
 Créer `backend/src/auth/dto/statut-user.dto.ts` :
 
@@ -567,7 +569,7 @@ export class StatutUserDto {
 }
 ```
 
-- [ ] **Step 4 : Service**
+- [x] **Step 4 : Service**
 
 ```ts
   async changerStatutUser(titulaireId: string, id: string, actif: boolean) {
@@ -590,7 +592,7 @@ export class StatutUserDto {
 
 Note : le test « 400 sur son propre compte » ne passe pas par la vérification d'existence, c'est voulu (son propre compte existe toujours).
 
-- [ ] **Step 5 : Route**
+- [x] **Step 5 : Route**
 
 Dans `auth.controller.ts`, importer `StatutUserDto`, puis :
 
@@ -608,7 +610,7 @@ Dans `auth.controller.ts`, importer `StatutUserDto`, puis :
   }
 ```
 
-- [ ] **Step 6 : Vérifications complètes backend**
+- [x] **Step 6 : Vérifications complètes backend**
 
 Run:
 ```bash
@@ -617,7 +619,7 @@ npx eslint src/auth/auth.service.ts src/auth/auth.controller.ts src/auth/dto/sta
 ```
 Expected: tout vert, aucune erreur eslint dans ces fichiers.
 
-- [ ] **Step 7 : Commit**
+- [x] **Step 7 : Commit**
 
 ```bash
 git add backend/src/auth backend/test/equipe.e2e-spec.ts
@@ -633,7 +635,7 @@ git commit -m "feat: let the cabinet owner deactivate and reactivate team accoun
 - Modify: les 4 modales de `frontend/src/components/cabinets/` (import), `frontend/src/components/utilisateurs/types.ts`
 - Create: `frontend/src/components/utilisateurs/EditUserModal.tsx`
 
-- [ ] **Step 1 : Déplacer le hook**
+- [x] **Step 1 : Déplacer le hook**
 
 ```bash
 mkdir -p frontend/src/components/commun
@@ -642,7 +644,7 @@ git mv frontend/src/components/cabinets/useModale.ts frontend/src/components/com
 
 Dans `CreateCabinetModal.tsx`, `EditCabinetModal.tsx`, `StatutCabinetModal.tsx`, `ResetTitulaireModal.tsx`, remplacer `import { useModale } from './useModale';` par `import { useModale } from '@/components/commun/useModale';`.
 
-- [ ] **Step 2 : Types**
+- [x] **Step 2 : Types**
 
 Dans `frontend/src/components/utilisateurs/types.ts`, ajouter à `Utilisateur` :
 
@@ -659,7 +661,7 @@ export const TELEPHONE = /^0[5-7][0-9]{8}$/;
 
 (`CreateUserModal.tsx` garde sa regex en ligne ; ne pas le modifier. Vérifier que `MotDePasseGenere` et les autres usages de `Utilisateur` compilent : `cree.user` renvoyé par `POST /auth/users` n'a pas `rdvAVenir` ; si TypeScript le signale, typer `Reponse.user` en `Omit<Utilisateur, 'rdvAVenir'>` dans `CreateUserModal.tsx` ou rendre `MotDePasseGenere` dépendant de `Pick<Utilisateur, 'prenom' | 'nom' | 'email'>`, selon ce qu'il utilise.)
 
-- [ ] **Step 3 : Modale**
+- [x] **Step 3 : Modale**
 
 Créer `frontend/src/components/utilisateurs/EditUserModal.tsx` :
 
@@ -798,12 +800,12 @@ export function EditUserModal({ utilisateur, onClose }: { utilisateur: Utilisate
 
 Attention : un champ `disabled` n'est pas renvoyé par React Hook Form (`data.email` peut être `undefined`). Le filtre `soiMeme && k === 'email'` l'écarte avant tout appel à `.trim()` ; garder cet ordre.
 
-- [ ] **Step 4 : Vérifier**
+- [x] **Step 4 : Vérifier**
 
 Run: `cd frontend && npx tsc --noEmit && npx eslint src/components/utilisateurs src/components/commun src/components/cabinets`
 Expected: seulement les 4 erreurs tsc connues ; eslint sans erreur.
 
-- [ ] **Step 5 : Commit**
+- [x] **Step 5 : Commit**
 
 ```bash
 git add frontend/src/components
@@ -818,7 +820,7 @@ git commit -m "feat: add team account edit modal and share the modal hook"
 - Create: `frontend/src/components/utilisateurs/StatutUserModal.tsx`
 - Modify: `frontend/src/app/(dashboard)/utilisateurs/page.tsx`
 
-- [ ] **Step 1 : Modale de statut**
+- [x] **Step 1 : Modale de statut**
 
 Créer `frontend/src/components/utilisateurs/StatutUserModal.tsx` :
 
@@ -883,7 +885,7 @@ export function StatutUserModal({ utilisateur, onClose }: { utilisateur: Utilisa
 }
 ```
 
-- [ ] **Step 2 : Page**
+- [x] **Step 2 : Page**
 
 Dans `frontend/src/app/(dashboard)/utilisateurs/page.tsx` :
 
@@ -930,12 +932,12 @@ Dans `frontend/src/app/(dashboard)/utilisateurs/page.tsx` :
    {aChangerStatut && <StatutUserModal utilisateur={aChangerStatut} onClose={() => setAChangerStatut(null)} />}
    ```
 
-- [ ] **Step 3 : Vérifier**
+- [x] **Step 3 : Vérifier**
 
 Run: `cd frontend && npx tsc --noEmit && npx eslint "src/app/(dashboard)/utilisateurs" src/components/utilisateurs`
 Expected: seulement les 4 erreurs tsc connues ; eslint sans erreur.
 
-- [ ] **Step 4 : Commit**
+- [x] **Step 4 : Commit**
 
 ```bash
 git add frontend/src
@@ -949,7 +951,7 @@ git commit -m "feat: add edit and deactivate actions to the users page"
 **Files:**
 - Modify: `CLAUDE.md`, ce plan (cases cochées)
 
-- [ ] **Step 1 : Parcours Playwright sur la base locale**
+- [x] **Step 1 : Parcours Playwright sur la base locale**
 
 Démarrer Docker (`docker compose -f docker-compose.dev.yml up -d`), le backend (`cd backend && npm run start:dev`, avec `MINIO_ENDPOINT=http://localhost:9000`) et le frontend (`cd frontend && npm run dev`) en arrière-plan. Si un serveur tourne déjà sur 3000/3001, vérifier ce que c'est avant d'agir ; n'arrêter à la fin que ceux qu'on a lancés.
 
@@ -966,7 +968,7 @@ Avec les outils Playwright sur http://localhost:3000, connecté en `admin@cabine
 
 Nettoyer ensuite `cabinet_medical` par des requêtes ciblées sur les identifiants créés (compte de test, ses refresh tokens, ses lignes d'audit et celles du titulaire écrites pendant le parcours, rendez-vous de test). Aucun `DELETE` sans `WHERE` sur un identifiant créé. Compter avant / après. Arrêter les serveurs lancés.
 
-- [ ] **Step 2 : Vérifications complètes**
+- [x] **Step 2 : Vérifications complètes**
 
 ```bash
 cd backend && npx tsc --noEmit && npx jest && DATABASE_URL="$TEST_DB" npm run test:e2e
@@ -975,7 +977,7 @@ cd ../frontend && npx tsc --noEmit && npm run build
 
 Expected : tout vert (4 erreurs tsc frontend connues). `next build` seulement après l'arrêt du serveur de dev. Noter les nombres de tests.
 
-- [ ] **Step 3 : `CLAUDE.md`**
+- [x] **Step 3 : `CLAUDE.md`**
 
 Dans « Architecture API », remplacer la ligne des users de `/auth` par :
 
@@ -991,7 +993,7 @@ Dans « Multi-cabinet : isolation », ajouter :
 - Un compte désactivé ne peut pas être réinitialisé (409) ; ses données restent visibles par le cabinet.
 ```
 
-- [ ] **Step 4 : Cocher le plan et commit**
+- [x] **Step 4 : Cocher le plan et commit**
 
 Cocher toutes les cases de ce plan, ajouter sous le titre : `Statut : réalisé le <date> sur la branche feat/multi-cabinet-equipe, non mergé.`
 
