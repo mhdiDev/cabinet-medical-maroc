@@ -27,7 +27,10 @@ export async function createApp(
       transformOptions: { enableImplicitConversion: true },
     }),
   );
-  await app.init();
+  // Un seul port pour tout le fichier : sans serveur à l'écoute, supertest ouvre et
+  // ferme un port par requête, et l'agent keep-alive de Node 20 peut réutiliser une
+  // socket déjà coupée (« read ECONNRESET » au hasard)
+  await app.listen(0, '127.0.0.1');
   return app;
 }
 

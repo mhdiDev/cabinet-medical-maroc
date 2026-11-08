@@ -8,7 +8,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Prisma } from '@prisma/client';
+import { Prisma, StatutRDV } from '@prisma/client';
 import * as argon2 from 'argon2';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaSansFiltre, PrismaService } from '../prisma/prisma.service';
@@ -16,6 +16,7 @@ import { cabinetCourant } from '../prisma/contexte-cabinet';
 import { AuditService } from '../audit/audit.service';
 import { LoginDto } from './dto/login.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { genererMotDePasse } from './generer-mot-de-passe';
 import {
   CODE_CABINET_SUSPENDU,
@@ -33,6 +34,39 @@ function obtenirHashFactice(): Promise<string> {
     throw e;
   });
   return hashFactice;
+}
+
+// Un titulaire ne gère pas un autre titulaire du cabinet depuis la page de l'équipe
+function refuserAutreTitulaire(user: { id: string; estTitulaire: boolean }, titulaireId: string) {
+  if (user.estTitulaire && user.id !== titulaireId) {
+    throw new ForbiddenException('Ce compte ne peut pas être modifié ici');
+  }
+}
+
+function selectUtilisateur() {
+  return {
+    id: true,
+    nom: true,
+    prenom: true,
+    email: true,
+    telephone: true,
+    role: true,
+    actif: true,
+    doitChangerMdp: true,
+    estTitulaire: true,
+    createdAt: true,
+    _count: {
+      select: {
+        rendezVous: {
+          where: { dateHeure: { gte: new Date() }, statut: { not: StatutRDV.ANNULE } },
+        },
+      },
+    },
+  } satisfies Prisma.UserSelect;
+}
+
+function versUtilisateur<T extends { _count: { rendezVous: number } }>({ _count, ...u }: T) {
+  return { ...u, rdvAVenir: _count.rendezVous };
 }
 
 @Injectable()
@@ -194,20 +228,94 @@ export class AuthService {
   }
 
   async listUsers() {
-    return this.prisma.user.findMany({
-      select: {
-        id: true,
-        nom: true,
-        prenom: true,
-        email: true,
-        role: true,
-        actif: true,
-        doitChangerMdp: true,
-        estTitulaire: true,
-        createdAt: true,
-      },
+    const users = await this.prisma.user.findMany({
+      select: selectUtilisateur(),
       orderBy: [{ nom: 'asc' }, { prenom: 'asc' }],
     });
+    return users.map(versUtilisateur);
+  }
+
+  async modifierUser(titulaireId: string, id: string, dto: UpdateUserDto) {
+    // Champs nommés : un corps [] devient un tableau dont Object.entries garderait d'autres clés
+    const { nom, prenom, email, telephone } = dto;
+    const champs = Object.fromEntries(
+      Object.entries({ nom, prenom, email, telephone }).filter(([, v]) => v !== undefined),
+    ) as UpdateUserDto;
+    if (Object.keys(champs).length === 0) throw new BadRequestException('Aucune modification');
+
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException('Utilisateur non trouvé');
+    refuserAutreTitulaire(user, titulaireId);
+
+    const emailChange = champs.email !== undefined && champs.email !== user.email;
+    if (emailChange && id === titulaireId) {
+      throw new BadRequestException('Vous ne pouvez pas modifier votre propre email');
+    }
+
+    const data = {
+      ...champs,
+      ...(champs.telephone !== undefined && { telephone: champs.telephone || null }),
+    };
+
+    const [modifie] = await this.prisma
+      .$transaction([
+        this.prisma.user.update({ where: { id }, data, select: selectUtilisateur() }),
+        // Nouvel identifiant de connexion : les sessions ouvertes avec l'ancien sont fermées
+        ...(emailChange ? [this.prisma.refreshToken.deleteMany({ where: { userId: id } })] : []),
+      ])
+      .catch((e) => {
+        // L'email est unique sur toute la plateforme : la contrainte de la base le garantit
+        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+          throw new ConflictException('Email déjà utilisé');
+        }
+        throw e;
+      });
+
+    await this.audit.log(titulaireId, 'UPDATE_USER', 'User', id, {
+      champs: Object.keys(champs),
+      ...(emailChange && { email: champs.email }),
+    });
+    return versUtilisateur(
+      modifie as Prisma.UserGetPayload<{ select: ReturnType<typeof selectUtilisateur> }>,
+    );
+  }
+
+  async changerStatutUser(titulaireId: string, id: string, actif: boolean) {
+    if (id === titulaireId) {
+      throw new BadRequestException('Vous ne pouvez pas désactiver votre propre compte');
+    }
+    const user = await this.prisma.user.findUnique({ where: { id }, select: selectUtilisateur() });
+    if (!user) throw new NotFoundException('Utilisateur non trouvé');
+    refuserAutreTitulaire(user, titulaireId);
+    if (user.actif === actif) return versUtilisateur(user);
+
+    await this.prisma.$transaction(async (tx) => {
+      // Conditionnel : parmi des demandes simultanées, une seule change l'état
+      // (le client filtré ajoute le cabinet au where)
+      const { count } = await tx.user.updateMany({
+        where: { id, actif: !actif },
+        data: { actif },
+      });
+      if (count !== 1) return;
+      // Désactivation : les sessions ouvertes sont fermées tout de suite
+      if (!actif) await tx.refreshToken.deleteMany({ where: { userId: id } });
+      await tx.auditLog.create({
+        data: {
+          userId: titulaireId,
+          action: actif ? 'REACTIVATE_USER' : 'DEACTIVATE_USER',
+          entite: 'User',
+          entiteId: id,
+          cabinetId: cabinetCourant(),
+        },
+      });
+    });
+
+    const modifie = await this.prisma.user.findUnique({
+      where: { id },
+      select: selectUtilisateur(),
+    });
+    if (!modifie) throw new NotFoundException('Utilisateur non trouvé');
+    return versUtilisateur(modifie);
   }
 
   async resetPassword(adminId: string, userId: string) {
@@ -219,6 +327,12 @@ export class AuthService {
 
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('Utilisateur non trouvé');
+    refuserAutreTitulaire(user, adminId);
+    if (!user.actif) {
+      throw new ConflictException(
+        'Le compte est désactivé : réactivez-le avant de réinitialiser son mot de passe.',
+      );
+    }
 
     const motDePasseTemporaire = genererMotDePasse();
     await this.prisma.$transaction([

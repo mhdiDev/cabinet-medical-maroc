@@ -2,6 +2,8 @@ export type Role = 'MEDECIN' | 'SECRETAIRE';
 
 export const ROLES: Role[] = ['MEDECIN', 'SECRETAIRE'];
 
+export const TELEPHONE = /^0[5-7][0-9]{8}$/;
+
 export interface Utilisateur {
   id: string;
   nom: string;
@@ -11,4 +13,6 @@ export interface Utilisateur {
   estTitulaire: boolean;
   actif: boolean;
   doitChangerMdp: boolean;
+  telephone: string | null;
+  rdvAVenir: number;
 }

@@ -1,8 +1,8 @@
 import { IsEmail, IsString, IsNotEmpty, IsIn, IsOptional, Matches } from 'class-validator';
-import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { NormaliserEmail } from '../../common/transforms/normaliser-email';
+import { NettoyerTexte } from '../../common/transforms/nettoyer-texte';
 
 // Le mot de passe initial est généré par le serveur : il n'est pas fourni par l'admin
 export class CreateUserDto {
@@ -12,13 +12,13 @@ export class CreateUserDto {
   email: string;
 
   @ApiProperty()
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @NettoyerTexte()
   @IsString()
   @IsNotEmpty()
   nom: string;
 
   @ApiProperty()
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @NettoyerTexte()
   @IsString()
   @IsNotEmpty()
   prenom: string;
@@ -28,6 +28,7 @@ export class CreateUserDto {
   role: Role;
 
   @ApiProperty({ required: false, example: '0612345678' })
+  @NettoyerTexte()
   @IsOptional()
   @Matches(/^0[5-7][0-9]{8}$/, { message: 'Téléphone marocain invalide' })
   telephone?: string;

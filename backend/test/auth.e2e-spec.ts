@@ -211,6 +211,33 @@ describe('Auth (e2e)', () => {
       expect(res.body.user.telephone).toBe('0612345678');
     });
 
+    it.each([
+      [{ nom: 123 }],
+      [{ nom: true }],
+      [{ prenom: {} }],
+      [{ email: ['typage@cabinet.ma'] }],
+      [{ telephone: ['0612345678'] }],
+    ])('400 pour un champ non textuel %j', async (champ) => {
+      const token = await loginAdmin(app);
+      const res = await request(app.getHttpServer())
+        .post('/api/auth/users')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ ...nouveau, email: 'typage@cabinet.ma', ...champ });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('201 en nettoyant les espaces autour du téléphone', async () => {
+      const token = await loginAdmin(app);
+      const res = await request(app.getHttpServer())
+        .post('/api/auth/users')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ ...nouveau, email: 'tel-espaces@cabinet.ma', telephone: ' 0612345679 ' });
+
+      expect(res.status).toBe(201);
+      expect(res.body.user.telephone).toBe('0612345679');
+    });
+
     it('400 si le nom ne contient que des espaces', async () => {
       const token = await loginAdmin(app);
       const res = await request(app.getHttpServer())

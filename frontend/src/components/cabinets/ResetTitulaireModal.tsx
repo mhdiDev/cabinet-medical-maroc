@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { apiClient } from '@/lib/api';
 import { MotDePasseGenere } from '@/components/utilisateurs/MotDePasseGenere';
 import type { Cabinet } from './types';
-import { useModale } from './useModale';
+import { useModale } from '@/components/commun/useModale';
 
 type Titulaire = NonNullable<Cabinet['titulaire']>;
 
