@@ -38,7 +38,7 @@ export function StatutUserModal({ utilisateur, onClose }: { utilisateur: Utilisa
         </p>
         {desactiver && utilisateur.rdvAVenir > 0 && (
           <p className="text-sm text-orange-700 bg-orange-50 rounded-lg p-3 mt-3">
-            {utilisateur.rdvAVenir} rendez-vous à venir restent dans l&apos;agenda.
+            {utilisateur.rdvAVenir} rendez-vous à venir {utilisateur.rdvAVenir > 1 ? 'restent' : 'reste'} dans l&apos;agenda.
           </p>
         )}
         <div className="flex justify-end gap-3 pt-5">
