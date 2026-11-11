@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
@@ -27,6 +27,7 @@ type FormData = z.infer<typeof schema>;
 
 export default function NouveauPatientPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
@@ -35,6 +36,7 @@ export default function NouveauPatientPage() {
     mutationFn: (data: any) => apiClient.post('/patients', data),
     onSuccess: (res) => {
       toast.success('Patient créé avec succès');
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       router.push(`/patients/${res.data.id}`);
     },
     onError: (err: any) => toast.error(err.response?.data?.message || 'Erreur lors de la création'),
