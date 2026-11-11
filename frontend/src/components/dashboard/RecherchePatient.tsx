@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api';
 import { heureCabinet } from '@/lib/fuseau';
 import { analyserRecherche } from './analyser-recherche';
+import { IconeRecherche } from '@/components/ui/icons';
 
 const LIMITE = 8;
 
@@ -127,7 +128,7 @@ export function RecherchePatient({ peutCreerConsultation }: { peutCreerConsultat
   return (
     <div ref={zone} className="relative">
       <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden>🔍</span>
+        <IconeRecherche className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" strokeWidth={2} />
         <input
           type="text"
           role="combobox"
