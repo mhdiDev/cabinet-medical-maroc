@@ -39,3 +39,6 @@ coverage/
 postgres_data/
 minio_data/
 .vercel
+
+# Tests de bout en bout : rapports générés (publiés sur la branche rapports-tests, jamais sur master)
+rapports/
