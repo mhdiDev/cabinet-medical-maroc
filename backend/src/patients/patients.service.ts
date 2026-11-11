@@ -7,6 +7,8 @@ import { AuditService } from '../audit/audit.service';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { SearchPatientDto } from './dto/search-patient.dto';
+import { journeeEnUtc } from '../common/dates/journee';
+import { conditionsRecherche } from './recherche-patients';
 
 @Injectable()
 export class PatientsService {
@@ -32,18 +34,22 @@ export class PatientsService {
   }
 
   async findAll(dto: SearchPatientDto) {
-    const { q, page = 1, limit = 20 } = dto;
+    const { q, date, page = 1, limit = 20 } = dto;
     const skip = (page - 1) * limit;
+
+    const conditions = q ? conditionsRecherche(q) : [];
+    const journee = date ? journeeEnUtc(date) : undefined;
+    // Le client filtré ne cloisonne que le premier niveau : le cabinet est donné explicitement
+    // pour la relation (filtre et sélection des consultations).
+    const duJour = journee && {
+      cabinetId: cabinetCourant(),
+      dateConsultation: { gte: journee.debut, lt: journee.fin },
+    };
 
     const where: Prisma.PatientWhereInput = {
       actif: true,
-      ...(q && {
-        OR: [
-          { nom: { contains: q, mode: 'insensitive' } },
-          { prenom: { contains: q, mode: 'insensitive' } },
-          { telephone: { contains: q } },
-        ],
-      }),
+      ...(conditions.length > 0 && { AND: conditions }),
+      ...(duJour && { consultations: { some: duJour } }),
     };
 
     const [patients, total] = await Promise.all([
@@ -62,14 +68,37 @@ export class PatientsService {
           email: true,
           ville: true,
           groupeSanguin: true,
+          // Affichées par les listes de choix d'un patient (consultation, ordonnance)
+          allergies: true,
           createdAt: true,
+          // Avec une date : les consultations de ce jour (heure et médecin)
+          ...(duJour && {
+            consultations: {
+              where: duJour,
+              orderBy: { dateConsultation: 'asc' as const },
+              select: {
+                id: true,
+                dateConsultation: true,
+                medecin: { select: { nom: true, prenom: true } },
+              },
+            },
+          }),
         },
       }),
       this.prisma.patient.count({ where }),
     ]);
 
+    const data = duJour
+      ? patients.map((patient) => {
+          const { consultations, ...p } = patient as typeof patient & {
+            consultations: unknown[];
+          };
+          return { ...p, consultationsDuJour: consultations };
+        })
+      : patients;
+
     return {
-      data: patients,
+      data,
       meta: { total, page, limit, pages: Math.ceil(total / limit) },
     };
   }

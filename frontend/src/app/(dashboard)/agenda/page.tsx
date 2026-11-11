@@ -75,6 +75,7 @@ export default function AgendaPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agenda'] });
       queryClient.invalidateQueries({ queryKey: ['rdv-today'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       toast.success('Statut mis à jour');
       setSelectedRdv(null);
     },
@@ -223,6 +224,7 @@ export default function AgendaPage() {
           onSuccess={() => {
             queryClient.invalidateQueries({ queryKey: ['agenda'] });
             queryClient.invalidateQueries({ queryKey: ['rdv-today'] });
+            queryClient.invalidateQueries({ queryKey: ['dashboard'] });
             setShowModal(false);
           }}
         />

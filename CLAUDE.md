@@ -154,7 +154,8 @@ Relations clés :
 /auth                login, refresh, logout, me, change-password
                      users (GET liste / POST création / PATCH :id modification / PATCH :id/statut)
                      + users/:id/reset-password  (titulaire)
-/patients            CRUD + export CSV + stats + /cin/:cin
+/patients            CRUD + export CSV + stats ; recherche ?q= (chaque mot : nom, prénom ou téléphone)
+                     &date=AAAA-MM-JJ (patients vus ce jour, heure de Casablanca, + consultationsDuJour)
 /rendez-vous         CRUD + agenda + today + statut
 /consultations       CRUD + /patient/:id  (filtre ?date= disponible)
 /ordonnances         CRUD + /patient/:id + /:id/pdf
@@ -228,6 +229,10 @@ Relations clés :
 | Trim d'un champ texte dans un DTO | `@NettoyerTexte()` (`common/transforms/nettoyer-texte.ts`) et `@NormaliserEmail()` lisent la valeur brute (`obj[key]`) : avec `enableImplicitConversion`, `value` est déjà convertie (`123` → `'123'`) et `IsString` l'accepterait. Ne pas écrire `Transform(({ value }) => value?.trim())` |
 | `read ECONNRESET` au hasard dans les e2e | `createApp()` (`test/helpers.ts`) fait `app.listen(0)` : sans serveur à l'écoute, supertest ouvre et ferme un port par requête et l'agent keep-alive de Node 20 peut réutiliser une socket coupée |
 | Variable non utilisée signalée par eslint | `no-unused-vars` ignore les frères d'un rest (`const { motDePasse, ...reste } = user`) et les arguments préfixés `_` |
+| Filtre par jour et fuseau horaire | Le serveur tourne en UTC : calculer les bornes d'un jour avec `journeeEnUtc()` (`common/dates/journee.ts`, fuseau `Africa/Casablanca`), jamais `setHours(0,0,0,0)`. Le filtre `?date=` de `/consultations` utilise encore l'heure du serveur (à corriger avec l'agenda) |
+| Relation imbriquée et cabinet | Le client filtré ne cloisonne que le premier niveau : un filtre ou un `select` sur une relation (`consultations: { some }`) doit porter `cabinetId: cabinetCourant()` |
+| `act()` et user-event dans les tests frontend | user-event utilise `@testing-library/dom` 10, RTL sa copie 9 : `jest.setup.js` enveloppe les événements dans `act()`. `next/link` peut encore en produire : le simuler par un `<a>` |
+| `useQuery` et `onSuccess` | React Query v5 n'appelle plus `onSuccess` dans `useQuery` (ne pas le masquer par `as any`) : lire `data` dans un `useEffect`, et `isFetchedAfterMount` si la donnée ne doit pas venir du cache |
 
 ## Variables d'environnement production
 

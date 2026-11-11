@@ -45,14 +45,40 @@ export default function NouvelleConsultationPage() {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Pré-remplir le patient si patientId passé en query param
+  // Pré-remplir le patient si patientId passé en query param.
+  // React Query v5 n'appelle plus onSuccess dans useQuery : on lit la donnée
+  // et on la place une seule fois (un choix manuel ultérieur n'est pas écrasé).
+  // Seule une réponse reçue depuis le montage est acceptée : le cache pourrait
+  // contenir une fiche périmée (allergies ajoutées depuis).
   const preloadId = searchParams.get('patientId');
-  useQuery({
+  const [preloadTraite, setPreloadTraite] = useState<string | null>(null);
+  const [erreurPatient, setErreurPatient] = useState<'introuvable' | 'indisponible' | null>(null);
+  const preload = useQuery({
     queryKey: ['patient-preload', preloadId],
-    queryFn: () => apiClient.get(`/patients/${preloadId}`).then(r => r.data),
-    enabled: !!preloadId && !selectedPatient,
-    onSuccess: (data: Patient) => setSelectedPatient(data),
-  } as any);
+    queryFn: () => apiClient.get(`/patients/${preloadId}`).then(r => r.data as Patient),
+    enabled: !!preloadId && preloadTraite !== preloadId,
+    retry: false,
+    gcTime: 0,
+  });
+  useEffect(() => {
+    if (!preloadId || preloadTraite === preloadId || !preload.isFetchedAfterMount) return;
+    if (preload.data) {
+      setSelectedPatient(preload.data);
+      setErreurPatient(null);
+      setPreloadTraite(preloadId);
+    } else if (preload.isError) {
+      const statut = (preload.error as { response?: { status?: number } } | null)?.response?.status;
+      setErreurPatient(statut === 400 || statut === 404 ? 'introuvable' : 'indisponible');
+      setPreloadTraite(preloadId);
+    }
+  }, [preloadId, preload.data, preload.isError, preload.error, preload.isFetchedAfterMount, preloadTraite]);
+  const chargementPatient = !!preloadId && preloadTraite !== preloadId;
+
+  // Retour à la page précédente (accueil ou fiche), sinon fiche du patient, sinon liste
+  const retour = () => {
+    if (window.history.length > 1) router.back();
+    else router.push(selectedPatient ? `/patients/${selectedPatient.id}` : '/patients');
+  };
 
   // Recherche patients avec debounce
   const { data: searchResults = [], isFetching } = useQuery({
@@ -110,6 +136,7 @@ export default function NouvelleConsultationPage() {
 
   const selectPatient = (p: Patient) => {
     setSelectedPatient(p);
+    setErreurPatient(null);
     setSearch('');
     setShowDropdown(false);
   };
@@ -121,12 +148,9 @@ export default function NouvelleConsultationPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-        <Link
-          href={selectedPatient ? `/patients/${selectedPatient.id}` : '/patients'}
-          className="text-gray-400 hover:text-gray-600 text-sm"
-        >
+        <button type="button" onClick={retour} className="text-left text-gray-400 hover:text-gray-600 text-sm">
           ← Retour
-        </Link>
+        </button>
         <h1 className="text-2xl font-bold text-gray-900">Nouvelle consultation</h1>
       </div>
 
@@ -134,7 +158,9 @@ export default function NouvelleConsultationPage() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
         <h2 className="font-semibold text-gray-700 mb-3">Patient *</h2>
 
-        {selectedPatient ? (
+        {chargementPatient ? (
+          <p className="p-3 text-sm text-gray-500">Chargement du patient…</p>
+        ) : selectedPatient ? (
           /* Patient sélectionné — carte récapitulative */
           <div className="flex items-center gap-4 p-3 bg-blue-50 border border-blue-200 rounded-xl">
             <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
@@ -166,67 +192,76 @@ export default function NouvelleConsultationPage() {
           </div>
         ) : (
           /* Champ de recherche patient */
-          <div ref={dropdownRef} className="relative">
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
-              <input
-                type="text"
-                value={search}
-                onChange={e => {
-                  setSearch(e.target.value);
-                  setShowDropdown(true);
-                }}
-                onFocus={() => setShowDropdown(true)}
-                placeholder="Rechercher par nom, CIN ou téléphone..."
-                className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
-              />
-              {isFetching && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                </span>
-              )}
-            </div>
-
-            {/* Dropdown résultats */}
-            {showDropdown && search.length >= 1 && (
-              <div className="absolute z-20 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
-                {searchResults.length === 0 ? (
-                  <div className="px-4 py-3 text-sm text-gray-400 flex items-center justify-between">
-                    <span>Aucun patient trouvé</span>
-                    <Link
-                      href={`/patients/nouveau`}
-                      className="text-blue-600 hover:underline text-xs"
-                      onClick={() => setShowDropdown(false)}
-                    >
-                      + Créer un patient
-                    </Link>
-                  </div>
-                ) : (
-                  searchResults.map((p: Patient) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => selectPatient(p)}
-                      className="w-full text-left px-4 py-3 hover:bg-blue-50 transition flex items-center gap-3 border-b border-gray-50 last:border-0"
-                    >
-                      <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs font-semibold text-gray-600 shrink-0">
-                        {p.prenom?.[0]}{p.nom?.[0]}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 text-sm">
-                          {p.prenom} {p.nom}
-                        </p>
-                        <p className="text-xs text-gray-400 truncate">{p.telephone}</p>
-                      </div>
-                      {p.allergies?.length > 0 && (
-                        <span className="text-xs text-red-500 shrink-0">⚠️</span>
-                      )}
-                    </button>
-                  ))
+          <>
+            {erreurPatient && (
+              <p className="mb-2 text-sm text-gray-500">
+                {erreurPatient === 'introuvable'
+                  ? 'Patient introuvable, recherchez-le ci-dessous'
+                  : 'Impossible de charger le patient, recherchez-le ci-dessous'}
+              </p>
+            )}
+            <div ref={dropdownRef} className="relative">
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
+                <input
+                  type="text"
+                  value={search}
+                  onChange={e => {
+                    setSearch(e.target.value);
+                    setShowDropdown(true);
+                  }}
+                  onFocus={() => setShowDropdown(true)}
+                  placeholder="Rechercher par nom ou téléphone..."
+                  className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
+                />
+                {isFetching && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                  </span>
                 )}
               </div>
-            )}
-          </div>
+
+              {/* Dropdown résultats */}
+              {showDropdown && search.length >= 1 && (
+                <div className="absolute z-20 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                  {searchResults.length === 0 ? (
+                    <div className="px-4 py-3 text-sm text-gray-400 flex items-center justify-between">
+                      <span>Aucun patient trouvé</span>
+                      <Link
+                        href={`/patients/nouveau`}
+                        className="text-blue-600 hover:underline text-xs"
+                        onClick={() => setShowDropdown(false)}
+                      >
+                        + Créer un patient
+                      </Link>
+                    </div>
+                  ) : (
+                    searchResults.map((p: Patient) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => selectPatient(p)}
+                        className="w-full text-left px-4 py-3 hover:bg-blue-50 transition flex items-center gap-3 border-b border-gray-50 last:border-0"
+                      >
+                        <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs font-semibold text-gray-600 shrink-0">
+                          {p.prenom?.[0]}{p.nom?.[0]}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-900 text-sm">
+                            {p.prenom} {p.nom}
+                          </p>
+                          <p className="text-xs text-gray-400 truncate">{p.telephone}</p>
+                        </div>
+                        {p.allergies?.length > 0 && (
+                          <span className="text-xs text-red-500 shrink-0">⚠️</span>
+                        )}
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
 
@@ -314,15 +349,16 @@ export default function NouvelleConsultationPage() {
         </section>
 
         <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-100">
-          <Link
-            href={selectedPatient ? `/patients/${selectedPatient.id}` : '/patients'}
+          <button
+            type="button"
+            onClick={retour}
             className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 text-center"
           >
             Annuler
-          </Link>
+          </button>
           <button
             type="submit"
-            disabled={mutation.isPending || !selectedPatient}
+            disabled={mutation.isPending || !selectedPatient || chargementPatient}
             className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
             title={!selectedPatient ? 'Sélectionnez un patient pour continuer' : ''}
           >

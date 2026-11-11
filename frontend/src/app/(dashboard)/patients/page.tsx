@@ -1,20 +1,38 @@
 'use client';
-import { useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api';
 import { SearchInput } from '@/components/ui/SearchInput';
 import toast from 'react-hot-toast';
 
-export default function PatientsPage() {
-  const [search, setSearch] = useState('');
+function ListePatients() {
+  const params = useSearchParams();
+  const router = useRouter();
+  const [search, setSearch] = useState(params.get('q') ?? '');
+  const dateUrl = params.get('date') ?? '';
+  const [date, setDate] = useState(/^\d{4}-\d{2}-\d{2}$/.test(dateUrl) ? dateUrl : '');
   const [page, setPage] = useState(1);
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ['patients', search, page],
-    queryFn: () => apiClient.get('/patients', { params: { q: search || undefined, page, limit: 20 } }).then(r => r.data),
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['patients', search, date, page],
+    queryFn: () =>
+      apiClient
+        .get('/patients', { params: { q: search || undefined, date: date || undefined, page, limit: 20 } })
+        .then(r => r.data),
     staleTime: 10000,
   });
+
+  // Garde l'adresse alignée sur les filtres : retirer la pastille puis revenir
+  // à la liste ne doit pas rétablir le filtre.
+  useEffect(() => {
+    const requete = new URLSearchParams();
+    if (search) requete.set('q', search);
+    if (date) requete.set('date', date);
+    const texte = requete.toString();
+    router.replace(texte ? `/patients?${texte}` : '/patients', { scroll: false });
+  }, [search, date, router]);
 
   const handleExport = async () => {
     try {
@@ -50,9 +68,26 @@ export default function PatientsPage() {
         placeholder="Rechercher par nom, téléphone..."
       />
 
+      {date && (
+        <div className="flex items-center gap-2 text-sm">
+          <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full">
+            Vus en consultation le {date.split('-').reverse().join('/')}
+          </span>
+          <button
+            onClick={() => { setDate(''); setPage(1); }}
+            className="text-gray-500 hover:text-gray-700"
+            aria-label="Retirer le filtre de date"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center text-gray-500">Chargement...</div>
+        ) : isError ? (
+          <div className="p-8 text-center text-red-600">Erreur lors du chargement des patients</div>
         ) : (
           <>
             <div className="overflow-x-auto">
@@ -111,5 +146,13 @@ export default function PatientsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function PatientsPage() {
+  return (
+    <Suspense>
+      <ListePatients />
+    </Suspense>
   );
 }
