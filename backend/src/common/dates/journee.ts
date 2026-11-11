@@ -17,7 +17,14 @@ function decalage(instant: number, fuseau: string): number {
     second: '2-digit',
   }).formatToParts(new Date(instant));
   const v = (type: string) => Number(parties.find((p) => p.type === type)!.value);
-  const commeUtc = Date.UTC(v('year'), v('month') - 1, v('day'), v('hour'), v('minute'), v('second'));
+  const commeUtc = Date.UTC(
+    v('year'),
+    v('month') - 1,
+    v('day'),
+    v('hour'),
+    v('minute'),
+    v('second'),
+  );
   return commeUtc - Math.floor(instant / 1000) * 1000;
 }
 
@@ -31,11 +38,19 @@ function minuitLocal(a: number, m: number, j: number, fuseau: string): Date {
 }
 
 // Journée civile AAAA-MM-JJ dans le fuseau, en instants UTC : [debut, fin[
-export function journeeEnUtc(date: string, fuseau: string = FUSEAU_CABINET): { debut: Date; fin: Date } {
+export function journeeEnUtc(
+  date: string,
+  fuseau: string = FUSEAU_CABINET,
+): { debut: Date; fin: Date } {
   const [a, m, j] = date.split('-').map(Number);
   const lendemain = new Date(Date.UTC(a, m - 1, j + 1));
   return {
     debut: minuitLocal(a, m, j, fuseau),
-    fin: minuitLocal(lendemain.getUTCFullYear(), lendemain.getUTCMonth() + 1, lendemain.getUTCDate(), fuseau),
+    fin: minuitLocal(
+      lendemain.getUTCFullYear(),
+      lendemain.getUTCMonth() + 1,
+      lendemain.getUTCDate(),
+      fuseau,
+    ),
   };
 }

@@ -30,7 +30,11 @@ describe('journeeEnUtc', () => {
   });
 
   it("chaque jour de 2026, changements d'heure compris, va de minuit à minuit heure locale", () => {
-    for (let jour = new Date(Date.UTC(2026, 0, 1)); jour.getUTCFullYear() === 2026; jour.setUTCDate(jour.getUTCDate() + 1)) {
+    for (
+      let jour = new Date(Date.UTC(2026, 0, 1));
+      jour.getUTCFullYear() === 2026;
+      jour.setUTCDate(jour.getUTCDate() + 1)
+    ) {
       const date = jour.toISOString().slice(0, 10);
       const { debut, fin } = journeeEnUtc(date);
       expect(local(debut)).toBe(`${date} 00:00`);
@@ -40,6 +44,8 @@ describe('journeeEnUtc', () => {
   });
 
   it('accepte un autre fuseau', () => {
-    expect(journeeEnUtc('2026-07-01', 'Europe/Paris').debut.toISOString()).toBe('2026-06-30T22:00:00.000Z');
+    expect(journeeEnUtc('2026-07-01', 'Europe/Paris').debut.toISOString()).toBe(
+      '2026-06-30T22:00:00.000Z',
+    );
   });
 });
