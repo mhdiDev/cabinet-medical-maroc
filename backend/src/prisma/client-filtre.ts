@@ -14,6 +14,7 @@ export const MODELES_CLOISONNES = new Set<string>([
   'Notification',
   'Parametre',
   'AuditLog',
+  'Constantes',
 ]);
 
 type Args = Record<string, any>;

@@ -36,6 +36,7 @@ export async function createApp(
 
 export async function resetDb(prisma: PrismaSansFiltre): Promise<void> {
   const tables = [
+    'constantes',
     'ordonnance_medicaments',
     'ordonnances',
     'paiements',

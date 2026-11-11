@@ -64,6 +64,7 @@ model Cabinet {
   notifications   Notification[]
   parametres      Parametre[]
   auditLogs       AuditLog[]
+  constantes      Constantes[]
 
   @@map("cabinets")
 }
@@ -88,6 +89,7 @@ model User {
   consultations Consultation[] @relation("MedecinConsultation")
   auditLogs     AuditLog[]
   notifications Notification[]
+  constantesPrises Constantes[] @relation("ConstantesPrisePar")
   cabinet       Cabinet? @relation(fields: [cabinetId], references: [id])
 
   @@index([cabinetId])
@@ -133,6 +135,7 @@ model Patient {
   documents     Document[]
   paiements     Paiement[]
   notifications Notification[]
+  constantes    Constantes[]
 
   cabinet Cabinet @relation(fields: [cabinetId], references: [id])
 
@@ -187,6 +190,7 @@ model Consultation {
   ordonnances Ordonnance[]
   documents   Document[]
   paiements   Paiement[]
+  constantes  Constantes?
 
   cabinet Cabinet @relation(fields: [cabinetId], references: [id])
 
@@ -388,4 +392,33 @@ model Notification {
 
   @@index([cabinetId])
   @@map("notifications")
+}
+
+model Constantes {
+  id                 String   @id @default(uuid())
+  cabinetId          String
+  patientId          String
+  consultationId     String?  @unique
+  priseParId         String
+  datePrise          DateTime @default(now())
+  tensionSystolique  Int?
+  tensionDiastolique Int?
+  pouls              Int?
+  spo2               Int?
+  temperature        Float?
+  poids              Float?
+  taille             Float?
+  glycemie           Float?
+  perimetreCranien   Float?
+  tourDeTaille       Float?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  cabinet      Cabinet       @relation(fields: [cabinetId], references: [id])
+  patient      Patient       @relation(fields: [patientId], references: [id])
+  consultation Consultation? @relation(fields: [consultationId], references: [id])
+  prisePar     User          @relation("ConstantesPrisePar", fields: [priseParId], references: [id])
+
+  @@index([cabinetId, patientId, datePrise])
+  @@map("constantes")
 }
