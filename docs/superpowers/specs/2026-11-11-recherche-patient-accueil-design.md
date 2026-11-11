@@ -29,7 +29,7 @@ maximale de 100.
 - Téléphone : on retire les espaces, points et tirets du texte avant de le comparer à
   `telephone` (stocké sans séparateur, ex. `0612345678`). « 06 12 34 » trouve `0612345678` :
   si le texte entier, sans séparateurs, ne contient que des chiffres, il est cherché comme un
-  seul fragment de téléphone (en plus de la règle par mot).
+  seul fragment de téléphone (à la place de la règle par mot, plus précise).
 
 ### Date (`date`, format `AAAA-MM-JJ`)
 
@@ -102,7 +102,7 @@ chargé mais jamais placé dans `selectedPatient`.
 - Pendant le chargement : la carte patient affiche « Chargement du patient… ».
 - Identifiant invalide ou inconnu (404/400) : champ de recherche affiché avec le message
   discret « Patient introuvable, recherchez-le ci-dessous ».
-- « ← Retour » : `router.back()` s'il y a une page précédente dans l'application, sinon
+- « ← Retour » : `router.back()` s'il y a une page précédente dans l'onglet (`history.length > 1`), sinon
   fiche du patient sélectionné, sinon `/patients`. (Les deux liens « Retour » de la page sont
   concernés.)
 
