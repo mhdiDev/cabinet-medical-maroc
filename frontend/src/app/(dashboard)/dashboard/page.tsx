@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api';
 import { StatCard } from '@/components/ui/StatCard';
 import { useAuthStore } from '@/store/auth';
+import { RecherchePatient } from '@/components/dashboard/RecherchePatient';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
@@ -25,6 +26,8 @@ export default function DashboardPage() {
         <h1 className="text-2xl font-bold text-gray-900">Tableau de bord</h1>
         <p className="text-gray-500">Bonjour, Dr {user?.nom}</p>
       </div>
+
+      <RecherchePatient peutCreerConsultation={user?.role === 'MEDECIN'} />
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
