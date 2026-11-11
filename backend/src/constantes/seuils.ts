@@ -114,7 +114,7 @@ const PRESENTATION: Record<CleAlerte, { feminin: boolean; texte: (v: ValeursEval
     imc: { feminin: false, texte: (v) => `IMC ${fr(v.imc as number)}` },
   };
 
-const estNombre = (n: number | null | undefined): n is number => typeof n === 'number';
+const estNombre = (n: number | null | undefined): n is number => Number.isFinite(n);
 
 /** Valeurs anormales d'une prise, pour un patient de l'âge donné (en années) */
 export function evaluerConstantes(v: ValeursEvaluees, age: number): AlerteConstante[] {

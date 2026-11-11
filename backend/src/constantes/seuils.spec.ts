@@ -11,6 +11,13 @@ describe('calculerImc', () => {
   });
 });
 
+describe('calculerImc (valeurs nulles)', () => {
+  it('null si le poids ou la taille vaut 0', () => {
+    expect(calculerImc(0, 170)).toBeNull();
+    expect(calculerImc(72, 0)).toBeNull();
+  });
+});
+
 describe('ageEnAnnees', () => {
   it('compte les années révolues', () => {
     expect(ageEnAnnees(new Date('2008-11-12'), new Date('2026-11-11'))).toBe(17);
@@ -106,5 +113,53 @@ describe('evaluerConstantes (enfant)', () => {
       (a) => a.cle,
     );
     expect(cles).toEqual(['spo2', 'temperature', 'glycemie']);
+  });
+});
+
+describe('evaluerConstantes (bornes adultes)', () => {
+  type V = Parameters<typeof evaluerConstantes>[0];
+  const cas: [string, V, string[]][] = [
+    ['tension 139/89', { tensionSystolique: 139, tensionDiastolique: 89 }, []],
+    ['tension 140/80', { tensionSystolique: 140, tensionDiastolique: 80 }, ['elevee', 'attention']],
+    ['tension 120/90', { tensionSystolique: 120, tensionDiastolique: 90 }, ['elevee', 'attention']],
+    ['tension 180/80', { tensionSystolique: 180, tensionDiastolique: 80 }, ['elevee', 'critique']],
+    ['tension 120/95', { tensionSystolique: 120, tensionDiastolique: 95 }, ['elevee', 'attention']],
+    ['tension 89/60', { tensionSystolique: 89, tensionDiastolique: 60 }, ['basse', 'attention']],
+    ['pouls 50', { pouls: 50 }, []],
+    ['pouls 49', { pouls: 49 }, ['basse', 'attention']],
+    ['pouls 40', { pouls: 40 }, ['basse', 'attention']],
+    ['pouls 39', { pouls: 39 }, ['basse', 'critique']],
+    ['pouls 99', { pouls: 99 }, []],
+    ['pouls 100', { pouls: 100 }, ['elevee', 'attention']],
+    ['pouls 130', { pouls: 130 }, ['elevee', 'critique']],
+    ['spo2 95', { spo2: 95 }, []],
+    ['spo2 94', { spo2: 94 }, ['basse', 'attention']],
+    ['spo2 90', { spo2: 90 }, ['basse', 'attention']],
+    ['spo2 89', { spo2: 89 }, ['basse', 'critique']],
+    ['température 37,9', { temperature: 37.9 }, []],
+    ['température 38', { temperature: 38 }, ['elevee', 'attention']],
+    ['température 40', { temperature: 40 }, ['elevee', 'critique']],
+    ['température 35,5', { temperature: 35.5 }, []],
+    ['température 35,4', { temperature: 35.4 }, ['basse', 'attention']],
+    ['température 35', { temperature: 35 }, ['basse', 'attention']],
+    ['température 34,9', { temperature: 34.9 }, ['basse', 'critique']],
+    ['glycémie 0,7', { glycemie: 0.7 }, []],
+    ['glycémie 0,69', { glycemie: 0.69 }, ['basse', 'attention']],
+    ['glycémie 1,25', { glycemie: 1.25 }, []],
+    ['glycémie 3', { glycemie: 3 }, ['elevee', 'critique']],
+    ['IMC 18,5', { imc: 18.5 }, []],
+    ['IMC 18,4', { imc: 18.4 }, ['basse', 'attention']],
+    ['IMC 29,9', { imc: 29.9 }, []],
+    ['IMC 30', { imc: 30 }, ['elevee', 'attention']],
+  ];
+
+  it.each(cas)('%s', (_nom, valeurs, attendu) => {
+    const alertes = evaluerConstantes(valeurs, 40);
+    expect(alertes.flatMap((a) => [a.sens, a.niveau])).toEqual(attendu);
+  });
+
+  it('une valeur non finie ne produit aucune alerte', () => {
+    expect(evaluerConstantes({ temperature: NaN }, 40)).toEqual([]);
+    expect(evaluerConstantes({ pouls: Infinity }, 40)).toEqual([]);
   });
 });
