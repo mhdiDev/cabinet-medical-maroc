@@ -48,25 +48,31 @@ export default function NouvelleConsultationPage() {
   // Pré-remplir le patient si patientId passé en query param.
   // React Query v5 n'appelle plus onSuccess dans useQuery : on lit la donnée
   // et on la place une seule fois (un choix manuel ultérieur n'est pas écrasé).
+  // Seule une réponse reçue depuis le montage est acceptée : le cache pourrait
+  // contenir une fiche périmée (allergies ajoutées depuis).
   const preloadId = searchParams.get('patientId');
-  const [preloadTraite, setPreloadTraite] = useState(false);
+  const [preloadTraite, setPreloadTraite] = useState<string | null>(null);
+  const [erreurPatient, setErreurPatient] = useState<'introuvable' | 'indisponible' | null>(null);
   const preload = useQuery({
     queryKey: ['patient-preload', preloadId],
     queryFn: () => apiClient.get(`/patients/${preloadId}`).then(r => r.data as Patient),
-    enabled: !!preloadId && !preloadTraite,
+    enabled: !!preloadId && preloadTraite !== preloadId,
     retry: false,
+    gcTime: 0,
   });
   useEffect(() => {
-    if (preloadTraite) return;
+    if (!preloadId || preloadTraite === preloadId || !preload.isFetchedAfterMount) return;
     if (preload.data) {
       setSelectedPatient(preload.data);
-      setPreloadTraite(true);
+      setErreurPatient(null);
+      setPreloadTraite(preloadId);
     } else if (preload.isError) {
-      setPreloadTraite(true);
+      const statut = (preload.error as { response?: { status?: number } } | null)?.response?.status;
+      setErreurPatient(statut === 400 || statut === 404 ? 'introuvable' : 'indisponible');
+      setPreloadTraite(preloadId);
     }
-  }, [preload.data, preload.isError, preloadTraite]);
-  const chargementPatient = !!preloadId && !preloadTraite;
-  const patientIntrouvable = preload.isError && !selectedPatient;
+  }, [preloadId, preload.data, preload.isError, preload.error, preload.isFetchedAfterMount, preloadTraite]);
+  const chargementPatient = !!preloadId && preloadTraite !== preloadId;
 
   // Retour à la page précédente (accueil ou fiche), sinon fiche du patient, sinon liste
   const retour = () => {
@@ -130,6 +136,7 @@ export default function NouvelleConsultationPage() {
 
   const selectPatient = (p: Patient) => {
     setSelectedPatient(p);
+    setErreurPatient(null);
     setSearch('');
     setShowDropdown(false);
   };
@@ -186,8 +193,12 @@ export default function NouvelleConsultationPage() {
         ) : (
           /* Champ de recherche patient */
           <>
-            {patientIntrouvable && (
-              <p className="mb-2 text-sm text-gray-500">Patient introuvable, recherchez-le ci-dessous</p>
+            {erreurPatient && (
+              <p className="mb-2 text-sm text-gray-500">
+                {erreurPatient === 'introuvable'
+                  ? 'Patient introuvable, recherchez-le ci-dessous'
+                  : 'Impossible de charger le patient, recherchez-le ci-dessous'}
+              </p>
             )}
             <div ref={dropdownRef} className="relative">
               <div className="relative">
