@@ -438,10 +438,13 @@ describe('Isolation entre cabinets (e2e)', () => {
         motif: 'Controle',
       });
       expect(res.status).toBe(201);
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      const notifs = await prisma.notification.findMany({
-        where: { consultationId: res.body.id },
-      });
+      // Les notifications partent en arrière-plan : on les attend (jusqu'à 2 s),
+      // un délai fixe court échouait sur une CI lente
+      let notifs = await prisma.notification.findMany({ where: { consultationId: res.body.id } });
+      for (let essai = 0; notifs.length === 0 && essai < 40; essai++) {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        notifs = await prisma.notification.findMany({ where: { consultationId: res.body.id } });
+      }
       expect(notifs.length).toBeGreaterThan(0);
       expect(notifs.every((n) => n.cabinetId === 'a-cabinet')).toBe(true);
       await prisma.notification.deleteMany({ where: { consultationId: res.body.id } });
