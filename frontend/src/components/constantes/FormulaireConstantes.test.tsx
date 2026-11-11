@@ -54,4 +54,10 @@ describe('FormulaireConstantes', () => {
     expect(screen.getByLabelText('Température')).toHaveAttribute('aria-invalid', 'true');
     expect(screen.getByText('Entre 30 et 45 °C')).toBeInTheDocument();
   });
+
+  it('la pastille décrit le champ', async () => {
+    render(<Hote />);
+    await userEvent.type(screen.getByLabelText('Température'), '39,5');
+    expect(screen.getByLabelText('Température')).toHaveAccessibleDescription(/élevée/);
+  });
 });

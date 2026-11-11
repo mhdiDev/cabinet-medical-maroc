@@ -62,21 +62,21 @@ export function FormulaireConstantes({ saisie, onChange, erreurs, dateNaissance,
           <input
             id={idChamp}
             name={c}
-            inputMode="decimal"
+            inputMode={CHAMPS[c].entier ? 'numeric' : 'decimal'}
             autoComplete="off"
             value={saisie[c]}
             onChange={(e) => onChange({ ...saisie, [c]: e.target.value })}
             disabled={desactive}
             data-autofocus={autoFocus && c === 'tensionSystolique' ? true : undefined}
             aria-invalid={erreurs[c] ? true : undefined}
-            aria-describedby={erreurs[c] ? `${idChamp}-erreur` : undefined}
+            aria-describedby={[a && `${idChamp}-alerte`, erreurs[c] && `${idChamp}-erreur`].filter(Boolean).join(' ') || undefined}
             className={`w-full min-h-[44px] px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 ${
               erreurs[c] ? 'border-red-400' : 'border-gray-300'
             }`}
           />
           <span className="w-12 shrink-0 text-sm text-gray-500">{CHAMPS[c].unite}</span>
         </div>
-        {a && <PastilleAlerte alerte={a} className="mt-1" />}
+        {a && <PastilleAlerte id={`${idChamp}-alerte`} alerte={a} className="mt-1" />}
         {erreurs[c] && (
           <p id={`${idChamp}-erreur`} className="mt-1 text-xs text-red-600">
             {erreurs[c]}
@@ -94,13 +94,13 @@ export function FormulaireConstantes({ saisie, onChange, erreurs, dateNaissance,
         <p id={`${id}-imc`} className="text-sm font-medium text-gray-700">
           IMC <span className="font-normal text-gray-400">(calculé)</span>
         </p>
-        <p
+        <output
           aria-labelledby={`${id}-imc`}
           data-testid="imc"
           className="mt-1 min-h-[44px] flex items-center px-3 rounded-lg bg-gray-50 text-sm text-gray-900"
         >
           {imc === null ? '—' : String(imc).replace('.', ',')}
-        </p>
+        </output>
         {alerteImc && <PastilleAlerte alerte={alerteImc} className="mt-1" />}
       </div>
       {APRES_IMC.map(champ)}
