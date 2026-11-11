@@ -1,0 +1,35 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Liste des patients",
+      "url": "/patients",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/liste-des-patients.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Liste des patients",
+      "url": "/patients",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/liste-des-patients.png",
+      "type": "texte-tronque",
+      "gravite": "mineur",
+      "description": "Texte coupé ou masqué : « Déconnexion (recouvert par un autre élément) ».",
+      "selecteur": "header > div:nth-of-type(2) > div:nth-of-type(3) > button"
+    },
+    {
+      "ecran": "Liste des patients",
+      "url": "/patients",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/liste-des-patients.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Les éléments doivent avoir un contraste de couleurs suffisant (color-contrast, 1 élément(s)).",
+      "selecteur": ".sm\\:text-xs"
+    }
+  ]
+}

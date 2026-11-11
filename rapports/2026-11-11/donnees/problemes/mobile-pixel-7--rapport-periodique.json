@@ -1,0 +1,123 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Rapport périodique",
+      "url": "/paiements",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/rapport-periodique.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Rapport périodique",
+      "url": "/paiements",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/rapport-periodique.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Ouvrir le menu » de 40×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Ouvrir le menu\"]"
+    },
+    {
+      "ecran": "Rapport périodique",
+      "url": "/paiements",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/rapport-periodique.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Notifications » de 36×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Notifications\"]"
+    },
+    {
+      "ecran": "Rapport périodique",
+      "url": "/paiements",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/rapport-periodique.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « + Encaissement » de 380×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "main > div > div:nth-of-type(1) > button"
+    },
+    {
+      "ecran": "Rapport périodique",
+      "url": "/paiements",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/rapport-periodique.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « 2026-10-12 » de 162×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > input"
+    },
+    {
+      "ecran": "Rapport périodique",
+      "url": "/paiements",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/rapport-periodique.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « 2026-11-11 » de 162×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > input"
+    },
+    {
+      "ecran": "Rapport périodique",
+      "url": "/paiements",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/rapport-periodique.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « TousAssurés uniquementNon assurés uniquement » de 209×33 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > div:nth-of-type(3) > div:nth-of-type(2) > select"
+    },
+    {
+      "ecran": "Rapport périodique",
+      "url": "/paiements",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/rapport-periodique.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « ⬇ Export Excel » de 131×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > div:nth-of-type(3) > div:nth-of-type(2) > button"
+    },
+    {
+      "ecran": "Rapport périodique",
+      "url": "/paiements",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/rapport-periodique.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Les éléments doivent avoir un contraste de couleurs suffisant (color-contrast, 2 élément(s)).",
+      "selecteur": ".sm\\:w-auto, .items-start > .bg-green-600.hover\\:bg-green-700.text-white"
+    },
+    {
+      "ecran": "Rapport périodique",
+      "url": "/paiements",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/rapport-periodique.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "Chaque élément de formulaire doit avoir une étiquette (label, 2 élément(s)).",
+      "selecteur": "input[value=\"2026-10-12\"], input[value=\"2026-11-11\"]"
+    },
+    {
+      "ecran": "Rapport périodique",
+      "url": "/paiements",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/rapport-periodique.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "L’élément 'select' doit avoir un nom accessible (select-name, 1 élément(s)).",
+      "selecteur": "select"
+    }
+  ]
+}

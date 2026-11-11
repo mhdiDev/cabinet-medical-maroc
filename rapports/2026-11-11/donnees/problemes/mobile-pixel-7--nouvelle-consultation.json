@@ -1,0 +1,123 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=331b5d3a-3a54-42ea-83dc-7e3a74d32258",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/nouvelle-consultation.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=331b5d3a-3a54-42ea-83dc-7e3a74d32258",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/nouvelle-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Ouvrir le menu » de 40×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Ouvrir le menu\"]"
+    },
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=331b5d3a-3a54-42ea-83dc-7e3a74d32258",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/nouvelle-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Notifications » de 36×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Notifications\"]"
+    },
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=331b5d3a-3a54-42ea-83dc-7e3a74d32258",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/nouvelle-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "majeur",
+      "description": "Zone cliquable « ← Retour » de 380×20 px (minimum 44×44 px sur mobile).",
+      "selecteur": "main > div > div:nth-of-type(1) > button"
+    },
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=331b5d3a-3a54-42ea-83dc-7e3a74d32258",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/nouvelle-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "majeur",
+      "description": "Zone cliquable « Changer ✕ » de 73×20 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > div:nth-of-type(2) > div > button"
+    },
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=331b5d3a-3a54-42ea-83dc-7e3a74d32258",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/nouvelle-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Fièvre, douleur abdominale... » de 346×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"motif\"]"
+    },
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=331b5d3a-3a54-42ea-83dc-7e3a74d32258",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/nouvelle-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « ECG, Suture, Injection... » de 346×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"actes\"]"
+    },
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=331b5d3a-3a54-42ea-83dc-7e3a74d32258",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/nouvelle-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Annuler » de 346×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > form > div > button:nth-of-type(1)"
+    },
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=331b5d3a-3a54-42ea-83dc-7e3a74d32258",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/nouvelle-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Enregistrer la consultation » de 346×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > form > div > button:nth-of-type(2)"
+    },
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=331b5d3a-3a54-42ea-83dc-7e3a74d32258",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/nouvelle-consultation.png",
+      "type": "texte-tronque",
+      "gravite": "mineur",
+      "description": "Texte coupé ou masqué : « Anamnèse (recouvert par un autre élément) ».",
+      "selecteur": "section:nth-of-type(1) > div > div:nth-of-type(2) > label"
+    },
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=331b5d3a-3a54-42ea-83dc-7e3a74d32258",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/nouvelle-consultation.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Les éléments doivent avoir un contraste de couleurs suffisant (color-contrast, 1 élément(s)).",
+      "selecteur": ".font-normal"
+    }
+  ]
+}

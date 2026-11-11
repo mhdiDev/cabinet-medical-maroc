@@ -1,0 +1,123 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Agenda — nouveau rendez-vous",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda-nouveau-rendez-vous.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Agenda — nouveau rendez-vous",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda-nouveau-rendez-vous.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Sélectionner un patient...mobileiphone13-2026-11-11-api TEST » de 342×37 px (minimum 44×44 px sur mobile).",
+      "selecteur": "select[name=\"patientId\"]"
+    },
+    {
+      "ecran": "Agenda — nouveau rendez-vous",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda-nouveau-rendez-vous.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « 2026-11-11T19:30 » de 342×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"dateHeure\"]"
+    },
+    {
+      "ecran": "Agenda — nouveau rendez-vous",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda-nouveau-rendez-vous.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « 15 min30 min45 min1 heure » de 342×37 px (minimum 44×44 px sur mobile).",
+      "selecteur": "select[name=\"dureeMinutes\"]"
+    },
+    {
+      "ecran": "Agenda — nouveau rendez-vous",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda-nouveau-rendez-vous.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Consultation, suivi... » de 342×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"motif\"]"
+    },
+    {
+      "ecran": "Agenda — nouveau rendez-vous",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda-nouveau-rendez-vous.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Annuler » de 84×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > form > div:nth-of-type(5) > button:nth-of-type(1)"
+    },
+    {
+      "ecran": "Agenda — nouveau rendez-vous",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda-nouveau-rendez-vous.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Créer le RDV » de 135×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > form > div:nth-of-type(5) > button:nth-of-type(2)"
+    },
+    {
+      "ecran": "Agenda — nouveau rendez-vous",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda-nouveau-rendez-vous.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "Certains rôles ARIA doivent comporter des descendants directs spécifiques (aria-required-children, 1 élément(s)).",
+      "selecteur": ".rbc-row-content"
+    },
+    {
+      "ecran": "Agenda — nouveau rendez-vous",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda-nouveau-rendez-vous.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "Certains rôles ARIA doivent être contenus par des parents spécifiques (aria-required-parent, 8 élément(s)).",
+      "selecteur": ".rbc-header:nth-child(1) > .rbc-button-link[type=\"button\"] > span[role=\"columnheader\"][aria-sort=\"none\"], .rbc-header:nth-child(2) > .rbc-button-link[type=\"button\"] > span[role=\"columnheader\"][aria-sort=\"none\"], .rbc-today.rbc-header > .rbc-button-link[type=\"button\"] > span[role=\"columnheader\"][aria-sort=\"none\"], .rbc-header:nth-child(4) > .rbc-button-link[type=\"button\"] > span[role=\"columnheader\"][aria-sort=\"none\"], .rbc-header:nth-child(5) > .rbc-button-link[type=\"button\"] > span[role=\"columnheader\"][aria-sort=\"none\"]"
+    },
+    {
+      "ecran": "Agenda — nouveau rendez-vous",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda-nouveau-rendez-vous.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "Chaque élément de formulaire doit avoir une étiquette (label, 1 élément(s)).",
+      "selecteur": "input[type=\"datetime-local\"]"
+    },
+    {
+      "ecran": "Agenda — nouveau rendez-vous",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda-nouveau-rendez-vous.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "L’élément 'select' doit avoir un nom accessible (select-name, 2 élément(s)).",
+      "selecteur": "select[name=\"patientId\"], select[name=\"dureeMinutes\"]"
+    }
+  ]
+}

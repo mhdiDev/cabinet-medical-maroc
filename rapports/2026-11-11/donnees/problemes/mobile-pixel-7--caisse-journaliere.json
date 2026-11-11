@@ -1,0 +1,90 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Caisse journalière",
+      "url": "/paiements",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/caisse-journaliere.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Caisse journalière",
+      "url": "/paiements",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/caisse-journaliere.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Ouvrir le menu » de 40×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Ouvrir le menu\"]"
+    },
+    {
+      "ecran": "Caisse journalière",
+      "url": "/paiements",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/caisse-journaliere.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Notifications » de 36×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Notifications\"]"
+    },
+    {
+      "ecran": "Caisse journalière",
+      "url": "/paiements",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/caisse-journaliere.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « + Encaissement » de 380×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "main > div > div:nth-of-type(1) > button"
+    },
+    {
+      "ecran": "Caisse journalière",
+      "url": "/paiements",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/caisse-journaliere.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « 2026-11-11 » de 162×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "main > div > div:nth-of-type(3) > input"
+    },
+    {
+      "ecran": "Caisse journalière",
+      "url": "/paiements",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/caisse-journaliere.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Les éléments doivent avoir un contraste de couleurs suffisant (color-contrast, 2 élément(s)).",
+      "selecteur": ".bg-green-600, .text-gray-400"
+    },
+    {
+      "ecran": "Caisse journalière",
+      "url": "/paiements",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/caisse-journaliere.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "Chaque élément de formulaire doit avoir une étiquette (label, 1 élément(s)).",
+      "selecteur": ".border-gray-300"
+    },
+    {
+      "ecran": "Caisse journalière",
+      "url": "/paiements",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/caisse-journaliere.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Vérifier que les régions défilantes sont accessibles au clavier (scrollable-region-focusable, 1 élément(s)).",
+      "selecteur": ".shadow-sm.overflow-hidden.rounded-xl > .overflow-x-auto"
+    }
+  ]
+}

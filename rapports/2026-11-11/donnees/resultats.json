@@ -1,0 +1,1227 @@
+{
+  "config": {
+    "argv": [
+      "/opt/hostedtoolcache/node/20.20.2/x64/bin/node",
+      "/home/runner/work/cabinet-medical-maroc/cabinet-medical-maroc/e2e/node_modules/.bin/playwright",
+      "test"
+    ],
+    "configFile": "/home/runner/work/cabinet-medical-maroc/cabinet-medical-maroc/e2e/playwright.config.ts",
+    "rootDir": "/home/runner/work/cabinet-medical-maroc/cabinet-medical-maroc/e2e/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "ci": {
+        "commitHref": "https://github.com/mhdiDev/cabinet-medical-maroc/commit/feee22cfd72651af83604a8ea32c9e693b675a9f",
+        "commitHash": "feee22cfd72651af83604a8ea32c9e693b675a9f",
+        "buildHref": "https://github.com/mhdiDev/cabinet-medical-maroc/actions/runs/43111503663"
+      },
+      "gitCommit": {
+        "shortHash": "feee22c",
+        "hash": "feee22cfd72651af83604a8ea32c9e693b675a9f",
+        "subject": "Merge pull request #15 from mhdiDev/feat/tests-e2e-nuit",
+        "body": "Merge pull request #15 from mhdiDev/feat/tests-e2e-nuit\n\nfeat: tests de bout en bout nocturnes + correction des formulaires patient sur mobile",
+        "author": {
+          "name": "mhdiDev",
+          "email": "39605947+mhdiDev@users.noreply.github.com",
+          "time": 1794435386000
+        },
+        "committer": {
+          "name": "GitHub",
+          "email": "noreply@github.com",
+          "time": 1794435386000
+        },
+        "branch": "master"
+      },
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/runner/work/cabinet-medical-maroc/cabinet-medical-maroc/rapports/2026-11-11/donnees/playwright",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "ci": {
+            "commitHref": "https://github.com/mhdiDev/cabinet-medical-maroc/commit/feee22cfd72651af83604a8ea32c9e693b675a9f",
+            "commitHash": "feee22cfd72651af83604a8ea32c9e693b675a9f",
+            "buildHref": "https://github.com/mhdiDev/cabinet-medical-maroc/actions/runs/43111503663"
+          },
+          "gitCommit": {
+            "shortHash": "feee22c",
+            "hash": "feee22cfd72651af83604a8ea32c9e693b675a9f",
+            "subject": "Merge pull request #15 from mhdiDev/feat/tests-e2e-nuit",
+            "body": "Merge pull request #15 from mhdiDev/feat/tests-e2e-nuit\n\nfeat: tests de bout en bout nocturnes + correction des formulaires patient sur mobile",
+            "author": {
+              "name": "mhdiDev",
+              "email": "39605947+mhdiDev@users.noreply.github.com",
+              "time": 1794435386000
+            },
+            "committer": {
+              "name": "GitHub",
+              "email": "noreply@github.com",
+              "time": 1794435386000
+            },
+            "branch": "master"
+          },
+          "actualWorkers": 1
+        },
+        "id": "desktop-chrome",
+        "name": "desktop-chrome",
+        "testDir": "/home/runner/work/cabinet-medical-maroc/cabinet-medical-maroc/e2e/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/home/runner/work/cabinet-medical-maroc/cabinet-medical-maroc/rapports/2026-11-11/donnees/playwright",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "ci": {
+            "commitHref": "https://github.com/mhdiDev/cabinet-medical-maroc/commit/feee22cfd72651af83604a8ea32c9e693b675a9f",
+            "commitHash": "feee22cfd72651af83604a8ea32c9e693b675a9f",
+            "buildHref": "https://github.com/mhdiDev/cabinet-medical-maroc/actions/runs/43111503663"
+          },
+          "gitCommit": {
+            "shortHash": "feee22c",
+            "hash": "feee22cfd72651af83604a8ea32c9e693b675a9f",
+            "subject": "Merge pull request #15 from mhdiDev/feat/tests-e2e-nuit",
+            "body": "Merge pull request #15 from mhdiDev/feat/tests-e2e-nuit\n\nfeat: tests de bout en bout nocturnes + correction des formulaires patient sur mobile",
+            "author": {
+              "name": "mhdiDev",
+              "email": "39605947+mhdiDev@users.noreply.github.com",
+              "time": 1794435386000
+            },
+            "committer": {
+              "name": "GitHub",
+              "email": "noreply@github.com",
+              "time": 1794435386000
+            },
+            "branch": "master"
+          },
+          "actualWorkers": 1
+        },
+        "id": "mobile-iphone-13",
+        "name": "mobile-iphone-13",
+        "testDir": "/home/runner/work/cabinet-medical-maroc/cabinet-medical-maroc/e2e/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/home/runner/work/cabinet-medical-maroc/cabinet-medical-maroc/rapports/2026-11-11/donnees/playwright",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "ci": {
+            "commitHref": "https://github.com/mhdiDev/cabinet-medical-maroc/commit/feee22cfd72651af83604a8ea32c9e693b675a9f",
+            "commitHash": "feee22cfd72651af83604a8ea32c9e693b675a9f",
+            "buildHref": "https://github.com/mhdiDev/cabinet-medical-maroc/actions/runs/43111503663"
+          },
+          "gitCommit": {
+            "shortHash": "feee22c",
+            "hash": "feee22cfd72651af83604a8ea32c9e693b675a9f",
+            "subject": "Merge pull request #15 from mhdiDev/feat/tests-e2e-nuit",
+            "body": "Merge pull request #15 from mhdiDev/feat/tests-e2e-nuit\n\nfeat: tests de bout en bout nocturnes + correction des formulaires patient sur mobile",
+            "author": {
+              "name": "mhdiDev",
+              "email": "39605947+mhdiDev@users.noreply.github.com",
+              "time": 1794435386000
+            },
+            "committer": {
+              "name": "GitHub",
+              "email": "noreply@github.com",
+              "time": 1794435386000
+            },
+            "branch": "master"
+          },
+          "actualWorkers": 1
+        },
+        "id": "mobile-pixel-7",
+        "name": "mobile-pixel-7",
+        "testDir": "/home/runner/work/cabinet-medical-maroc/cabinet-medical-maroc/e2e/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/runner/work/cabinet-medical-maroc/cabinet-medical-maroc/rapports/2026-11-11/donnees/playwright",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "ci": {
+            "commitHref": "https://github.com/mhdiDev/cabinet-medical-maroc/commit/feee22cfd72651af83604a8ea32c9e693b675a9f",
+            "commitHash": "feee22cfd72651af83604a8ea32c9e693b675a9f",
+            "buildHref": "https://github.com/mhdiDev/cabinet-medical-maroc/actions/runs/43111503663"
+          },
+          "gitCommit": {
+            "shortHash": "feee22c",
+            "hash": "feee22cfd72651af83604a8ea32c9e693b675a9f",
+            "subject": "Merge pull request #15 from mhdiDev/feat/tests-e2e-nuit",
+            "body": "Merge pull request #15 from mhdiDev/feat/tests-e2e-nuit\n\nfeat: tests de bout en bout nocturnes + correction des formulaires patient sur mobile",
+            "author": {
+              "name": "mhdiDev",
+              "email": "39605947+mhdiDev@users.noreply.github.com",
+              "time": 1794435386000
+            },
+            "committer": {
+              "name": "GitHub",
+              "email": "noreply@github.com",
+              "time": 1794435386000
+            },
+            "branch": "master"
+          },
+          "actualWorkers": 1
+        },
+        "name": "desktop-chrome",
+        "testDir": "/home/runner/work/cabinet-medical-maroc/cabinet-medical-maroc/e2e/tests",
+        "snapshotDir": "/home/runner/work/cabinet-medical-maroc/cabinet-medical-maroc/e2e/tests",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 60000,
+        "use": {
+          "baseURL": "http://149.56.209.147",
+          "locale": "fr-FR",
+          "timezoneId": "Africa/Casablanca",
+          "trace": "retain-on-failure",
+          "screenshot": "only-on-failure",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.8127.18 Safari/537.36",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": false,
+          "hasTouch": false,
+          "defaultBrowserType": "chromium"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop-chrome"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/runner/work/cabinet-medical-maroc/cabinet-medical-maroc/rapports/2026-11-11/donnees/playwright",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "ci": {
+            "commitHref": "https://github.com/mhdiDev/cabinet-medical-maroc/commit/feee22cfd72651af83604a8ea32c9e693b675a9f",
+            "commitHash": "feee22cfd72651af83604a8ea32c9e693b675a9f",
+            "buildHref": "https://github.com/mhdiDev/cabinet-medical-maroc/actions/runs/43111503663"
+          },
+          "gitCommit": {
+            "shortHash": "feee22c",
+            "hash": "feee22cfd72651af83604a8ea32c9e693b675a9f",
+            "subject": "Merge pull request #15 from mhdiDev/feat/tests-e2e-nuit",
+            "body": "Merge pull request #15 from mhdiDev/feat/tests-e2e-nuit\n\nfeat: tests de bout en bout nocturnes + correction des formulaires patient sur mobile",
+            "author": {
+              "name": "mhdiDev",
+              "email": "39605947+mhdiDev@users.noreply.github.com",
+              "time": 1794435386000
+            },
+            "committer": {
+              "name": "GitHub",
+              "email": "noreply@github.com",
+              "time": 1794435386000
+            },
+            "branch": "master"
+          },
+          "actualWorkers": 1
+        },
+        "name": "mobile-iphone-13",
+        "testDir": "/home/runner/work/cabinet-medical-maroc/cabinet-medical-maroc/e2e/tests",
+        "snapshotDir": "/home/runner/work/cabinet-medical-maroc/cabinet-medical-maroc/e2e/tests",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 60000,
+        "use": {
+          "baseURL": "http://149.56.209.147",
+          "locale": "fr-FR",
+          "timezoneId": "Africa/Casablanca",
+          "trace": "retain-on-failure",
+          "screenshot": "only-on-failure",
+          "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1",
+          "viewport": {
+            "width": 390,
+            "height": 664
+          },
+          "screen": {
+            "width": 390,
+            "height": 844
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true,
+          "defaultBrowserType": "chromium"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "mobile-iphone-13"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/runner/work/cabinet-medical-maroc/cabinet-medical-maroc/rapports/2026-11-11/donnees/playwright",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "ci": {
+            "commitHref": "https://github.com/mhdiDev/cabinet-medical-maroc/commit/feee22cfd72651af83604a8ea32c9e693b675a9f",
+            "commitHash": "feee22cfd72651af83604a8ea32c9e693b675a9f",
+            "buildHref": "https://github.com/mhdiDev/cabinet-medical-maroc/actions/runs/43111503663"
+          },
+          "gitCommit": {
+            "shortHash": "feee22c",
+            "hash": "feee22cfd72651af83604a8ea32c9e693b675a9f",
+            "subject": "Merge pull request #15 from mhdiDev/feat/tests-e2e-nuit",
+            "body": "Merge pull request #15 from mhdiDev/feat/tests-e2e-nuit\n\nfeat: tests de bout en bout nocturnes + correction des formulaires patient sur mobile",
+            "author": {
+              "name": "mhdiDev",
+              "email": "39605947+mhdiDev@users.noreply.github.com",
+              "time": 1794435386000
+            },
+            "committer": {
+              "name": "GitHub",
+              "email": "noreply@github.com",
+              "time": 1794435386000
+            },
+            "branch": "master"
+          },
+          "actualWorkers": 1
+        },
+        "name": "mobile-pixel-7",
+        "testDir": "/home/runner/work/cabinet-medical-maroc/cabinet-medical-maroc/e2e/tests",
+        "snapshotDir": "/home/runner/work/cabinet-medical-maroc/cabinet-medical-maroc/e2e/tests",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 60000,
+        "use": {
+          "baseURL": "http://149.56.209.147",
+          "locale": "fr-FR",
+          "timezoneId": "Africa/Casablanca",
+          "trace": "retain-on-failure",
+          "screenshot": "only-on-failure",
+          "userAgent": "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.8127.18 Mobile Safari/537.36",
+          "viewport": {
+            "width": 412,
+            "height": 839
+          },
+          "screen": {
+            "width": 412,
+            "height": 915
+          },
+          "deviceScaleFactor": 2.625,
+          "isMobile": true,
+          "hasTouch": true,
+          "defaultBrowserType": "chromium"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "mobile-pixel-7"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "html",
+        {
+          "outputFolder": "/home/runner/work/cabinet-medical-maroc/cabinet-medical-maroc/rapports/2026-11-11/rapport-html",
+          "open": "never"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "/home/runner/work/cabinet-medical-maroc/cabinet-medical-maroc/rapports/2026-11-11/donnees/resultats.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "parcours.spec.ts",
+      "file": "parcours.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "1. Connexion",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop-chrome",
+              "projectName": "desktop-chrome",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3202,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Connexion",
+                      "duration": 1965
+                    },
+                    {
+                      "title": "Connexion — mauvais mot de passe",
+                      "duration": 382
+                    },
+                    {
+                      "title": "Connexion — compte de test",
+                      "duration": 701
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:25:01.360Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-iphone-13",
+              "projectName": "mobile-iphone-13",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3395,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Connexion",
+                      "duration": 1636
+                    },
+                    {
+                      "title": "Connexion — mauvais mot de passe",
+                      "duration": 891
+                    },
+                    {
+                      "title": "Connexion — compte de test",
+                      "duration": 698
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:25:37.459Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-pixel-7",
+              "projectName": "mobile-pixel-7",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3506,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Connexion",
+                      "duration": 1682
+                    },
+                    {
+                      "title": "Connexion — mauvais mot de passe",
+                      "duration": 892
+                    },
+                    {
+                      "title": "Connexion — compte de test",
+                      "duration": 700
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:26:18.667Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "18697220be5cc07477a1-682e55595de672e578a9",
+          "file": "parcours.spec.ts",
+          "line": 53,
+          "column": 1
+        },
+        {
+          "title": "2. Tableau de bord et recherche",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop-chrome",
+              "projectName": "desktop-chrome",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4967,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Tableau de bord",
+                      "duration": 2053
+                    },
+                    {
+                      "title": "Tableau de bord — recherche patient",
+                      "duration": 1965
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:25:05.353Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-iphone-13",
+              "projectName": "mobile-iphone-13",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4727,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Tableau de bord",
+                      "duration": 1855
+                    },
+                    {
+                      "title": "Tableau de bord — recherche patient",
+                      "duration": 1806
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:25:41.436Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-pixel-7",
+              "projectName": "mobile-pixel-7",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4824,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Tableau de bord",
+                      "duration": 1968
+                    },
+                    {
+                      "title": "Tableau de bord — recherche patient",
+                      "duration": 1856
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:26:22.799Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "18697220be5cc07477a1-dd10e05a4119e624b2e0",
+          "file": "parcours.spec.ts",
+          "line": 75,
+          "column": 1
+        },
+        {
+          "title": "3. Patients : création et fiche",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop-chrome",
+              "projectName": "desktop-chrome",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6385,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Liste des patients",
+                      "duration": 1873
+                    },
+                    {
+                      "title": "Nouveau patient",
+                      "duration": 1399
+                    },
+                    {
+                      "title": "Fiche patient",
+                      "duration": 998
+                    },
+                    {
+                      "title": "Modifier le patient",
+                      "duration": 1168
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:25:10.331Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-iphone-13",
+              "projectName": "mobile-iphone-13",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6333,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Liste des patients",
+                      "duration": 1999
+                    },
+                    {
+                      "title": "Nouveau patient",
+                      "duration": 1293
+                    },
+                    {
+                      "title": "Fiche patient",
+                      "duration": 955
+                    },
+                    {
+                      "title": "Modifier le patient",
+                      "duration": 1029
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:25:46.173Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-pixel-7",
+              "projectName": "mobile-pixel-7",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6381,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Liste des patients",
+                      "duration": 2029
+                    },
+                    {
+                      "title": "Nouveau patient",
+                      "duration": 1293
+                    },
+                    {
+                      "title": "Fiche patient",
+                      "duration": 973
+                    },
+                    {
+                      "title": "Modifier le patient",
+                      "duration": 1052
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:26:27.634Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "18697220be5cc07477a1-75fd14912be167823f76",
+          "file": "parcours.spec.ts",
+          "line": 91,
+          "column": 1
+        },
+        {
+          "title": "4. Agenda et prise de rendez-vous",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop-chrome",
+              "projectName": "desktop-chrome",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4673,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Agenda",
+                      "duration": 2093
+                    },
+                    {
+                      "title": "Agenda — nouveau rendez-vous",
+                      "duration": 1530
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:25:16.726Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-iphone-13",
+              "projectName": "mobile-iphone-13",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9978,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Agenda",
+                      "duration": 2157
+                    },
+                    {
+                      "title": "Agenda — nouveau rendez-vous",
+                      "duration": 6814
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:25:52.516Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-pixel-7",
+              "projectName": "mobile-pixel-7",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 15626,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Agenda",
+                      "duration": 2216
+                    },
+                    {
+                      "title": "Agenda — nouveau rendez-vous",
+                      "duration": 12426
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:26:34.025Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "18697220be5cc07477a1-1154806000265996397f",
+          "file": "parcours.spec.ts",
+          "line": 128,
+          "column": 1
+        },
+        {
+          "title": "5. Consultation depuis la fiche patient",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop-chrome",
+              "projectName": "desktop-chrome",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6201,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Nouvelle consultation",
+                      "duration": 2328
+                    },
+                    {
+                      "title": "Encaissement de la consultation",
+                      "duration": 1252
+                    },
+                    {
+                      "title": "Ordonnances",
+                      "duration": 1632
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:25:21.410Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-iphone-13",
+              "projectName": "mobile-iphone-13",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5864,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Nouvelle consultation",
+                      "duration": 2159
+                    },
+                    {
+                      "title": "Encaissement de la consultation",
+                      "duration": 1145
+                    },
+                    {
+                      "title": "Ordonnances",
+                      "duration": 1523
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:26:02.506Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-pixel-7",
+              "projectName": "mobile-pixel-7",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5874,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Nouvelle consultation",
+                      "duration": 2077
+                    },
+                    {
+                      "title": "Encaissement de la consultation",
+                      "duration": 1167
+                    },
+                    {
+                      "title": "Ordonnances",
+                      "duration": 1539
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:26:49.663Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "18697220be5cc07477a1-61d75a32fd9918fdc86f",
+          "file": "parcours.spec.ts",
+          "line": 162,
+          "column": 1
+        },
+        {
+          "title": "6. Facturation : caisse et rapport",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop-chrome",
+              "projectName": "desktop-chrome",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4858,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Caisse journalière",
+                      "duration": 1883
+                    },
+                    {
+                      "title": "Nouvel encaissement",
+                      "duration": 1106
+                    },
+                    {
+                      "title": "Rapport périodique",
+                      "duration": 918
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:25:27.621Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-iphone-13",
+              "projectName": "mobile-iphone-13",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4942,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Caisse journalière",
+                      "duration": 2041
+                    },
+                    {
+                      "title": "Nouvel encaissement",
+                      "duration": 975
+                    },
+                    {
+                      "title": "Rapport périodique",
+                      "duration": 885
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:26:08.380Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-pixel-7",
+              "projectName": "mobile-pixel-7",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4897,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Caisse journalière",
+                      "duration": 2024
+                    },
+                    {
+                      "title": "Nouvel encaissement",
+                      "duration": 987
+                    },
+                    {
+                      "title": "Rapport périodique",
+                      "duration": 903
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:26:55.547Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "18697220be5cc07477a1-085a743154a090b53576",
+          "file": "parcours.spec.ts",
+          "line": 198,
+          "column": 1
+        },
+        {
+          "title": "7. Paramètres : mon compte et utilisateurs",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop-chrome",
+              "projectName": "desktop-chrome",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3756,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Mon compte",
+                      "duration": 1833
+                    },
+                    {
+                      "title": "Utilisateurs",
+                      "duration": 993
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:25:32.488Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-iphone-13",
+              "projectName": "mobile-iphone-13",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4139,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Mon compte",
+                      "duration": 1781
+                    },
+                    {
+                      "title": "Utilisateurs",
+                      "duration": 1327
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:26:13.331Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-pixel-7",
+              "projectName": "mobile-pixel-7",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4099,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Mon compte",
+                      "duration": 1782
+                    },
+                    {
+                      "title": "Utilisateurs",
+                      "duration": 1329
+                    }
+                  ],
+                  "startTime": "2026-11-11T22:27:00.456Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "18697220be5cc07477a1-6ff659232fe74bf51346",
+          "file": "parcours.spec.ts",
+          "line": 220,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-11T22:25:00.591Z",
+    "duration": 124873.992,
+    "expected": 21,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

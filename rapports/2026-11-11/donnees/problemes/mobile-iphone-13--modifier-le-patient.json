@@ -1,0 +1,222 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Modifier le patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69/modifier",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/modifier-le-patient.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Modifier le patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69/modifier",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/modifier-le-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Ouvrir le menu » de 40×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Ouvrir le menu\"]"
+    },
+    {
+      "ecran": "Modifier le patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69/modifier",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/modifier-le-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Notifications » de 36×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Notifications\"]"
+    },
+    {
+      "ecran": "Modifier le patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69/modifier",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/modifier-le-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « ← Retour » de 358×24 px (minimum 44×44 px sur mobile).",
+      "selecteur": "main > div > div > a"
+    },
+    {
+      "ecran": "Modifier le patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69/modifier",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/modifier-le-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « TEST-E2E » de 324×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"nom\"]"
+    },
+    {
+      "ecran": "Modifier le patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69/modifier",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/modifier-le-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « mobileiphone13-2026-11-11-ui » de 324×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"prenom\"]"
+    },
+    {
+      "ecran": "Modifier le patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69/modifier",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/modifier-le-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « 1985-06-15 » de 324×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"dateNaissance\"]"
+    },
+    {
+      "ecran": "Modifier le patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69/modifier",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/modifier-le-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « MasculinFéminin » de 324×37 px (minimum 44×44 px sur mobile).",
+      "selecteur": "select[name=\"sexe\"]"
+    },
+    {
+      "ecran": "Modifier le patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69/modifier",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/modifier-le-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « 0612345678 » de 324×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"telephone\"]"
+    },
+    {
+      "ecran": "Modifier le patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69/modifier",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/modifier-le-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « email » de 324×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"email\"]"
+    },
+    {
+      "ecran": "Modifier le patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69/modifier",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/modifier-le-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « adresse » de 324×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"adresse\"]"
+    },
+    {
+      "ecran": "Modifier le patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69/modifier",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/modifier-le-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Ville fictive » de 324×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"ville\"]"
+    },
+    {
+      "ecran": "Modifier le patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69/modifier",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/modifier-le-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « InconnuA+A-B+B-AB+AB-O+O- » de 324×37 px (minimum 44×44 px sur mobile).",
+      "selecteur": "select[name=\"groupeSanguin\"]"
+    },
+    {
+      "ecran": "Modifier le patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69/modifier",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/modifier-le-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Pénicilline, Aspirine... » de 324×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"allergies\"]"
+    },
+    {
+      "ecran": "Modifier le patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69/modifier",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/modifier-le-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "majeur",
+      "description": "Zone cliquable « on » de 16×16 px (minimum 44×44 px sur mobile).",
+      "selecteur": "#estAssure"
+    },
+    {
+      "ecran": "Modifier le patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69/modifier",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/modifier-le-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Annuler » de 324×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > form > div > a"
+    },
+    {
+      "ecran": "Modifier le patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69/modifier",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/modifier-le-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Enregistrer » de 324×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > form > div > button"
+    },
+    {
+      "ecran": "Modifier le patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69/modifier",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/modifier-le-patient.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Les éléments doivent avoir un contraste de couleurs suffisant (color-contrast, 1 élément(s)).",
+      "selecteur": ".text-gray-400"
+    },
+    {
+      "ecran": "Modifier le patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69/modifier",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/modifier-le-patient.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "Chaque élément de formulaire doit avoir une étiquette (label, 7 élément(s)).",
+      "selecteur": "input[name=\"nom\"], input[name=\"prenom\"], input[type=\"date\"], input[type=\"email\"], input[name=\"adresse\"]"
+    },
+    {
+      "ecran": "Modifier le patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69/modifier",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/modifier-le-patient.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "L’élément 'select' doit avoir un nom accessible (select-name, 2 élément(s)).",
+      "selecteur": "select[name=\"sexe\"], select[name=\"groupeSanguin\"]"
+    }
+  ]
+}

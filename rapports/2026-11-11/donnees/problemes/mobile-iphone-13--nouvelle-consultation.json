@@ -1,0 +1,101 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=693fe6d7-07c3-4eda-bad6-8781c2662c6a",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvelle-consultation.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=693fe6d7-07c3-4eda-bad6-8781c2662c6a",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvelle-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Ouvrir le menu » de 40×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Ouvrir le menu\"]"
+    },
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=693fe6d7-07c3-4eda-bad6-8781c2662c6a",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvelle-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Notifications » de 36×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Notifications\"]"
+    },
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=693fe6d7-07c3-4eda-bad6-8781c2662c6a",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvelle-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "majeur",
+      "description": "Zone cliquable « ← Retour » de 358×20 px (minimum 44×44 px sur mobile).",
+      "selecteur": "main > div > div:nth-of-type(1) > button"
+    },
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=693fe6d7-07c3-4eda-bad6-8781c2662c6a",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvelle-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "majeur",
+      "description": "Zone cliquable « Changer ✕ » de 73×20 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > div:nth-of-type(2) > div > button"
+    },
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=693fe6d7-07c3-4eda-bad6-8781c2662c6a",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvelle-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Fièvre, douleur abdominale... » de 324×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"motif\"]"
+    },
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=693fe6d7-07c3-4eda-bad6-8781c2662c6a",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvelle-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « ECG, Suture, Injection... » de 324×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"actes\"]"
+    },
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=693fe6d7-07c3-4eda-bad6-8781c2662c6a",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvelle-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Annuler » de 324×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > form > div > button:nth-of-type(1)"
+    },
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=693fe6d7-07c3-4eda-bad6-8781c2662c6a",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvelle-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Enregistrer la consultation » de 324×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > form > div > button:nth-of-type(2)"
+    }
+  ]
+}

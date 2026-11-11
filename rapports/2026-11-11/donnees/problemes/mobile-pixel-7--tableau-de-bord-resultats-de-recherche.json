@@ -1,0 +1,167 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Tableau de bord — résultats de recherche",
+      "url": "/dashboard",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/tableau-de-bord-resultats-de-recherche.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Tableau de bord — résultats de recherche",
+      "url": "/dashboard",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/tableau-de-bord-resultats-de-recherche.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Ouvrir le menu » de 40×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Ouvrir le menu\"]"
+    },
+    {
+      "ecran": "Tableau de bord — résultats de recherche",
+      "url": "/dashboard",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/tableau-de-bord-resultats-de-recherche.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Notifications » de 36×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Notifications\"]"
+    },
+    {
+      "ecran": "Tableau de bord — résultats de recherche",
+      "url": "/dashboard",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/tableau-de-bord-resultats-de-recherche.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Actualiser » de 34×34 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Actualiser\"]"
+    },
+    {
+      "ecran": "Tableau de bord — résultats de recherche",
+      "url": "/dashboard",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/tableau-de-bord-resultats-de-recherche.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Nouveau patient » de 147×34 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > div:nth-of-type(1) > div:nth-of-type(2) > a"
+    },
+    {
+      "ecran": "Tableau de bord — résultats de recherche",
+      "url": "/dashboard",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/tableau-de-bord-resultats-de-recherche.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Nouveau RDV » de 134×32 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(2)"
+    },
+    {
+      "ecran": "Tableau de bord — résultats de recherche",
+      "url": "/dashboard",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/tableau-de-bord-resultats-de-recherche.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « + Consultation pour mobilepixel7-2026-11-11-api TEST-E2E » de 112×30 px (minimum 44×44 px sur mobile).",
+      "selecteur": "a[aria-label=\"+ Consultation pour mobilepixel7-2026-11-11-api TEST-E2E\"]"
+    },
+    {
+      "ecran": "Tableau de bord — résultats de recherche",
+      "url": "/dashboard",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/tableau-de-bord-resultats-de-recherche.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Tous (2) » de 70×24 px (minimum 44×44 px sur mobile).",
+      "selecteur": "section:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(1)"
+    },
+    {
+      "ecran": "Tableau de bord — résultats de recherche",
+      "url": "/dashboard",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/tableau-de-bord-resultats-de-recherche.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « En attente (2) » de 98×24 px (minimum 44×44 px sur mobile).",
+      "selecteur": "section:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(2)"
+    },
+    {
+      "ecran": "Tableau de bord — résultats de recherche",
+      "url": "/dashboard",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/tableau-de-bord-resultats-de-recherche.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Confirmé (0) » de 95×24 px (minimum 44×44 px sur mobile).",
+      "selecteur": "section:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(3)"
+    },
+    {
+      "ecran": "Tableau de bord — résultats de recherche",
+      "url": "/dashboard",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/tableau-de-bord-resultats-de-recherche.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Arrivé (0) » de 76×24 px (minimum 44×44 px sur mobile).",
+      "selecteur": "section:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(4)"
+    },
+    {
+      "ecran": "Tableau de bord — résultats de recherche",
+      "url": "/dashboard",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/tableau-de-bord-resultats-de-recherche.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Facturé (0) » de 84×24 px (minimum 44×44 px sur mobile).",
+      "selecteur": "section:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(5)"
+    },
+    {
+      "ecran": "Tableau de bord — résultats de recherche",
+      "url": "/dashboard",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/tableau-de-bord-resultats-de-recherche.png",
+      "type": "zone-cliquable",
+      "gravite": "majeur",
+      "description": "Zone cliquable « mobileiphone13-2026-11-11-api TEST-E2E » de 252×15 px (minimum 44×44 px sur mobile).",
+      "selecteur": "td:nth-of-type(2) > div > div:nth-of-type(2) > a"
+    },
+    {
+      "ecran": "Tableau de bord — résultats de recherche",
+      "url": "/dashboard",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/tableau-de-bord-resultats-de-recherche.png",
+      "type": "texte-tronque",
+      "gravite": "mineur",
+      "description": "Texte coupé ou masqué : « mobilepixel7-2026-11-11-api TEST-E2E ».",
+      "selecteur": "#\\:r0\\:-0 > p:nth-of-type(1)"
+    },
+    {
+      "ecran": "Tableau de bord — résultats de recherche",
+      "url": "/dashboard",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/tableau-de-bord-resultats-de-recherche.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "Certains rôles ARIA doivent comporter des descendants directs spécifiques (aria-required-children, 1 élément(s)).",
+      "selecteur": "#\\:r0\\:"
+    }
+  ]
+}

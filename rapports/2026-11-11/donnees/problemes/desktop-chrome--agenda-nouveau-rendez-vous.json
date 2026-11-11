@@ -1,0 +1,79 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Agenda — nouveau rendez-vous",
+      "url": "/agenda",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/agenda-nouveau-rendez-vous.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Agenda — nouveau rendez-vous",
+      "url": "/agenda",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/agenda-nouveau-rendez-vous.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "Certains rôles ARIA doivent comporter des descendants directs spécifiques (aria-required-children, 1 élément(s)).",
+      "selecteur": ".rbc-row-content"
+    },
+    {
+      "ecran": "Agenda — nouveau rendez-vous",
+      "url": "/agenda",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/agenda-nouveau-rendez-vous.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "Certains rôles ARIA doivent être contenus par des parents spécifiques (aria-required-parent, 8 élément(s)).",
+      "selecteur": ".rbc-header:nth-child(1) > .rbc-button-link[type=\"button\"] > span[role=\"columnheader\"][aria-sort=\"none\"], .rbc-header:nth-child(2) > .rbc-button-link[type=\"button\"] > span[role=\"columnheader\"][aria-sort=\"none\"], .rbc-today.rbc-header > .rbc-button-link[type=\"button\"] > span[role=\"columnheader\"][aria-sort=\"none\"], .rbc-header:nth-child(4) > .rbc-button-link[type=\"button\"] > span[role=\"columnheader\"][aria-sort=\"none\"], .rbc-header:nth-child(5) > .rbc-button-link[type=\"button\"] > span[role=\"columnheader\"][aria-sort=\"none\"]"
+    },
+    {
+      "ecran": "Agenda — nouveau rendez-vous",
+      "url": "/agenda",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/agenda-nouveau-rendez-vous.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Les éléments doivent avoir un contraste de couleurs suffisant (color-contrast, 1 élément(s)).",
+      "selecteur": ".sm\\:text-xs"
+    },
+    {
+      "ecran": "Agenda — nouveau rendez-vous",
+      "url": "/agenda",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/agenda-nouveau-rendez-vous.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "Chaque élément de formulaire doit avoir une étiquette (label, 1 élément(s)).",
+      "selecteur": "input[type=\"datetime-local\"]"
+    },
+    {
+      "ecran": "Agenda — nouveau rendez-vous",
+      "url": "/agenda",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/agenda-nouveau-rendez-vous.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Vérifier que les régions défilantes sont accessibles au clavier (scrollable-region-focusable, 1 élément(s)).",
+      "selecteur": ".rbc-time-content"
+    },
+    {
+      "ecran": "Agenda — nouveau rendez-vous",
+      "url": "/agenda",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/agenda-nouveau-rendez-vous.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "L’élément 'select' doit avoir un nom accessible (select-name, 2 élément(s)).",
+      "selecteur": "select[name=\"patientId\"], select[name=\"dureeMinutes\"]"
+    }
+  ]
+}

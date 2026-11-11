@@ -1,0 +1,68 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Ordonnances",
+      "url": "/ordonnances",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/ordonnances.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Ordonnances",
+      "url": "/ordonnances",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/ordonnances.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Ouvrir le menu » de 40×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Ouvrir le menu\"]"
+    },
+    {
+      "ecran": "Ordonnances",
+      "url": "/ordonnances",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/ordonnances.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Notifications » de 36×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Notifications\"]"
+    },
+    {
+      "ecran": "Ordonnances",
+      "url": "/ordonnances",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/ordonnances.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « + Nouvelle ordonnance » de 358×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "main > div > div:nth-of-type(1) > button"
+    },
+    {
+      "ecran": "Ordonnances",
+      "url": "/ordonnances",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/ordonnances.png",
+      "type": "zone-cliquable",
+      "gravite": "majeur",
+      "description": "Zone cliquable « Créer la première ordonnance » de 202×20 px (minimum 44×44 px sur mobile).",
+      "selecteur": "tbody > tr > td > button"
+    },
+    {
+      "ecran": "Ordonnances",
+      "url": "/ordonnances",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/ordonnances.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Les éléments doivent avoir un contraste de couleurs suffisant (color-contrast, 1 élément(s)).",
+      "selecteur": ".mb-2"
+    }
+  ]
+}

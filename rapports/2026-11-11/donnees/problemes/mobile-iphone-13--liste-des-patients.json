@@ -1,0 +1,79 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Liste des patients",
+      "url": "/patients",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/liste-des-patients.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Liste des patients",
+      "url": "/patients",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/liste-des-patients.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Ouvrir le menu » de 40×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Ouvrir le menu\"]"
+    },
+    {
+      "ecran": "Liste des patients",
+      "url": "/patients",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/liste-des-patients.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Notifications » de 36×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Notifications\"]"
+    },
+    {
+      "ecran": "Liste des patients",
+      "url": "/patients",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/liste-des-patients.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Export CSV » de 110×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > div:nth-of-type(1) > div > button"
+    },
+    {
+      "ecran": "Liste des patients",
+      "url": "/patients",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/liste-des-patients.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « + Nouveau patient » de 154×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > div:nth-of-type(1) > div > a"
+    },
+    {
+      "ecran": "Liste des patients",
+      "url": "/patients",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/liste-des-patients.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Précédent » de 96×30 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div:nth-of-type(3) > div:nth-of-type(2) > div > button:nth-of-type(1)"
+    },
+    {
+      "ecran": "Liste des patients",
+      "url": "/patients",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/liste-des-patients.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Suivant » de 74×30 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div:nth-of-type(3) > div:nth-of-type(2) > div > button:nth-of-type(2)"
+    }
+  ]
+}

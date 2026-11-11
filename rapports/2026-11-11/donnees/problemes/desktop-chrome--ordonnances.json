@@ -1,0 +1,24 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Ordonnances",
+      "url": "/ordonnances",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/ordonnances.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Ordonnances",
+      "url": "/ordonnances",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/ordonnances.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Les éléments doivent avoir un contraste de couleurs suffisant (color-contrast, 2 élément(s)).",
+      "selecteur": ".sm\\:text-xs, .mb-2"
+    }
+  ]
+}

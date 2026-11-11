@@ -1,0 +1,79 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Fiche patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/fiche-patient.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Fiche patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/fiche-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Ouvrir le menu » de 40×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Ouvrir le menu\"]"
+    },
+    {
+      "ecran": "Fiche patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/fiche-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Notifications » de 36×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Notifications\"]"
+    },
+    {
+      "ecran": "Fiche patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/fiche-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "majeur",
+      "description": "Zone cliquable « ← Retour » de 62×20 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > div:nth-of-type(1) > div:nth-of-type(1) > a"
+    },
+    {
+      "ecran": "Fiche patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/fiche-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Modifier » de 358×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > div:nth-of-type(1) > div:nth-of-type(2) > a:nth-of-type(1)"
+    },
+    {
+      "ecran": "Fiche patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/fiche-patient.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « + Consultation » de 358×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > div:nth-of-type(1) > div:nth-of-type(2) > a:nth-of-type(2)"
+    },
+    {
+      "ecran": "Fiche patient",
+      "url": "/patients/7e1fa7ec-2f64-4ea4-b678-a92f2e43bb69",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/fiche-patient.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Les éléments doivent avoir un contraste de couleurs suffisant (color-contrast, 1 élément(s)).",
+      "selecteur": ".text-gray-400"
+    }
+  ]
+}

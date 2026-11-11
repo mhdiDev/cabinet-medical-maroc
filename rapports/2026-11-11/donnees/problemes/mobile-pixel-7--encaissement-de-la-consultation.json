@@ -1,0 +1,178 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=7d5589c8-3bbf-40d4-aa1d-34e424a456b3&date=2026-11-11",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/encaissement-de-la-consultation.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=7d5589c8-3bbf-40d4-aa1d-34e424a456b3&date=2026-11-11",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/encaissement-de-la-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Ouvrir le menu » de 40×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Ouvrir le menu\"]"
+    },
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=7d5589c8-3bbf-40d4-aa1d-34e424a456b3&date=2026-11-11",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/encaissement-de-la-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Notifications » de 36×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Notifications\"]"
+    },
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=7d5589c8-3bbf-40d4-aa1d-34e424a456b3&date=2026-11-11",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/encaissement-de-la-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « + Encaissement » de 380×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "main > div > div:nth-of-type(1) > button"
+    },
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=7d5589c8-3bbf-40d4-aa1d-34e424a456b3&date=2026-11-11",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/encaissement-de-la-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « — Sélectionner une consultation (optionnel) —TEST-E2E mobile » de 330×37 px (minimum 44×44 px sur mobile).",
+      "selecteur": "select[name=\"consultationId\"]"
+    },
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=7d5589c8-3bbf-40d4-aa1d-34e424a456b3&date=2026-11-11",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/encaissement-de-la-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « 200.00 » de 330×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"montant\"]"
+    },
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=7d5589c8-3bbf-40d4-aa1d-34e424a456b3&date=2026-11-11",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/encaissement-de-la-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « 0 » de 330×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"montantRemise\"]"
+    },
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=7d5589c8-3bbf-40d4-aa1d-34e424a456b3&date=2026-11-11",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/encaissement-de-la-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « 💵 Espèces💳 Carte bancaire📝 Chèque🏥 Assurance » de 330×37 px (minimum 44×44 px sur mobile).",
+      "selecteur": "select[name=\"typePaiement\"]"
+    },
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=7d5589c8-3bbf-40d4-aa1d-34e424a456b3&date=2026-11-11",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/encaissement-de-la-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Consultation, acte, examen... » de 330×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"description\"]"
+    },
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=7d5589c8-3bbf-40d4-aa1d-34e424a456b3&date=2026-11-11",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/encaissement-de-la-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Annuler » de 84×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > form > div:nth-of-type(3) > button:nth-of-type(1)"
+    },
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=7d5589c8-3bbf-40d4-aa1d-34e424a456b3&date=2026-11-11",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/encaissement-de-la-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Enregistrer » de 120×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > form > div:nth-of-type(3) > button:nth-of-type(2)"
+    },
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=7d5589c8-3bbf-40d4-aa1d-34e424a456b3&date=2026-11-11",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/encaissement-de-la-consultation.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « 2026-11-11 » de 162×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "main > div > div:nth-of-type(3) > input"
+    },
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=7d5589c8-3bbf-40d4-aa1d-34e424a456b3&date=2026-11-11",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/encaissement-de-la-consultation.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Les éléments doivent avoir un contraste de couleurs suffisant (color-contrast, 2 élément(s)).",
+      "selecteur": ".sm\\:w-auto, .disabled\\:opacity-50"
+    },
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=7d5589c8-3bbf-40d4-aa1d-34e424a456b3&date=2026-11-11",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/encaissement-de-la-consultation.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "Chaque élément de formulaire doit avoir une étiquette (label, 2 élément(s)).",
+      "selecteur": "input[value=\"0\"], input[type=\"date\"]"
+    },
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=7d5589c8-3bbf-40d4-aa1d-34e424a456b3&date=2026-11-11",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/encaissement-de-la-consultation.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Vérifier que les régions défilantes sont accessibles au clavier (scrollable-region-focusable, 1 élément(s)).",
+      "selecteur": ".overflow-hidden.shadow-sm.rounded-xl > .overflow-x-auto"
+    },
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=7d5589c8-3bbf-40d4-aa1d-34e424a456b3&date=2026-11-11",
+      "projet": "mobile-pixel-7",
+      "mobile": true,
+      "capture": "captures/mobile-pixel-7/encaissement-de-la-consultation.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "L’élément 'select' doit avoir un nom accessible (select-name, 2 élément(s)).",
+      "selecteur": "select[name=\"consultationId\"], select[name=\"typePaiement\"]"
+    }
+  ]
+}

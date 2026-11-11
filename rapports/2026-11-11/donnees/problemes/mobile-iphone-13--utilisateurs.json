@@ -1,0 +1,68 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Utilisateurs",
+      "url": "/utilisateurs",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/utilisateurs.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Utilisateurs",
+      "url": "/utilisateurs",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/utilisateurs.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Ouvrir le menu » de 40×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Ouvrir le menu\"]"
+    },
+    {
+      "ecran": "Utilisateurs",
+      "url": "/utilisateurs",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/utilisateurs.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Notifications » de 36×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Notifications\"]"
+    },
+    {
+      "ecran": "Utilisateurs",
+      "url": "/utilisateurs",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/utilisateurs.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « + Nouvel utilisateur » de 358×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "main > div > div:nth-of-type(1) > button"
+    },
+    {
+      "ecran": "Utilisateurs",
+      "url": "/utilisateurs",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/utilisateurs.png",
+      "type": "zone-cliquable",
+      "gravite": "majeur",
+      "description": "Zone cliquable « Modifier Test E2E » de 55×20 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Modifier Test E2E\"]"
+    },
+    {
+      "ecran": "Utilisateurs",
+      "url": "/utilisateurs",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/utilisateurs.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Les éléments doivent avoir un contraste de couleurs suffisant (color-contrast, 1 élément(s)).",
+      "selecteur": ".text-gray-400"
+    }
+  ]
+}

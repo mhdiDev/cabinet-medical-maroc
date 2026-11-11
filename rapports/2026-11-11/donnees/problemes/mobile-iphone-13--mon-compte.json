@@ -1,0 +1,101 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Mon compte",
+      "url": "/mon-compte",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/mon-compte.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Mon compte",
+      "url": "/mon-compte",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/mon-compte.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Ouvrir le menu » de 40×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Ouvrir le menu\"]"
+    },
+    {
+      "ecran": "Mon compte",
+      "url": "/mon-compte",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/mon-compte.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Notifications » de 36×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Notifications\"]"
+    },
+    {
+      "ecran": "Mon compte",
+      "url": "/mon-compte",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/mon-compte.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « ancienMdp » de 308×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"ancienMdp\"]"
+    },
+    {
+      "ecran": "Mon compte",
+      "url": "/mon-compte",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/mon-compte.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « nouveauMdp » de 308×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"nouveauMdp\"]"
+    },
+    {
+      "ecran": "Mon compte",
+      "url": "/mon-compte",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/mon-compte.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « confirmation » de 308×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"confirmation\"]"
+    },
+    {
+      "ecran": "Mon compte",
+      "url": "/mon-compte",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/mon-compte.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Modifier le mot de passe » de 213×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div:nth-of-type(2) > form > div:nth-of-type(4) > button"
+    },
+    {
+      "ecran": "Mon compte",
+      "url": "/mon-compte",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/mon-compte.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Les éléments doivent avoir un contraste de couleurs suffisant (color-contrast, 1 élément(s)).",
+      "selecteur": ".text-gray-400"
+    },
+    {
+      "ecran": "Mon compte",
+      "url": "/mon-compte",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/mon-compte.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "Chaque élément de formulaire doit avoir une étiquette (label, 3 élément(s)).",
+      "selecteur": "input[autocomplete=\"current-password\"], input[name=\"nouveauMdp\"], input[name=\"confirmation\"]"
+    }
+  ]
+}

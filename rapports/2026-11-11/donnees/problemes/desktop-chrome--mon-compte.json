@@ -1,0 +1,46 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Mon compte",
+      "url": "/mon-compte",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/mon-compte.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Mon compte",
+      "url": "/mon-compte",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/mon-compte.png",
+      "type": "texte-tronque",
+      "gravite": "mineur",
+      "description": "Texte coupé ou masqué : « Déconnexion (recouvert par un autre élément) ».",
+      "selecteur": "header > div:nth-of-type(2) > div:nth-of-type(3) > button"
+    },
+    {
+      "ecran": "Mon compte",
+      "url": "/mon-compte",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/mon-compte.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Les éléments doivent avoir un contraste de couleurs suffisant (color-contrast, 2 élément(s)).",
+      "selecteur": ".sm\\:text-xs, .text-gray-400"
+    },
+    {
+      "ecran": "Mon compte",
+      "url": "/mon-compte",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/mon-compte.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "Chaque élément de formulaire doit avoir une étiquette (label, 3 élément(s)).",
+      "selecteur": "input[autocomplete=\"current-password\"], input[name=\"nouveauMdp\"], input[name=\"confirmation\"]"
+    }
+  ]
+}

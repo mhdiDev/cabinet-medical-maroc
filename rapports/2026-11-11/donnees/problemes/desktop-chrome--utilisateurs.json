@@ -1,0 +1,35 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Utilisateurs",
+      "url": "/utilisateurs",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/utilisateurs.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Utilisateurs",
+      "url": "/utilisateurs",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/utilisateurs.png",
+      "type": "texte-tronque",
+      "gravite": "mineur",
+      "description": "Texte coupé ou masqué : « Déconnexion (recouvert par un autre élément) ».",
+      "selecteur": "header > div:nth-of-type(2) > div:nth-of-type(3) > button"
+    },
+    {
+      "ecran": "Utilisateurs",
+      "url": "/utilisateurs",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/utilisateurs.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Les éléments doivent avoir un contraste de couleurs suffisant (color-contrast, 1 élément(s)).",
+      "selecteur": ".sm\\:text-xs"
+    }
+  ]
+}

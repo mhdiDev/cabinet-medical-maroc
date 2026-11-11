@@ -1,0 +1,57 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Rapport périodique",
+      "url": "/paiements",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/rapport-periodique.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Rapport périodique",
+      "url": "/paiements",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/rapport-periodique.png",
+      "type": "texte-tronque",
+      "gravite": "mineur",
+      "description": "Texte coupé ou masqué : « Déconnexion (recouvert par un autre élément) ».",
+      "selecteur": "header > div:nth-of-type(2) > div:nth-of-type(3) > button"
+    },
+    {
+      "ecran": "Rapport périodique",
+      "url": "/paiements",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/rapport-periodique.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Les éléments doivent avoir un contraste de couleurs suffisant (color-contrast, 3 élément(s)).",
+      "selecteur": ".sm\\:text-xs, .sm\\:w-auto, .items-start > .bg-green-600.hover\\:bg-green-700.text-white"
+    },
+    {
+      "ecran": "Rapport périodique",
+      "url": "/paiements",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/rapport-periodique.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "Chaque élément de formulaire doit avoir une étiquette (label, 2 élément(s)).",
+      "selecteur": "input[value=\"2026-10-12\"], input[value=\"2026-11-11\"]"
+    },
+    {
+      "ecran": "Rapport périodique",
+      "url": "/paiements",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/rapport-periodique.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "L’élément 'select' doit avoir un nom accessible (select-name, 1 élément(s)).",
+      "selecteur": "select"
+    }
+  ]
+}

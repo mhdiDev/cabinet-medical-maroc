@@ -1,0 +1,57 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=356c3d1f-cc18-4e26-8e68-af6c28ca5331&date=2026-11-11",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/encaissement-de-la-consultation.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=356c3d1f-cc18-4e26-8e68-af6c28ca5331&date=2026-11-11",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/encaissement-de-la-consultation.png",
+      "type": "texte-tronque",
+      "gravite": "mineur",
+      "description": "Texte coupé ou masqué : « Déconnexion (recouvert par un autre élément) ».",
+      "selecteur": "header > div:nth-of-type(2) > div:nth-of-type(3) > button"
+    },
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=356c3d1f-cc18-4e26-8e68-af6c28ca5331&date=2026-11-11",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/encaissement-de-la-consultation.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Les éléments doivent avoir un contraste de couleurs suffisant (color-contrast, 4 élément(s)).",
+      "selecteur": ".sm\\:text-xs, .sm\\:w-auto, .disabled\\:opacity-50, .md\\:col-span-1 > .text-gray-400"
+    },
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=356c3d1f-cc18-4e26-8e68-af6c28ca5331&date=2026-11-11",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/encaissement-de-la-consultation.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "Chaque élément de formulaire doit avoir une étiquette (label, 2 élément(s)).",
+      "selecteur": "input[value=\"0\"], input[type=\"date\"]"
+    },
+    {
+      "ecran": "Encaissement de la consultation",
+      "url": "/paiements?consultationId=356c3d1f-cc18-4e26-8e68-af6c28ca5331&date=2026-11-11",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/encaissement-de-la-consultation.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "L’élément 'select' doit avoir un nom accessible (select-name, 2 élément(s)).",
+      "selecteur": "select[name=\"consultationId\"], select[name=\"typePaiement\"]"
+    }
+  ]
+}

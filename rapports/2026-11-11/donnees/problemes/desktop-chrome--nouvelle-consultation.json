@@ -1,0 +1,24 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=03ab206b-5dae-4c2a-aa36-c40eb2e63ef9",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/nouvelle-consultation.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Nouvelle consultation",
+      "url": "/consultations/nouvelle?patientId=03ab206b-5dae-4c2a-aa36-c40eb2e63ef9",
+      "projet": "desktop-chrome",
+      "mobile": false,
+      "capture": "captures/desktop-chrome/nouvelle-consultation.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Les éléments doivent avoir un contraste de couleurs suffisant (color-contrast, 3 élément(s)).",
+      "selecteur": ".sm\\:text-xs, .text-left, .hover\\:text-red-500"
+    }
+  ]
+}

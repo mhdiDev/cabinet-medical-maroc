@@ -1,0 +1,299 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "chevauchement",
+      "gravite": "mineur",
+      "description": "« 09 lun. » et « 10 mar. » se chevauchent (22 % de la plus petite boîte).",
+      "selecteur": "div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > button  ⟷  div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > button"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "chevauchement",
+      "gravite": "mineur",
+      "description": "« 10 mar. » et « 11 mer. » se chevauchent (27 % de la plus petite boîte).",
+      "selecteur": "div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > button  ⟷  div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3) > button"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "chevauchement",
+      "gravite": "mineur",
+      "description": "« 11 mer. » et « 12 jeu. » se chevauchent (20 % de la plus petite boîte).",
+      "selecteur": "div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3) > button  ⟷  div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(4) > button"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "chevauchement",
+      "gravite": "mineur",
+      "description": "« 12 jeu. » et « 13 ven. » se chevauchent (13 % de la plus petite boîte).",
+      "selecteur": "div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(4) > button  ⟷  div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(5) > button"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "chevauchement",
+      "gravite": "mineur",
+      "description": "« 13 ven. » et « 14 sam. » se chevauchent (22 % de la plus petite boîte).",
+      "selecteur": "div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(5) > button  ⟷  div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(6) > button"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "chevauchement",
+      "gravite": "mineur",
+      "description": "« 14 sam. » et « 15 dim. » se chevauchent (33 % de la plus petite boîte).",
+      "selecteur": "div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(6) > button  ⟷  div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(7) > button"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Ouvrir le menu » de 40×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Ouvrir le menu\"]"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Notifications » de 36×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Notifications\"]"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « + Nouveau RDV » de 138×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "main > div > div:nth-of-type(1) > button"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Aujourd'hui » de 123×34 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > div:nth-of-type(1) > span:nth-of-type(1) > button:nth-of-type(1)"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « ‹ » de 40×34 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > div:nth-of-type(1) > span:nth-of-type(1) > button:nth-of-type(2)"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « › » de 40×34 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > div:nth-of-type(1) > span:nth-of-type(1) > button:nth-of-type(3)"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Mois » de 70×34 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > div:nth-of-type(1) > span:nth-of-type(3) > button:nth-of-type(1)"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Semaine » de 99×34 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > div:nth-of-type(1) > span:nth-of-type(3) > button:nth-of-type(2)"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Jour » de 71×34 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > div:nth-of-type(1) > span:nth-of-type(3) > button:nth-of-type(3)"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Liste » de 68×34 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > div:nth-of-type(1) > span:nth-of-type(3) > button:nth-of-type(4)"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "zone-cliquable",
+      "gravite": "majeur",
+      "description": "Zone cliquable « 09 lun. » de 49×22 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > button"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "zone-cliquable",
+      "gravite": "majeur",
+      "description": "Zone cliquable « 10 mar. » de 51×22 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > button"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "zone-cliquable",
+      "gravite": "majeur",
+      "description": "Zone cliquable « 11 mer. » de 47×22 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3) > button"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "zone-cliquable",
+      "gravite": "majeur",
+      "description": "Zone cliquable « 12 jeu. » de 44×22 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(4) > button"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "zone-cliquable",
+      "gravite": "majeur",
+      "description": "Zone cliquable « 13 ven. » de 49×22 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(5) > button"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "zone-cliquable",
+      "gravite": "majeur",
+      "description": "Zone cliquable « 14 sam. » de 55×22 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(6) > button"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "zone-cliquable",
+      "gravite": "majeur",
+      "description": "Zone cliquable « 15 dim. » de 50×22 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(7) > button"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "zone-cliquable",
+      "gravite": "majeur",
+      "description": "Zone cliquable « 19:30 – 20:00desktopchrome-2026-11-11-api TEST-E2E » de 27×20 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div:nth-of-type(2) > div:nth-of-type(4) > div:nth-of-type(14) > div"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "Certains rôles ARIA doivent comporter des descendants directs spécifiques (aria-required-children, 1 élément(s)).",
+      "selecteur": ".rbc-row-content"
+    },
+    {
+      "ecran": "Agenda",
+      "url": "/agenda",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/agenda.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "Certains rôles ARIA doivent être contenus par des parents spécifiques (aria-required-parent, 8 élément(s)).",
+      "selecteur": ".rbc-header:nth-child(1) > .rbc-button-link[type=\"button\"] > span[role=\"columnheader\"][aria-sort=\"none\"], .rbc-header:nth-child(2) > .rbc-button-link[type=\"button\"] > span[role=\"columnheader\"][aria-sort=\"none\"], .rbc-today.rbc-header > .rbc-button-link[type=\"button\"] > span[role=\"columnheader\"][aria-sort=\"none\"], .rbc-header:nth-child(4) > .rbc-button-link[type=\"button\"] > span[role=\"columnheader\"][aria-sort=\"none\"], .rbc-header:nth-child(5) > .rbc-button-link[type=\"button\"] > span[role=\"columnheader\"][aria-sort=\"none\"]"
+    }
+  ]
+}

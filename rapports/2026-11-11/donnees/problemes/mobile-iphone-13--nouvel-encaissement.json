@@ -1,0 +1,167 @@
+{
+  "ecrans": [
+    {
+      "ecran": "Nouvel encaissement",
+      "url": "/paiements",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvel-encaissement.png"
+    }
+  ],
+  "problemes": [
+    {
+      "ecran": "Nouvel encaissement",
+      "url": "/paiements",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvel-encaissement.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Ouvrir le menu » de 40×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Ouvrir le menu\"]"
+    },
+    {
+      "ecran": "Nouvel encaissement",
+      "url": "/paiements",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvel-encaissement.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Notifications » de 36×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "button[aria-label=\"Notifications\"]"
+    },
+    {
+      "ecran": "Nouvel encaissement",
+      "url": "/paiements",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvel-encaissement.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « + Encaissement » de 358×36 px (minimum 44×44 px sur mobile).",
+      "selecteur": "main > div > div:nth-of-type(1) > button"
+    },
+    {
+      "ecran": "Nouvel encaissement",
+      "url": "/paiements",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvel-encaissement.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « — Sélectionner une consultation (optionnel) —TEST-E2E mobile » de 308×37 px (minimum 44×44 px sur mobile).",
+      "selecteur": "select[name=\"consultationId\"]"
+    },
+    {
+      "ecran": "Nouvel encaissement",
+      "url": "/paiements",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvel-encaissement.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « 200.00 » de 308×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"montant\"]"
+    },
+    {
+      "ecran": "Nouvel encaissement",
+      "url": "/paiements",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvel-encaissement.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « 0 » de 308×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"montantRemise\"]"
+    },
+    {
+      "ecran": "Nouvel encaissement",
+      "url": "/paiements",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvel-encaissement.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « 💵 Espèces💳 Carte bancaire📝 Chèque🏥 Assurance » de 308×37 px (minimum 44×44 px sur mobile).",
+      "selecteur": "select[name=\"typePaiement\"]"
+    },
+    {
+      "ecran": "Nouvel encaissement",
+      "url": "/paiements",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvel-encaissement.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Consultation, acte, examen... » de 308×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "input[name=\"description\"]"
+    },
+    {
+      "ecran": "Nouvel encaissement",
+      "url": "/paiements",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvel-encaissement.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Annuler » de 84×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > form > div:nth-of-type(3) > button:nth-of-type(1)"
+    },
+    {
+      "ecran": "Nouvel encaissement",
+      "url": "/paiements",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvel-encaissement.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « Enregistrer » de 120×38 px (minimum 44×44 px sur mobile).",
+      "selecteur": "div > form > div:nth-of-type(3) > button:nth-of-type(2)"
+    },
+    {
+      "ecran": "Nouvel encaissement",
+      "url": "/paiements",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvel-encaissement.png",
+      "type": "zone-cliquable",
+      "gravite": "mineur",
+      "description": "Zone cliquable « 2026-11-11 » de 164×40 px (minimum 44×44 px sur mobile).",
+      "selecteur": "main > div > div:nth-of-type(3) > input"
+    },
+    {
+      "ecran": "Nouvel encaissement",
+      "url": "/paiements",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvel-encaissement.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "Chaque élément de formulaire doit avoir une étiquette (label, 2 élément(s)).",
+      "selecteur": "input[value=\"0\"], input[type=\"date\"]"
+    },
+    {
+      "ecran": "Nouvel encaissement",
+      "url": "/paiements",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvel-encaissement.png",
+      "type": "accessibilite",
+      "gravite": "majeur",
+      "description": "Vérifier que les régions défilantes sont accessibles au clavier (scrollable-region-focusable, 1 élément(s)).",
+      "selecteur": ".overflow-hidden.shadow-sm.rounded-xl > .overflow-x-auto"
+    },
+    {
+      "ecran": "Nouvel encaissement",
+      "url": "/paiements",
+      "projet": "mobile-iphone-13",
+      "mobile": true,
+      "capture": "captures/mobile-iphone-13/nouvel-encaissement.png",
+      "type": "accessibilite",
+      "gravite": "bloquant",
+      "description": "L’élément 'select' doit avoir un nom accessible (select-name, 2 élément(s)).",
+      "selecteur": "select[name=\"consultationId\"], select[name=\"typePaiement\"]"
+    }
+  ]
+}
