@@ -152,15 +152,16 @@ MinIO ne publie plus d'image Docker).
 
 Sauvegardes : `scripts/backup.sh` (dump Postgres + archive MinIO vers OVH Object Storage via rclone, cron à 02h00).
 
-## Modèles Prisma (16 modèles)
+## Modèles Prisma (17 modèles)
 
-`Cabinet` · `User` · `RefreshToken` · `Patient` · `RendezVous` · `Consultation` · `Ordonnance` · `Medicament` · `OrdonnanceMedicament` · `Paiement` · `StockArticle` · `StockMouvement` · `Document` · `AuditLog` · `Notification` · `Parametre`
+`Cabinet` · `User` · `RefreshToken` · `Patient` · `RendezVous` · `Consultation` · `Ordonnance` · `Medicament` · `OrdonnanceMedicament` · `Paiement` · `StockArticle` · `StockMouvement` · `Document` · `AuditLog` · `Notification` · `Parametre` · `Constantes`
 
 Relations clés :
 - `Paiement` → `Consultation` (consultationId, optionnel)
 - `Paiement` → `Patient` (patientId, optionnel)
 - `Paiement` → `RendezVous` (rendezVousId, optionnel)
 - `Patient.estAssure Boolean` — statut assuré/non assuré
+- `Constantes` → `Patient`, `Consultation` (consultationId unique, optionnel), `User` (priseParId)
 
 ## Architecture API (préfixe `/api`)
 
@@ -172,6 +173,7 @@ Relations clés :
                      &date=AAAA-MM-JJ (patients vus ce jour, heure de Casablanca, + consultationsDuJour)
 /rendez-vous         CRUD + agenda + today + statut
 /consultations       CRUD + /patient/:id  (filtre ?date= disponible)
+/constantes          POST + /patient/:id + /patient/:id/du-jour + PATCH/DELETE :id (médecin, ou auteur le jour même)
 /ordonnances         CRUD + /patient/:id + /:id/pdf
 /medicaments         search + find-or-create + CRUD
 /paiements           CRUD + caisse + rapport + export Excel (?debut=&fin=&assurance=)
@@ -248,6 +250,7 @@ Relations clés :
 | `act()` et user-event dans les tests frontend | user-event utilise `@testing-library/dom` 10, RTL sa copie 9 : `jest.setup.js` enveloppe les événements dans `act()`. `next/link` peut encore en produire : le simuler par un `<a>` |
 | `useQuery` et `onSuccess` | React Query v5 n'appelle plus `onSuccess` dans `useQuery` (ne pas le masquer par `as any`) : lire `data` dans un `useEffect`, et `isFetchedAfterMount` si la donnée ne doit pas venir du cache |
 | Grille mobile qui écrase un champ | Dans une grille `grid-cols-1 sm:grid-cols-2`, écrire `sm:col-span-2` et non `col-span-2` (qui crée une 2e colonne fantôme sur mobile) |
+| Seuils des constantes | `backend/src/constantes/seuils.ts` est recopié dans `frontend/src/lib/constantes/seuils.ts` : modifier les deux (un test du backend compare les fichiers) |
 | Playwright lent en local | Utiliser le Chromium de Playwright (pas le Chrome du Mac) et un frontend compilé, pas `npm run dev` |
 
 ## Variables d'environnement production
