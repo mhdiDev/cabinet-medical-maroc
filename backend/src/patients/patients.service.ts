@@ -68,6 +68,8 @@ export class PatientsService {
           email: true,
           ville: true,
           groupeSanguin: true,
+          // Affichées par les listes de choix d'un patient (consultation, ordonnance)
+          allergies: true,
           createdAt: true,
           // Avec une date : les consultations de ce jour (heure et médecin)
           ...(duJour && {

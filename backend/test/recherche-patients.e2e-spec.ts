@@ -115,6 +115,16 @@ describe('Recherche de patients (e2e)', () => {
     expect(ids(await chercher({ date: '2026-11-12' }))).toEqual([]);
   });
 
+  // Les listes de choix (nouvelle consultation, ordonnance) affichent les allergies
+  // du patient choisi à partir de ce résultat
+  it('renvoie les allergies de chaque patient', async () => {
+    await prisma.patient.update({ where: { id: 'p-tazi' }, data: { allergies: ['Pénicilline'] } });
+    const res = await chercher({ q: 'tazi' });
+    expect(res.body.data[0].allergies).toEqual(['Pénicilline']);
+    const parDate = await chercher({ date: '2026-11-10' });
+    expect(parDate.body.data.find((p: { id: string }) => p.id === 'p-tazi').allergies).toEqual(['Pénicilline']);
+  });
+
   it('sans date, pas de consultationsDuJour', async () => {
     const res = await chercher({ q: 'tazi' });
     expect(res.body.data[0]).not.toHaveProperty('consultationsDuJour');
