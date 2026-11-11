@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -34,6 +34,9 @@ export default function PatientDetailPage({ params }: { params: { id: string } }
   // ?onglet=constantes (lien de la notification « Constantes anormales »)
   const [tab, setTab] = useState(searchParams.get('onglet') === 'constantes' ? 2 : 0);
   const [priseOuverte, setPriseOuverte] = useState(false);
+  useEffect(() => {
+    if (searchParams.get('onglet') === 'constantes') setTab(2);
+  }, [searchParams]);
   const { user } = useAuthStore();
 
   const { data: patient, isLoading } = useQuery({

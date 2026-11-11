@@ -37,7 +37,10 @@ export function OngletConstantes({ patient }: { patient: { id: string; dateNaiss
       queryClient.invalidateQueries({ queryKey: cleConstantes(patient.id) });
       toast.success('Prise supprimée');
     },
-    onError: () => toast.error('Suppression impossible'),
+    onError: (err: any) => {
+      const message = err.response?.data?.message;
+      toast.error(Array.isArray(message) ? message.join(', ') : message || 'Suppression impossible');
+    },
   });
 
   if (isLoading) return <p className="text-sm text-gray-500">Chargement…</p>;

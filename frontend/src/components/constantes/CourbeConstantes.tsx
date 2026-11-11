@@ -2,7 +2,7 @@
 'use client';
 import { useId, useState } from 'react';
 import { CartesianGrid, Legend, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { COURBES, fr, pointsCourbe, reperesCourbe } from '@/lib/constantes/affichage';
+import { COURBES, fr, libelleDate, libelleDateHeure, pointsCourbe, reperesCourbe } from '@/lib/constantes/affichage';
 import type { Prise } from '@/lib/constantes/api';
 
 const COULEURS = ['#2563eb', '#7c3aed'];
@@ -38,9 +38,9 @@ export function CourbeConstantes({ prises }: { prises: Prise[] }) {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={points} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+              <XAxis dataKey="instant" tickFormatter={libelleDate} tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} width={44} domain={['auto', 'auto']} />
-              <Tooltip formatter={(v: number) => `${fr(v)} ${courbe.unite}`} />
+              <Tooltip labelFormatter={(l: string) => libelleDateHeure(l)} formatter={(v: number) => `${fr(v)} ${courbe.unite}`} />
               {courbe.series.length > 1 && <Legend />}
               {reperesCourbe(courbe).map((y) => (
                 <ReferenceLine key={y} y={y} stroke="#f59e0b" strokeDasharray="4 4" />

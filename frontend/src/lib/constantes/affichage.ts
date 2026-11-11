@@ -113,7 +113,20 @@ export const COURBES: Courbe[] = [
   courbeSimple('tourDeTaille'),
 ];
 
-export type PointCourbe = { date: string } & Partial<Record<CleSerie, number | null>>;
+export const libelleDate = (iso: string) =>
+  new Date(iso).toLocaleDateString('fr-MA', { day: '2-digit', month: '2-digit', year: '2-digit', timeZone: FUSEAU_CABINET });
+
+export const libelleDateHeure = (iso: string) =>
+  new Date(iso).toLocaleString('fr-MA', {
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: FUSEAU_CABINET,
+  });
+
+export type PointCourbe = { date: string; instant: string } & Partial<Record<CleSerie, number | null>>;
 
 /** Points de la courbe, du plus ancien au plus récent (prises sans valeur ignorées) */
 export function pointsCourbe(prises: Prise[], courbe: Courbe): PointCourbe[] {
@@ -121,12 +134,8 @@ export function pointsCourbe(prises: Prise[], courbe: Courbe): PointCourbe[] {
     .sort((a, b) => a.datePrise.localeCompare(b.datePrise))
     .filter((p) => courbe.series.some((s) => p[s.cle] !== null && p[s.cle] !== undefined))
     .map((p) => ({
-      date: new Date(p.datePrise).toLocaleDateString('fr-MA', {
-        day: '2-digit',
-        month: '2-digit',
-        year: '2-digit',
-        timeZone: FUSEAU_CABINET,
-      }),
+      date: libelleDate(p.datePrise),
+      instant: p.datePrise,
       ...Object.fromEntries(courbe.series.map((s) => [s.cle, p[s.cle] ?? null])),
     }));
 }
