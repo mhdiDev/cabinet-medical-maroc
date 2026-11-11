@@ -15,6 +15,13 @@ function ListePatients() {
   const [date, setDate] = useState(/^\d{4}-\d{2}-\d{2}$/.test(dateUrl) ? dateUrl : '');
   const [page, setPage] = useState(1);
 
+  // Recherche lancée depuis la barre du haut alors que la liste est déjà ouverte
+  const qUrl = params.get('q') ?? '';
+  useEffect(() => {
+    setSearch(qUrl);
+    setPage(1);
+  }, [qUrl]);
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ['patients', search, date, page],
     queryFn: () =>

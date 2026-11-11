@@ -16,6 +16,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pagePlateforme = pathname === '/cabinets' || pathname === '/mon-compte';
   const horsEspacePlateforme = user?.role === 'SUPER_ADMIN' && !pagePlateforme && !mdpAChanger;
 
+  // Menu mobile : se ferme au changement de page et avec Échap
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const surTouche = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSidebarOpen(false);
+    };
+    document.addEventListener('keydown', surTouche);
+    return () => document.removeEventListener('keydown', surTouche);
+  }, [sidebarOpen]);
+
   useEffect(() => {
     // Attendre la fin de la réhydratation avant de juger l'état d'auth
     if (_hasHydrated && !token) router.push('/login');
@@ -67,18 +81,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!token || mdpAChanger || horsEspacePlateforme) return null;
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Overlay mobile — ferme la sidebar en cliquant dehors */}
+    <div className="h-screen flex overflow-hidden bg-slate-50 text-slate-800 antialiased">
+      {/* Fond du menu mobile : un clic dehors ferme le menu */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-20 lg:hidden"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-30 lg:hidden"
           onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
         />
       )}
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-        <Header onMenuClick={() => setSidebarOpen(o => !o)} />
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">{children}</main>
+      <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
+        <Header menuOuvert={sidebarOpen} onMenuClick={() => setSidebarOpen(o => !o)} />
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
   );
