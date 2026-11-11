@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { PatientsModule } from './patients/patients.module';
 import { RendezVousModule } from './rendez-vous/rendez-vous.module';
 import { ConsultationsModule } from './consultations/consultations.module';
+import { ConstantesModule } from './constantes/constantes.module';
 import { OrdonnancesModule } from './ordonnances/ordonnances.module';
 import { PaiementsModule } from './paiements/paiements.module';
 import { StockModule } from './stock/stock.module';
@@ -26,6 +27,7 @@ import { PlateformeModule } from './plateforme/plateforme.module';
     PatientsModule,
     RendezVousModule,
     ConsultationsModule,
+    ConstantesModule,
     OrdonnancesModule,
     PaiementsModule,
     StockModule,
