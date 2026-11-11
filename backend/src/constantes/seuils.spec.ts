@@ -1,4 +1,6 @@
 // backend/src/constantes/seuils.spec.ts
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { ageEnAnnees, calculerImc, evaluerConstantes } from './seuils';
 
 describe('calculerImc', () => {
@@ -161,5 +163,13 @@ describe('evaluerConstantes (bornes adultes)', () => {
   it('une valeur non finie ne produit aucune alerte', () => {
     expect(evaluerConstantes({ temperature: NaN }, 40)).toEqual([]);
     expect(evaluerConstantes({ pouls: Infinity }, 40)).toEqual([]);
+  });
+});
+
+describe('copie frontend', () => {
+  it('frontend/src/lib/constantes/seuils.ts est identique', () => {
+    const backend = readFileSync(join(__dirname, 'seuils.ts'), 'utf8');
+    const frontend = readFileSync(join(__dirname, '../../../frontend/src/lib/constantes/seuils.ts'), 'utf8');
+    expect(frontend).toBe(backend);
   });
 });
