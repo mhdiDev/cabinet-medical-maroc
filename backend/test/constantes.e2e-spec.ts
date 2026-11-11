@@ -119,11 +119,13 @@ describe('Constantes (e2e)', () => {
     const ligne = await prisma.constantes.findUnique({ where: { id: constantesId } });
     expect(ligne?.consultationId).toBe(consultation.body.id);
 
+    const avant = await prisma.consultation.count();
     const encore = await api()
       .post('/api/consultations')
       .set('Authorization', `Bearer ${medecin}`)
       .send({ patientId, medecinId: 'test-admin-id', constantesId });
     expect(encore.status).toBe(400);
+    expect(await prisma.consultation.count()).toBe(avant);
 
     const apres = await api()
       .get(`/api/constantes/patient/${patientId}/du-jour`)
@@ -181,5 +183,13 @@ describe('Constantes (e2e)', () => {
     expect((await api().post('/api/constantes').set(auth).send({ patientId: 'b-patient', poids: 70 })).status).toBe(404);
     expect((await api().patch(`/api/constantes/${priseB}`).set(auth).send({ poids: 61 })).status).toBe(404);
     expect((await api().delete(`/api/constantes/${priseB}`).set(auth)).status).toBe(404);
+
+    const avantConsultations = await prisma.consultation.count();
+    const rattachement = await api()
+      .post('/api/consultations')
+      .set(auth)
+      .send({ patientId, medecinId: 'test-admin-id', constantesId: priseB });
+    expect(rattachement.status).toBe(404);
+    expect(await prisma.consultation.count()).toBe(avantConsultations);
   });
 });
