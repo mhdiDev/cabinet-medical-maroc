@@ -138,10 +138,11 @@ export default function NouvelleConsultationPage() {
     setPriseDuJour(null);
     setSaisie(SAISIE_VIDE);
     setErreursConstantes({});
+    setPriseChargeePour(null);
   }, [selectedPatient?.id]);
   useEffect(() => {
     const id = selectedPatient?.id;
-    if (!id || priseChargeePour === id || !duJour.isFetchedAfterMount) return;
+    if (!id || priseChargeePour === id || !(duJour.isFetchedAfterMount || duJour.isError)) return;
     const prise = duJour.isError ? null : duJour.data ?? null;
     setPriseDuJour(prise);
     if (prise) setSaisie(versSaisie(prise));
@@ -151,6 +152,7 @@ export default function NouvelleConsultationPage() {
   /** Enregistre les constantes et renvoie l'identifiant de la prise à rattacher */
   const enregistrerConstantes = async (): Promise<string | undefined> => {
     if (priseDuJour) {
+      if (saisieVide(saisie)) return undefined; // champs tous vidés : la prise de la secrétaire reste telle quelle
       if (!memeSaisie(saisie, versSaisie(priseDuJour))) {
         const r = await apiClient.patch(`/constantes/${priseDuJour.id}`, versValeursCompletes(saisie));
         setPriseDuJour(r.data);
@@ -371,13 +373,18 @@ export default function NouvelleConsultationPage() {
               Prises à {heureCabinet(priseDuJour.datePrise)} par {priseDuJour.prisePar.prenom} {priseDuJour.prisePar.nom}
             </p>
           )}
+          {duJour.isError && (
+            <p className="text-sm text-orange-700 mb-3">
+              Impossible de vérifier les constantes déjà prises aujourd&apos;hui.
+            </p>
+          )}
           {selectedPatient ? (
             <FormulaireConstantes
               saisie={saisie}
               onChange={setSaisie}
               erreurs={erreursConstantes}
               dateNaissance={selectedPatient.dateNaissance}
-              desactive={mutation.isPending}
+              desactive={mutation.isPending || priseChargeePour !== selectedPatient.id}
             />
           ) : (
             <p className="text-sm text-gray-500">Choisissez d&apos;abord le patient.</p>

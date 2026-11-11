@@ -180,7 +180,8 @@ describe('Nouvelle consultation : constantes', () => {
     reponses(null);
     afficher('patientId=p-tazi');
     await screen.findByText('Ahmed Tazi');
-    await userEvent.type(await screen.findByLabelText('Poids'), '70');
+    await waitFor(() => expect(screen.getByLabelText('Poids')).toBeEnabled());
+    await userEvent.type(screen.getByLabelText('Poids'), '70');
     await userEvent.click(screen.getByRole('button', { name: 'Enregistrer la consultation' }));
     await waitFor(() => expect(post).toHaveBeenCalledTimes(2));
     expect(post).toHaveBeenNthCalledWith(1, '/constantes', { patientId: 'p-tazi', poids: 70 });
@@ -200,9 +201,36 @@ describe('Nouvelle consultation : constantes', () => {
     reponses(null);
     afficher('patientId=p-tazi');
     await screen.findByText('Ahmed Tazi');
-    await userEvent.type(await screen.findByLabelText('Température'), '375');
+    await waitFor(() => expect(screen.getByLabelText('Température')).toBeEnabled());
+    await userEvent.type(screen.getByLabelText('Température'), '375');
     await userEvent.click(screen.getByRole('button', { name: 'Enregistrer la consultation' }));
     expect(await screen.findByText('Entre 30 et 45 °C')).toBeInTheDocument();
     expect(post).not.toHaveBeenCalled();
+  });
+
+  it('échec du chargement de la prise du jour : avertissement, formulaire utilisable', async () => {
+    get.mockImplementation((url: string) =>
+      url.endsWith('/du-jour') ? Promise.reject({ response: { status: 500 } }) : Promise.resolve({ data: tazi }),
+    );
+    post.mockResolvedValue({ data: { id: 'c1' } });
+    afficher('patientId=p-tazi');
+    expect(await screen.findByText('Impossible de vérifier les constantes déjà prises aujourd\'hui.')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByLabelText('Poids')).toBeEnabled());
+    await userEvent.click(screen.getByRole('button', { name: 'Enregistrer la consultation' }));
+    await waitFor(() =>
+      expect(post).toHaveBeenCalledWith('/consultations', expect.objectContaining({ constantesId: undefined })),
+    );
+  });
+
+  it('prise du jour dont le médecin vide tous les champs : ni PATCH ni rattachement', async () => {
+    reponses(priseFatima);
+    afficher('patientId=p-tazi');
+    const poids = await screen.findByDisplayValue('72');
+    await userEvent.clear(poids);
+    await userEvent.click(screen.getByRole('button', { name: 'Enregistrer la consultation' }));
+    await waitFor(() =>
+      expect(post).toHaveBeenCalledWith('/consultations', expect.objectContaining({ constantesId: undefined })),
+    );
+    expect(patch).not.toHaveBeenCalled();
   });
 });
