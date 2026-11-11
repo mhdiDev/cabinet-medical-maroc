@@ -5,6 +5,9 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { apiClient } from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
+import { useSearchParams } from 'next/navigation';
+import { PriseConstantesModal } from '@/components/constantes/PriseConstantesModal';
+import { OngletConstantes } from '@/components/constantes/OngletConstantes';
 
 async function ouvrirDocument(id: string) {
   // Ouvert avant l'appel réseau, sinon le navigateur bloque l'onglet
@@ -24,10 +27,13 @@ async function ouvrirDocument(id: string) {
   }
 }
 
-const TABS = ['Profil', 'Consultations', 'Ordonnances', 'Documents', 'RDV'];
+const TABS = ['Profil', 'Consultations', 'Constantes', 'Ordonnances', 'Documents', 'RDV'];
 
 export default function PatientDetailPage({ params }: { params: { id: string } }) {
-  const [tab, setTab] = useState(0);
+  const searchParams = useSearchParams();
+  // ?onglet=constantes (lien de la notification « Constantes anormales »)
+  const [tab, setTab] = useState(searchParams.get('onglet') === 'constantes' ? 2 : 0);
+  const [priseOuverte, setPriseOuverte] = useState(false);
   const { user } = useAuthStore();
 
   const { data: patient, isLoading } = useQuery({
@@ -53,6 +59,13 @@ export default function PatientDetailPage({ params }: { params: { id: string } }
           </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            type="button"
+            onClick={() => setPriseOuverte(true)}
+            className="px-4 py-2 border border-blue-600 text-blue-700 rounded-lg text-sm hover:bg-blue-50 transition"
+          >
+            Prendre les constantes
+          </button>
           <Link href={`/patients/${params.id}/modifier`}
             className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition">
             Modifier
@@ -110,11 +123,13 @@ export default function PatientDetailPage({ params }: { params: { id: string } }
         <div className="p-4 sm:p-6">
           {tab === 0 && <ProfileTab patient={patient} />}
           {tab === 1 && <ConsultationsTab consultations={patient.consultations} patientId={params.id} canCreate={canCreateConsultation} />}
-          {tab === 2 && <OrdonnancesTab ordonnances={patient.ordonnances} />}
-          {tab === 3 && <DocumentsTab patientId={params.id} />}
-          {tab === 4 && <RdvTab rdvList={patient.rendezVous} />}
+          {tab === 2 && <OngletConstantes patient={patient} />}
+          {tab === 3 && <OrdonnancesTab ordonnances={patient.ordonnances} />}
+          {tab === 4 && <DocumentsTab patientId={params.id} />}
+          {tab === 5 && <RdvTab rdvList={patient.rendezVous} />}
         </div>
       </div>
+      {priseOuverte && <PriseConstantesModal patient={patient} onClose={() => setPriseOuverte(false)} />}
     </div>
   );
 }
