@@ -8,7 +8,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 
 jest.mock('../prisma/contexte-cabinet', () => ({ cabinetCourant: () => 'cabinet-test' }));
 
-const mockPrisma = {
+const mockPrisma: any = {
   consultation: {
     create: jest.fn(),
     findMany: jest.fn(),
@@ -16,6 +16,8 @@ const mockPrisma = {
     update: jest.fn(),
     count: jest.fn(),
   },
+  constantes: { findUnique: jest.fn(), updateMany: jest.fn() },
+  $transaction: jest.fn((fn: (tx: unknown) => unknown) => fn(mockPrisma)),
 };
 
 const mockAudit = { log: jest.fn() };
@@ -61,6 +63,53 @@ describe('ConsultationsService', () => {
       expect(mockPrisma.consultation.create).toHaveBeenCalled();
       expect(mockAudit.log).toHaveBeenCalledWith('user-1', 'CREATE', 'Consultation', 'consult-1');
       expect(result.id).toBe('consult-1');
+    });
+
+    it('rattache la prise de constantes du patient', async () => {
+      mockPrisma.constantes.findUnique.mockResolvedValue({ patientId: 'patient-1' });
+      mockPrisma.constantes.updateMany.mockResolvedValue({ count: 1 });
+      mockPrisma.consultation.create.mockResolvedValue({
+        id: 'consult-1',
+        patientId: 'patient-1',
+        patient: { nom: 'Tazi', prenom: 'Ahmed' },
+      });
+
+      await service.create(
+        { patientId: 'patient-1', medecinId: 'medecin-1', constantesId: 'k1' },
+        'user-1',
+      );
+
+      expect(mockPrisma.consultation.create.mock.calls[0][0].data.constantesId).toBeUndefined();
+      expect(mockPrisma.constantes.updateMany).toHaveBeenCalledWith({
+        where: { id: 'k1', consultationId: null },
+        data: { consultationId: 'consult-1' },
+      });
+    });
+
+    it('refuse les constantes d un autre patient', async () => {
+      mockPrisma.constantes.findUnique.mockResolvedValue({ patientId: 'autre' });
+      await expect(
+        service.create(
+          { patientId: 'patient-1', medecinId: 'medecin-1', constantesId: 'k1' },
+          'user-1',
+        ),
+      ).rejects.toThrow('Ces constantes concernent un autre patient');
+      expect(mockPrisma.consultation.create).not.toHaveBeenCalled();
+    });
+
+    it('refuse des constantes déjà rattachées (la transaction annule la consultation)', async () => {
+      mockPrisma.constantes.findUnique.mockResolvedValue({ patientId: 'patient-1' });
+      mockPrisma.constantes.updateMany.mockResolvedValue({ count: 0 });
+      mockPrisma.consultation.create.mockResolvedValue({
+        id: 'consult-2',
+        patient: { nom: 'T', prenom: 'A' },
+      });
+      await expect(
+        service.create(
+          { patientId: 'patient-1', medecinId: 'medecin-1', constantesId: 'k1' },
+          'user-1',
+        ),
+      ).rejects.toThrow('Ces constantes sont déjà rattachées à une consultation');
     });
   });
 

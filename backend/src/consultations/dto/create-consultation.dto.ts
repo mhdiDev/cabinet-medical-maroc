@@ -13,4 +13,8 @@ export class CreateConsultationDto {
   @ApiProperty({ required: false }) @IsOptional() @IsString() traitement?: string;
   @ApiProperty({ required: false }) @IsOptional() @IsString() notes?: string;
   @ApiProperty({ required: false, type: [String] }) @IsOptional() @IsArray() actes?: string[];
+  @ApiProperty({ required: false, description: 'Prise de constantes du jour à rattacher' })
+  @IsOptional()
+  @IsString()
+  constantesId?: string;
 }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { DOCUMENT_PUBLIC } from '../documents/document-public';
 import { PrismaService } from '../prisma/prisma.service';
 import { ReferencesService } from '../prisma/references.service';
@@ -56,17 +56,44 @@ export class ConsultationsService {
   }
 
   async create(dto: CreateConsultationDto, userId: string) {
-    await this.references.verifier(dto);
-    const consultation = await this.prisma.consultation.create({
-      data: {
-        ...dto,
-        dateConsultation: dto.dateConsultation ? new Date(dto.dateConsultation) : undefined,
-        cabinetId: cabinetCourant(),
-      },
-      include: {
-        patient: { select: { nom: true, prenom: true } },
-        medecin: { select: { nom: true, prenom: true } },
-      },
+    const { constantesId, ...donnees } = dto;
+    await this.references.verifier(donnees);
+    if (constantesId) {
+      const prise = await this.prisma.constantes.findUnique({
+        where: { id: constantesId },
+        select: { patientId: true },
+      });
+      if (!prise) throw new NotFoundException('Constantes introuvables');
+      if (prise.patientId !== donnees.patientId) {
+        throw new BadRequestException('Ces constantes concernent un autre patient');
+      }
+    }
+
+    // Consultation et rattachement des constantes : tout ou rien
+    const consultation = await this.prisma.$transaction(async (tx) => {
+      const c = await tx.consultation.create({
+        data: {
+          ...donnees,
+          dateConsultation: donnees.dateConsultation
+            ? new Date(donnees.dateConsultation)
+            : undefined,
+          cabinetId: cabinetCourant(),
+        },
+        include: {
+          patient: { select: { nom: true, prenom: true } },
+          medecin: { select: { nom: true, prenom: true } },
+        },
+      });
+      if (constantesId) {
+        // consultationId: null dans le filtre : deux consultations ne prennent pas la même prise
+        const { count } = await tx.constantes.updateMany({
+          where: { id: constantesId, consultationId: null },
+          data: { consultationId: c.id },
+        });
+        if (count === 0)
+          throw new BadRequestException('Ces constantes sont déjà rattachées à une consultation');
+      }
+      return c;
     });
 
     await this.audit.log(userId, 'CREATE', 'Consultation', consultation.id);
@@ -98,6 +125,7 @@ export class ConsultationsService {
         medecin: { select: { id: true, nom: true, prenom: true } },
         ordonnances: { include: { medicaments: { include: { medicament: true } } } },
         documents: { select: DOCUMENT_PUBLIC },
+        constantes: { include: { prisePar: { select: { prenom: true, nom: true, role: true } } } },
       },
     });
     if (!c) throw new NotFoundException(`Consultation ${id} introuvable`);
