@@ -31,8 +31,8 @@ export class RendezVousController {
   }
 
   @Get('today')
-  @ApiOperation({ summary: 'RDV du jour' })
-  today(@Query('medecinId') medecinId: string) {
+  @ApiOperation({ summary: 'RDV du jour (sans medecinId : tout le cabinet)' })
+  today(@Query('medecinId') medecinId?: string) {
     return this.service.findToday(medecinId);
   }
 

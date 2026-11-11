@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ReferencesService } from '../prisma/references.service';
 import { cabinetCourant } from '../prisma/contexte-cabinet';
 import { AuditService } from '../audit/audit.service';
+import { aujourdhui } from '../rapports/semaine';
 import { CreateRendezVousDto } from './dto/create-rendez-vous.dto';
 import { UpdateRendezVousDto } from './dto/update-rendez-vous.dto';
 
@@ -106,20 +107,29 @@ export class RendezVousService {
     await this.audit.log(userId, 'CANCEL', 'RendezVous', id);
   }
 
-  async findToday(medecinId: string) {
-    const debut = new Date();
-    debut.setHours(0, 0, 0, 0);
-    const fin = new Date();
-    fin.setHours(23, 59, 59, 999);
+  // Sans medecinId : les RDV du jour de tout le cabinet (vue secrétaire)
+  async findToday(medecinId?: string) {
+    // Journée du cabinet (le serveur tourne en UTC)
+    const { debut, fin } = aujourdhui();
 
     return this.prisma.rendezVous.findMany({
       where: {
-        medecinId,
-        dateHeure: { gte: debut, lte: fin },
+        ...(medecinId && { medecinId }),
+        dateHeure: { gte: debut, lt: fin },
         statut: { not: StatutRDV.ANNULE },
       },
       include: {
-        patient: { select: { id: true, nom: true, prenom: true, telephone: true } },
+        patient: {
+          select: {
+            id: true,
+            nom: true,
+            prenom: true,
+            telephone: true,
+            dateNaissance: true,
+            sexe: true,
+          },
+        },
+        medecin: { select: { id: true, nom: true, prenom: true } },
       },
       orderBy: { dateHeure: 'asc' },
     });

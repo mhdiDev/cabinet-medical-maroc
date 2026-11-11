@@ -9,6 +9,11 @@ interface Props {
 export function SearchInput({ value, onChange, placeholder }: Props) {
   const [local, setLocal] = useState(value);
 
+  // Valeur changée de l'extérieur (ex. recherche de la barre du haut)
+  useEffect(() => {
+    setLocal(value);
+  }, [value]);
+
   useEffect(() => {
     const t = setTimeout(() => onChange(local), 300);
     return () => clearTimeout(t);
