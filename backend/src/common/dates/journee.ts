@@ -55,3 +55,13 @@ export function journeeEnUtc(
     ),
   };
 }
+
+// Date civile AAAA-MM-JJ d'un instant dans le fuseau du cabinet (« aujourd'hui » au cabinet)
+export function jourCabinet(instant: Date = new Date(), fuseau: string = FUSEAU_CABINET): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: fuseau,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(instant);
+}

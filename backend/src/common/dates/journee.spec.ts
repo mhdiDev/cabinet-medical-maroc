@@ -1,5 +1,5 @@
 // backend/src/common/dates/journee.spec.ts
-import { FUSEAU_CABINET, journeeEnUtc } from './journee';
+import { FUSEAU_CABINET, jourCabinet, journeeEnUtc } from './journee';
 
 // Date et heure locales d'un instant dans le fuseau, ex. « 2026-11-10 00:00 »
 function local(instant: Date, fuseau = FUSEAU_CABINET): string {
@@ -47,5 +47,13 @@ describe('journeeEnUtc', () => {
     expect(journeeEnUtc('2026-07-01', 'Europe/Paris').debut.toISOString()).toBe(
       '2026-06-30T22:00:00.000Z',
     );
+  });
+});
+
+describe('jourCabinet', () => {
+  it('donne la date AAAA-MM-JJ dans le fuseau demandé', () => {
+    const instant = new Date('2026-11-10T23:30:00Z');
+    expect(jourCabinet(instant, 'UTC')).toBe('2026-11-10');
+    expect(jourCabinet(instant, 'Asia/Tokyo')).toBe('2026-11-11');
   });
 });
