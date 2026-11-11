@@ -1,18 +1,24 @@
 'use client';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api';
 import { SearchInput } from '@/components/ui/SearchInput';
 import toast from 'react-hot-toast';
 
-export default function PatientsPage() {
-  const [search, setSearch] = useState('');
+function ListePatients() {
+  const params = useSearchParams();
+  const [search, setSearch] = useState(params.get('q') ?? '');
+  const [date, setDate] = useState(params.get('date') ?? '');
   const [page, setPage] = useState(1);
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ['patients', search, page],
-    queryFn: () => apiClient.get('/patients', { params: { q: search || undefined, page, limit: 20 } }).then(r => r.data),
+  const { data, isLoading } = useQuery({
+    queryKey: ['patients', search, date, page],
+    queryFn: () =>
+      apiClient
+        .get('/patients', { params: { q: search || undefined, date: date || undefined, page, limit: 20 } })
+        .then(r => r.data),
     staleTime: 10000,
   });
 
@@ -49,6 +55,21 @@ export default function PatientsPage() {
         onChange={(v) => { setSearch(v); setPage(1); }}
         placeholder="Rechercher par nom, téléphone..."
       />
+
+      {date && (
+        <div className="flex items-center gap-2 text-sm">
+          <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full">
+            Vus en consultation le {date.split('-').reverse().join('/')}
+          </span>
+          <button
+            onClick={() => { setDate(''); setPage(1); }}
+            className="text-gray-500 hover:text-gray-700"
+            aria-label="Retirer le filtre de date"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {isLoading ? (
@@ -111,5 +132,13 @@ export default function PatientsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function PatientsPage() {
+  return (
+    <Suspense>
+      <ListePatients />
+    </Suspense>
   );
 }
