@@ -16,6 +16,27 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+// La clé de renouvellement ne sert qu'une fois (le serveur la remplace) : un seul
+// renouvellement à la fois, que les requêtes refusées en même temps attendent toutes
+let renouvellementEnCours: Promise<string> | null = null;
+
+function renouvelerSession(): Promise<string> {
+  if (!renouvellementEnCours) {
+    const refreshToken = useAuthStore.getState().refreshToken;
+    renouvellementEnCours = api
+      .post('/auth/refresh', { refreshToken })
+      .then((res) => {
+        // Garder aussi la nouvelle clé de renouvellement : l'ancienne n'existe plus
+        useAuthStore.getState().setTokens(res.data.accessToken, res.data.refreshToken);
+        return res.data.accessToken as string;
+      })
+      .finally(() => {
+        renouvellementEnCours = null;
+      });
+  }
+  return renouvellementEnCours;
+}
+
 apiClient.interceptors.response.use(
   (res) => res,
   async (err) => {
@@ -23,10 +44,11 @@ apiClient.interceptors.response.use(
     if (err.response?.status === 401 && !original._retry) {
       original._retry = true;
       try {
-        const refreshToken = useAuthStore.getState().refreshToken;
-        const res = await api.post('/auth/refresh', { refreshToken });
-        useAuthStore.getState().setToken(res.data.accessToken);
-        original.headers.Authorization = `Bearer ${res.data.accessToken}`;
+        // Requête partie avec un jeton déjà remplacé entre-temps : repartir avec le nouveau
+        const envoye = String(original.headers?.Authorization ?? '').replace('Bearer ', '');
+        const actuel = useAuthStore.getState().token;
+        const jeton = actuel && actuel !== envoye ? actuel : await renouvelerSession();
+        original.headers.Authorization = `Bearer ${jeton}`;
         return apiClient(original);
       } catch {
         useAuthStore.getState().clearAuth();
