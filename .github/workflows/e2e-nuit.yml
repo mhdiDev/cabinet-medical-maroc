@@ -1,0 +1,128 @@
+name: Tests de bout en bout (nuit)
+
+# Chaque nuit à 2 h, heure de Paris. GitHub ne connaît que l'heure UTC :
+# 0 h UTC = 2 h en été (CEST), 1 h UTC = 2 h en hiver (CET). Le job vérifie
+# l'heure à Paris et ne tourne qu'une fois par nuit. Lancement manuel possible.
+on:
+  schedule:
+    - cron: '0 0 * * *'
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+    inputs:
+      projets:
+        description: 'Profils à lancer (vide = tous ; ex. desktop-chrome)'
+        required: false
+        default: ''
+
+concurrency:
+  group: e2e-nuit
+  cancel-in-progress: false
+
+permissions:
+  contents: write # publier le rapport sur la branche rapports-tests
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      E2E_URL: ${{ vars.E2E_URL || secrets.E2E_URL }}
+      E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+      E2E_MOT_DE_PASSE: ${{ secrets.E2E_MOT_DE_PASSE }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - name: Est-il 2 h à Paris ?
+        id: heure
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$(TZ=Europe/Paris date +%H)" = "02" ]; then
+            echo "lancer=oui" >> "$GITHUB_OUTPUT"
+            echo "jour=$(TZ=Europe/Paris date +%F)" >> "$GITHUB_OUTPUT"
+          else
+            echo "Il n'est pas 2 h à Paris : l'autre déclenchement s'en charge."
+            echo "lancer=non" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Vérifier la configuration
+        if: steps.heure.outputs.lancer == 'oui'
+        run: |
+          for v in E2E_URL E2E_EMAIL E2E_MOT_DE_PASSE; do
+            if [ -z "${!v}" ]; then echo "::error::Secret ou variable $v manquant(e)"; exit 1; fi
+          done
+
+      - uses: actions/checkout@v4
+        if: steps.heure.outputs.lancer == 'oui'
+
+      - uses: actions/setup-node@v4
+        if: steps.heure.outputs.lancer == 'oui'
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+
+      - name: Installer Playwright
+        if: steps.heure.outputs.lancer == 'oui'
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Lancer les parcours
+        if: steps.heure.outputs.lancer == 'oui'
+        id: tests
+        working-directory: e2e
+        continue-on-error: true
+        env:
+          E2E_DATE: ${{ steps.heure.outputs.jour }}
+        run: |
+          if [ -n "${{ inputs.projets }}" ]; then
+            npx playwright test --project="${{ inputs.projets }}"
+          else
+            npx playwright test
+          fi
+
+      - name: Générer le rapport
+        if: steps.heure.outputs.lancer == 'oui'
+        working-directory: e2e
+        env:
+          E2E_DATE: ${{ steps.heure.outputs.jour }}
+        run: npm run rapport
+
+      - name: Conserver le dossier du jour (artefact)
+        if: steps.heure.outputs.lancer == 'oui'
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapport-${{ steps.heure.outputs.jour }}
+          path: rapports/${{ steps.heure.outputs.jour }}
+          retention-days: 30
+
+      # Jamais sur master : tout ajout sur master part en production
+      - name: Publier sur la branche rapports-tests
+        if: steps.heure.outputs.lancer == 'oui'
+        env:
+          JOUR: ${{ steps.heure.outputs.jour }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin rapports-tests >/dev/null; then
+            git fetch origin rapports-tests
+            git worktree add ../rapports-tests origin/rapports-tests
+            git -C ../rapports-tests checkout -B rapports-tests
+          else
+            git worktree add --detach ../rapports-tests
+            git -C ../rapports-tests checkout --orphan rapports-tests
+            git -C ../rapports-tests rm -rf --quiet .
+          fi
+          mkdir -p ../rapports-tests/rapports
+          rm -rf "../rapports-tests/rapports/$JOUR"
+          # Les traces Playwright (lourdes) restent dans l'artefact
+          rsync -a --exclude 'donnees/playwright' "rapports/$JOUR" ../rapports-tests/rapports/
+          cd ../rapports-tests
+          git add -f rapports
+          git commit -m "chore: rapport des tests de bout en bout du $JOUR" || echo "Rien à publier"
+          git push origin rapports-tests
+
+      - name: Résultat
+        if: steps.heure.outputs.lancer == 'oui' && steps.tests.outcome == 'failure'
+        run: |
+          echo "::warning::Des parcours ont échoué : voir rapports/${{ steps.heure.outputs.jour }} sur la branche rapports-tests."
+          exit 1

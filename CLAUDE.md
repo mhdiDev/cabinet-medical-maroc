@@ -118,6 +118,20 @@ DATABASE_URL="postgresql://postgres:password@localhost:5432/cabinet_test" npx pr
 DATABASE_URL="postgresql://postgres:password@localhost:5432/cabinet_test" npm run test:e2e
 ```
 
+### Tests de bout en bout (Playwright, `e2e/`)
+
+```bash
+cd e2e && npm ci && npx playwright install chromium   # une fois
+# Viser une version compilée du frontend (next build && next start) : en mode dev, tout est 30× plus lent
+npx playwright test                       # 7 parcours × 3 profils (desktop 1440×900, iPhone 13, Pixel 7)
+npx playwright test --project=desktop-chrome --headed   # voir le navigateur
+npm run rapport                           # rapports/AAAA-MM-JJ/rapport-tests-AAAA-MM-JJ.md
+```
+
+Variables : `E2E_URL` (défaut http://localhost:3000), `E2E_EMAIL`, `E2E_MOT_DE_PASSE` (défaut : compte de démo local), `ANTHROPIC_API_KEY` (avis UX automatique, facultatif).
+Nuit : `.github/workflows/e2e-nuit.yml` à 2 h (Paris), vise la production avec le compte titulaire d'un cabinet dédié aux tests ; le rapport part sur la branche `rapports-tests` (jamais sur master : tout ajout sur master part en production).
+Les tests créent des patients « TEST-E2E » (téléphones 0699…), un RDV, une consultation et un paiement ; ils désactivent ces patients à la fin.
+
 ### Déploiement (VPS OVH)
 
 ```bash
@@ -233,6 +247,8 @@ Relations clés :
 | Relation imbriquée et cabinet | Le client filtré ne cloisonne que le premier niveau : un filtre ou un `select` sur une relation (`consultations: { some }`) doit porter `cabinetId: cabinetCourant()` |
 | `act()` et user-event dans les tests frontend | user-event utilise `@testing-library/dom` 10, RTL sa copie 9 : `jest.setup.js` enveloppe les événements dans `act()`. `next/link` peut encore en produire : le simuler par un `<a>` |
 | `useQuery` et `onSuccess` | React Query v5 n'appelle plus `onSuccess` dans `useQuery` (ne pas le masquer par `as any`) : lire `data` dans un `useEffect`, et `isFetchedAfterMount` si la donnée ne doit pas venir du cache |
+| Grille mobile qui écrase un champ | Dans une grille `grid-cols-1 sm:grid-cols-2`, écrire `sm:col-span-2` et non `col-span-2` (qui crée une 2e colonne fantôme sur mobile) |
+| Playwright lent en local | Utiliser le Chromium de Playwright (pas le Chrome du Mac) et un frontend compilé, pas `npm run dev` |
 
 ## Variables d'environnement production
 

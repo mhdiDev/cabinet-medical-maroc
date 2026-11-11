@@ -97,11 +97,11 @@ export default function NouveauPatientPage() {
         <section>
           <h2 className="font-semibold text-gray-700 mb-4 pb-2 border-b">Coordonnées</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <label className="text-sm font-medium text-gray-700">Email</label>
               <input {...register('email')} type="email" className={inputClass} />
             </div>
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <label className="text-sm font-medium text-gray-700">Adresse</label>
               <input {...register('adresse')} className={inputClass} />
             </div>
@@ -128,11 +128,11 @@ export default function NouveauPatientPage() {
               <label className="text-sm font-medium text-gray-700">Allergies (séparées par virgule)</label>
               <input {...register('allergies')} placeholder="Pénicilline, Aspirine..." className={inputClass} />
             </div>
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <label className="text-sm font-medium text-gray-700">Antécédents médicaux</label>
               <textarea {...register('antecedents')} rows={3} className={inputClass} />
             </div>
-            <div className="col-span-2 flex items-center gap-3">
+            <div className="sm:col-span-2 flex items-center gap-3">
               <input
                 type="checkbox"
                 id="estAssure"
