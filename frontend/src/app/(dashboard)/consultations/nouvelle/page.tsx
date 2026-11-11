@@ -7,6 +7,20 @@ import { apiClient } from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+import { FormulaireConstantes } from '@/components/constantes/FormulaireConstantes';
+import type { Prise } from '@/lib/constantes/api';
+import { heureCabinet } from '@/lib/fuseau';
+import {
+  erreursSaisie,
+  memeSaisie,
+  SAISIE_VIDE,
+  saisieVide,
+  versSaisie,
+  versValeurs,
+  versValeursCompletes,
+  type ErreursSaisie,
+  type SaisieConstantes,
+} from '@/lib/constantes/saisie';
 
 interface ConsultationForm {
   motif: string;
@@ -104,19 +118,76 @@ export default function NouvelleConsultationPage() {
 
   const { register, handleSubmit } = useForm<ConsultationForm>();
 
+  // Constantes : la prise du jour (secrétaire) est reprise et complétée, sinon une prise est créée
+  const [saisie, setSaisie] = useState<SaisieConstantes>(SAISIE_VIDE);
+  const [erreursConstantes, setErreursConstantes] = useState<ErreursSaisie>({});
+  const [priseDuJour, setPriseDuJour] = useState<Prise | null>(null);
+  const [priseChargeePour, setPriseChargeePour] = useState<string | null>(null);
+  const duJour = useQuery({
+    queryKey: ['constantes-du-jour', selectedPatient?.id],
+    queryFn: () =>
+      apiClient
+        .get(`/constantes/patient/${selectedPatient!.id}/du-jour`)
+        .then((r) => (r.data?.prise ?? null) as Prise | null),
+    enabled: !!selectedPatient,
+    retry: false,
+    gcTime: 0,
+  });
+  // Changement de patient : on repart d'un bloc vide
+  useEffect(() => {
+    setPriseDuJour(null);
+    setSaisie(SAISIE_VIDE);
+    setErreursConstantes({});
+  }, [selectedPatient?.id]);
+  useEffect(() => {
+    const id = selectedPatient?.id;
+    if (!id || priseChargeePour === id || !duJour.isFetchedAfterMount) return;
+    const prise = duJour.isError ? null : duJour.data ?? null;
+    setPriseDuJour(prise);
+    if (prise) setSaisie(versSaisie(prise));
+    setPriseChargeePour(id);
+  }, [selectedPatient?.id, duJour.data, duJour.isError, duJour.isFetchedAfterMount, priseChargeePour]);
+
+  /** Enregistre les constantes et renvoie l'identifiant de la prise à rattacher */
+  const enregistrerConstantes = async (): Promise<string | undefined> => {
+    if (priseDuJour) {
+      if (!memeSaisie(saisie, versSaisie(priseDuJour))) {
+        const r = await apiClient.patch(`/constantes/${priseDuJour.id}`, versValeursCompletes(saisie));
+        setPriseDuJour(r.data);
+      }
+      return priseDuJour.id;
+    }
+    if (saisieVide(saisie)) return undefined;
+    const r = await apiClient.post('/constantes', { patientId: selectedPatient!.id, ...versValeurs(saisie) });
+    setPriseDuJour(r.data); // un nouvel essai ne recrée pas la prise
+    return r.data.id;
+  };
+
   const mutation = useMutation({
-    mutationFn: (data: any) => apiClient.post('/consultations', data),
+    mutationFn: async (data: any) => {
+      const constantesId = await enregistrerConstantes();
+      return apiClient.post('/consultations', { ...data, constantesId });
+    },
     onSuccess: (res) => {
       toast.success('Consultation enregistrée — vous pouvez ajouter une ordonnance');
       const today = new Date().toISOString().split('T')[0];
       router.push(`/paiements?consultationId=${res.data.id}&date=${today}`);
     },
-    onError: () => toast.error("Erreur lors de l'enregistrement"),
+    onError: (err: any) => {
+      const message = err.response?.data?.message;
+      toast.error(Array.isArray(message) ? message.join(', ') : message || "Erreur lors de l'enregistrement");
+    },
   });
 
   const onSubmit = (data: ConsultationForm) => {
     if (!selectedPatient) {
       toast.error('Veuillez sélectionner un patient');
+      return;
+    }
+    const erreurs = erreursSaisie(saisie);
+    setErreursConstantes(erreurs);
+    if (Object.keys(erreurs).length) {
+      toast.error('Vérifiez les constantes');
       return;
     }
     mutation.mutate({
@@ -291,6 +362,26 @@ export default function NouvelleConsultationPage() {
               />
             </div>
           </div>
+        </section>
+
+        <section>
+          <h2 className="font-semibold text-gray-700 mb-4 pb-2 border-b">Constantes</h2>
+          {priseDuJour && (
+            <p className="text-sm text-gray-500 mb-3">
+              Prises à {heureCabinet(priseDuJour.datePrise)} par {priseDuJour.prisePar.prenom} {priseDuJour.prisePar.nom}
+            </p>
+          )}
+          {selectedPatient ? (
+            <FormulaireConstantes
+              saisie={saisie}
+              onChange={setSaisie}
+              erreurs={erreursConstantes}
+              dateNaissance={selectedPatient.dateNaissance}
+              desactive={mutation.isPending}
+            />
+          ) : (
+            <p className="text-sm text-gray-500">Choisissez d&apos;abord le patient.</p>
+          )}
         </section>
 
         <section>
