@@ -1,6 +1,6 @@
 'use client';
-import { Suspense, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api';
@@ -9,11 +9,13 @@ import toast from 'react-hot-toast';
 
 function ListePatients() {
   const params = useSearchParams();
+  const router = useRouter();
   const [search, setSearch] = useState(params.get('q') ?? '');
-  const [date, setDate] = useState(params.get('date') ?? '');
+  const dateUrl = params.get('date') ?? '';
+  const [date, setDate] = useState(/^\d{4}-\d{2}-\d{2}$/.test(dateUrl) ? dateUrl : '');
   const [page, setPage] = useState(1);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['patients', search, date, page],
     queryFn: () =>
       apiClient
@@ -21,6 +23,16 @@ function ListePatients() {
         .then(r => r.data),
     staleTime: 10000,
   });
+
+  // Garde l'adresse alignée sur les filtres : retirer la pastille puis revenir
+  // à la liste ne doit pas rétablir le filtre.
+  useEffect(() => {
+    const requete = new URLSearchParams();
+    if (search) requete.set('q', search);
+    if (date) requete.set('date', date);
+    const texte = requete.toString();
+    router.replace(texte ? `/patients?${texte}` : '/patients', { scroll: false });
+  }, [search, date, router]);
 
   const handleExport = async () => {
     try {
@@ -74,6 +86,8 @@ function ListePatients() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center text-gray-500">Chargement...</div>
+        ) : isError ? (
+          <div className="p-8 text-center text-red-600">Erreur lors du chargement des patients</div>
         ) : (
           <>
             <div className="overflow-x-auto">
