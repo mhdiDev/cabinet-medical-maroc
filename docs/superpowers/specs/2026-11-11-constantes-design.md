@@ -55,7 +55,7 @@ Tous les rôles du cabinet (`MEDECIN`, `SECRETAIRE`) ; `JwtAuthGuard` comme part
 |---|---|---|
 | `POST /constantes` | médecin, secrétaire | crée une prise ; `priseParId` = utilisateur connecté |
 | `GET /constantes/patient/:patientId` | médecin, secrétaire | prises du patient, de la plus récente à la plus ancienne, avec `prisePar { prenom, nom, role }` |
-| `GET /constantes/patient/:patientId/du-jour` | médecin, secrétaire | dernière prise du jour (heure de Casablanca, `journeeEnUtc()`) **sans consultation** rattachée, ou `null` |
+| `GET /constantes/patient/:patientId/du-jour` | médecin, secrétaire | dernière prise du jour (heure de Casablanca, `journeeEnUtc()`) **sans consultation** rattachée : `{ prise }`, `prise` à `null` s'il n'y en a pas |
 | `PATCH /constantes/:id` | voir ci-dessous | modifie les valeurs (DTO `PartialType`) ; mêmes contrôles qu'à la création |
 | `DELETE /constantes/:id` | voir ci-dessous | supprime la prise (suppression réelle : une constante n'a pas d'historique à garder) |
 
@@ -63,9 +63,10 @@ Droits de modification et suppression : un `MEDECIN` toujours ; l'auteur de la p
 (heure de Casablanca). Sinon 403. Une prise d'un autre cabinet répond 404.
 
 Rattachement à une consultation :
-- `POST /consultations` et `PATCH /consultations/:id` acceptent un champ `constantesId` optionnel :
-  la prise est rattachée à la consultation dans la même transaction (contrôle : même patient, prise
-  pas déjà rattachée ailleurs, sinon 400).
+- `POST /consultations` accepte un champ `constantesId` optionnel : la prise est rattachée à la
+  consultation dans la même transaction (contrôle : même patient, prise pas déjà rattachée ailleurs,
+  sinon 400). L'application n'a pas d'écran de modification de consultation : `PATCH /consultations/:id`
+  ne change pas.
 - Le formulaire du médecin peut aussi créer directement une prise avec `consultationId`.
 
 Audit : `CREATE_CONSTANTES`, `UPDATE_CONSTANTES`, `DELETE_CONSTANTES` via `AuditService.log`, comme pour
@@ -81,15 +82,15 @@ Seuils adultes (patient de 18 ans ou plus) :
 | Constante | Basse | Élevée |
 |---|---|---|
 | Tension | systolique < 90 ou diastolique < 60 | systolique ≥ 140 ou diastolique ≥ 90 |
-| Pouls | < 50 | > 100 |
+| Pouls | < 50 | ≥ 100 |
 | SpO2 | < 95 | — |
 | Température | < 35,5 | ≥ 38 |
-| Glycémie | < 0,7 | > 1,26 |
+| Glycémie | < 0,7 | ≥ 1,26 |
 | IMC | < 18,5 | ≥ 30 |
 
 Niveau d'alerte : `attention` (orange) dès le seuil ; `critique` (rouge) pour tension systolique
-≥ 180 ou diastolique ≥ 110, SpO2 < 90, température ≥ 40 ou < 35, glycémie < 0,5 ou > 3, pouls < 40
-ou > 130.
+≥ 180 ou diastolique ≥ 110, SpO2 < 90, température ≥ 40 ou < 35, glycémie < 0,5 ou ≥ 3, pouls < 40
+ou ≥ 130. Une valeur « élevée » l'est dès le seuil (≥), une valeur « basse » sous le seuil (<).
 
 Enfant (moins de 18 ans) : seules la température, la SpO2 et la glycémie sont évaluées (leurs seuils
 ne dépendent pas de l'âge) ; tension, pouls et IMC sont affichés sans couleur.
@@ -99,7 +100,7 @@ Poids, taille, périmètre crânien et tour de taille : jamais d'alerte.
 Notification au médecin :
 - Quand une `SECRETAIRE` crée ou modifie une prise et qu'au moins une valeur est anormale, une
   `Notification` de type `CONSTANTES_ANORMALES` est créée, avec `patientId`, et le message
-  « Constantes anormales — Prénom Nom : tension 16/10 élevée, température 39,5 °C élevée ».
+  « Constantes anormales — Prénom Nom : tension 160/100 mmHg élevée, température 39,5 °C élevée ».
 - Destinataire : le médecin du rendez-vous du patient aujourd'hui (heure de Casablanca, statut non
   annulé) ; s'il n'y en a pas, tous les médecins actifs du cabinet.
 - Une prise saisie par un médecin ne crée pas de notification.
@@ -112,7 +113,8 @@ Composant commun `components/constantes/FormulaireConstantes.tsx` :
   (deux champs « / »), Pouls, SpO2, Température, Poids, Taille, IMC (calculé, lecture seule),
   Glycémie, Périmètre crânien, Tour de taille. Unité affichée à droite de chaque champ.
 - Virgule ou point acceptés comme séparateur décimal.
-- Validation Zod reprenant les bornes du §1 ; message en français sous le champ.
+- Validation reprenant les bornes du §1 (fonctions pures de `lib/constantes/saisie.ts`, sans Zod :
+  le formulaire est un composant contrôlé partagé) ; message en français sous le champ.
 - À côté de chaque valeur saisie : pastille « élevée » / « basse » orange ou rouge, en direct.
 - Grille `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`, labels reliés aux champs (`htmlFor` / `id`),
   zones cliquables d'au moins 44 px sur mobile.
@@ -120,7 +122,7 @@ Composant commun `components/constantes/FormulaireConstantes.tsx` :
 Deux points d'entrée :
 1. **Fiche patient** : bouton « Prendre les constantes » (médecin et secrétaire) qui ouvre une
    modale (`useModale`) avec le formulaire ; enregistrement → prise sans consultation.
-2. **Nouvelle consultation** et **modification de consultation** : bloc « Constantes » au-dessus de
+2. **Nouvelle consultation** : bloc « Constantes » au-dessus de
    « Examen clinique ». À l'ouverture, `GET …/du-jour` : si la secrétaire a déjà pris les constantes,
    elles sont pré-remplies avec la mention « prises à 9 h 12 par Fatima » ; le médecin peut les
    compléter. À l'enregistrement de la consultation :
