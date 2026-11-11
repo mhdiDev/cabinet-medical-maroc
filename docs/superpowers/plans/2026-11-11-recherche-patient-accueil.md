@@ -52,7 +52,7 @@ Spec : `docs/superpowers/specs/2026-11-11-recherche-patient-accueil-design.md`. 
 - Create: `backend/src/common/dates/journee.ts`
 - Test: `backend/src/common/dates/journee.spec.ts`
 
-- [ ] **Step 1 : écrire le test**
+- [x] **Step 1 : écrire le test**
 
 ```ts
 // backend/src/common/dates/journee.spec.ts
@@ -102,12 +102,12 @@ describe('journeeEnUtc', () => {
 });
 ```
 
-- [ ] **Step 2 : vérifier qu'il échoue**
+- [x] **Step 2 : vérifier qu'il échoue**
 
 Run: `cd backend && PATH="/Users/Mehdi/.nvm/versions/node/v20.19.5/bin:$PATH" npx jest src/common/dates`
 Expected: FAIL, « Cannot find module './journee' ».
 
-- [ ] **Step 3 : implémenter**
+- [x] **Step 3 : implémenter**
 
 ```ts
 // backend/src/common/dates/journee.ts
@@ -153,12 +153,12 @@ export function journeeEnUtc(date: string, fuseau: string = FUSEAU_CABINET): { d
 }
 ```
 
-- [ ] **Step 4 : vérifier qu'il passe**
+- [x] **Step 4 : vérifier qu'il passe**
 
 Run: `cd backend && PATH="/Users/Mehdi/.nvm/versions/node/v20.19.5/bin:$PATH" npx jest src/common/dates`
 Expected: 4 tests PASS.
 
-- [ ] **Step 5 : commit**
+- [x] **Step 5 : commit**
 
 ```bash
 git add backend/src/common/dates
@@ -175,7 +175,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Create: `backend/src/patients/recherche-patients.ts`
 - Test: `backend/src/patients/recherche-patients.spec.ts`
 
-- [ ] **Step 1 : écrire le test**
+- [x] **Step 1 : écrire le test**
 
 ```ts
 // backend/src/patients/recherche-patients.spec.ts
@@ -213,12 +213,12 @@ describe('conditionsRecherche', () => {
 });
 ```
 
-- [ ] **Step 2 : vérifier qu'il échoue**
+- [x] **Step 2 : vérifier qu'il échoue**
 
 Run: `cd backend && PATH="/Users/Mehdi/.nvm/versions/node/v20.19.5/bin:$PATH" npx jest src/patients/recherche-patients`
 Expected: FAIL, module introuvable.
 
-- [ ] **Step 3 : implémenter**
+- [x] **Step 3 : implémenter**
 
 ```ts
 // backend/src/patients/recherche-patients.ts
@@ -252,12 +252,12 @@ export function conditionsRecherche(q: string): Prisma.PatientWhereInput[] {
 }
 ```
 
-- [ ] **Step 4 : vérifier qu'il passe**
+- [x] **Step 4 : vérifier qu'il passe**
 
 Run: `cd backend && PATH="/Users/Mehdi/.nvm/versions/node/v20.19.5/bin:$PATH" npx jest src/patients/recherche-patients`
 Expected: 5 tests PASS.
 
-- [ ] **Step 5 : commit**
+- [x] **Step 5 : commit**
 
 ```bash
 git add backend/src/patients/recherche-patients.ts backend/src/patients/recherche-patients.spec.ts
@@ -275,7 +275,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Modify: `backend/src/patients/patients.service.ts` (méthode `findAll`, lignes ~35-74)
 - Test: `backend/test/recherche-patients.e2e-spec.ts`
 
-- [ ] **Step 1 : écrire le test e2e**
+- [x] **Step 1 : écrire le test e2e**
 
 ```ts
 // backend/test/recherche-patients.e2e-spec.ts
@@ -400,7 +400,7 @@ describe('Recherche de patients (e2e)', () => {
 });
 ```
 
-- [ ] **Step 2 : vérifier qu'il échoue**
+- [x] **Step 2 : vérifier qu'il échoue**
 
 Run:
 ```bash
@@ -410,7 +410,7 @@ cd backend && PATH="/Users/Mehdi/.nvm/versions/node/v20.19.5/bin:$PATH" \
 ```
 Expected: FAIL (nom complet sans résultat, `date` refusé en 400 par `forbidNonWhitelisted`).
 
-- [ ] **Step 3 : modifier le DTO**
+- [x] **Step 3 : modifier le DTO**
 
 Remplacer `backend/src/patients/dto/search-patient.dto.ts` par :
 
@@ -455,7 +455,7 @@ export class SearchPatientDto {
 }
 ```
 
-- [ ] **Step 4 : modifier `findAll`**
+- [x] **Step 4 : modifier `findAll`**
 
 Dans `backend/src/patients/patients.service.ts`, ajouter les imports :
 
@@ -522,7 +522,7 @@ et remplacer toute la méthode `findAll` par :
   }
 ```
 
-- [ ] **Step 5 : vérifier**
+- [x] **Step 5 : vérifier**
 
 Run (e2e de la tâche, puis tous les e2e des patients et de l'isolation) :
 ```bash
@@ -535,7 +535,7 @@ npx eslint src/patients src/common/dates test/recherche-patients.e2e-spec.ts
 ```
 Expected: tout PASS, aucune erreur de type ni d'eslint.
 
-- [ ] **Step 6 : commit**
+- [x] **Step 6 : commit**
 
 ```bash
 git add backend/src/patients backend/test/recherche-patients.e2e-spec.ts
@@ -552,7 +552,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Create: `frontend/src/components/dashboard/analyser-recherche.ts`
 - Test: `frontend/src/components/dashboard/analyser-recherche.test.ts`
 
-- [ ] **Step 1 : écrire le test**
+- [x] **Step 1 : écrire le test**
 
 ```ts
 // frontend/src/components/dashboard/analyser-recherche.test.ts
@@ -589,12 +589,12 @@ describe('analyserRecherche', () => {
 });
 ```
 
-- [ ] **Step 2 : vérifier qu'il échoue**
+- [x] **Step 2 : vérifier qu'il échoue**
 
 Run: `cd frontend && PATH="/Users/Mehdi/.nvm/versions/node/v20.19.5/bin:$PATH" npx jest src/components/dashboard/analyser-recherche`
 Expected: FAIL, module introuvable.
 
-- [ ] **Step 3 : implémenter**
+- [x] **Step 3 : implémenter**
 
 ```ts
 // frontend/src/components/dashboard/analyser-recherche.ts
@@ -638,12 +638,12 @@ export function analyserRecherche(texte: string): Recherche {
 }
 ```
 
-- [ ] **Step 4 : vérifier qu'il passe**
+- [x] **Step 4 : vérifier qu'il passe**
 
 Run: `cd frontend && PATH="/Users/Mehdi/.nvm/versions/node/v20.19.5/bin:$PATH" npx jest src/components/dashboard/analyser-recherche`
 Expected: PASS.
 
-- [ ] **Step 5 : commit**
+- [x] **Step 5 : commit**
 
 ```bash
 git add frontend/src/components/dashboard/analyser-recherche.ts frontend/src/components/dashboard/analyser-recherche.test.ts
@@ -662,7 +662,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Test: `frontend/src/components/dashboard/RecherchePatient.test.tsx`
 - Modify: `frontend/src/app/(dashboard)/dashboard/page.tsx`
 
-- [ ] **Step 1 : écrire le test**
+- [x] **Step 1 : écrire le test**
 
 ```tsx
 // frontend/src/components/dashboard/RecherchePatient.test.tsx
@@ -786,12 +786,12 @@ describe('RecherchePatient', () => {
 });
 ```
 
-- [ ] **Step 2 : vérifier qu'il échoue**
+- [x] **Step 2 : vérifier qu'il échoue**
 
 Run: `cd frontend && PATH="/Users/Mehdi/.nvm/versions/node/v20.19.5/bin:$PATH" npx jest src/components/dashboard/RecherchePatient`
 Expected: FAIL, module introuvable.
 
-- [ ] **Step 3 : créer `frontend/src/lib/fuseau.ts`**
+- [x] **Step 3 : créer `frontend/src/lib/fuseau.ts`**
 
 ```ts
 // Fuseau des cabinets (le même que côté serveur). Deviendra un réglage par cabinet.
@@ -803,7 +803,7 @@ export function heureCabinet(iso: string): string {
 }
 ```
 
-- [ ] **Step 4 : créer le composant**
+- [x] **Step 4 : créer le composant**
 
 ```tsx
 // frontend/src/components/dashboard/RecherchePatient.tsx
@@ -1018,12 +1018,12 @@ export function RecherchePatient({ peutCreerConsultation }: { peutCreerConsultat
 }
 ```
 
-- [ ] **Step 5 : vérifier que les tests passent**
+- [x] **Step 5 : vérifier que les tests passent**
 
 Run: `cd frontend && PATH="/Users/Mehdi/.nvm/versions/node/v20.19.5/bin:$PATH" npx jest src/components/dashboard`
 Expected: PASS. Si le test « date » échoue sur l'heure (`09:30`), vérifier que `heureCabinet` passe bien `timeZone: FUSEAU_CABINET` (le 10/11/2026, 08:30 UTC = 09:30 à Casablanca).
 
-- [ ] **Step 6 : insérer sur l'accueil**
+- [x] **Step 6 : insérer sur l'accueil**
 
 Dans `frontend/src/app/(dashboard)/dashboard/page.tsx`, ajouter l'import :
 
@@ -1051,12 +1051,12 @@ par :
       <RecherchePatient peutCreerConsultation={user?.role === 'MEDECIN'} />
 ```
 
-- [ ] **Step 7 : vérifier les types**
+- [x] **Step 7 : vérifier les types**
 
 Run: `cd frontend && PATH="/Users/Mehdi/.nvm/versions/node/v20.19.5/bin:$PATH" npx tsc --noEmit`
 Expected: uniquement les 4 erreurs déjà présentes (`stock/page.tsx`, `NouveauRdvModal.tsx`).
 
-- [ ] **Step 8 : commit**
+- [x] **Step 8 : commit**
 
 ```bash
 git add frontend/src/lib/fuseau.ts frontend/src/components/dashboard "frontend/src/app/(dashboard)/dashboard/page.tsx"
@@ -1074,7 +1074,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 `useSearchParams` impose une frontière `Suspense` pour le build Next 14 (même schéma que `paiements/page.tsx`).
 
-- [ ] **Step 1 : modifier la page**
+- [x] **Step 1 : modifier la page**
 
 En tête du fichier, remplacer les imports React/Next par :
 
@@ -1138,7 +1138,7 @@ export default function PatientsPage() {
 
 (`refetch` n'était pas utilisé : il disparaît de la déstructuration.)
 
-- [ ] **Step 2 : vérifier**
+- [x] **Step 2 : vérifier**
 
 Run:
 ```bash
@@ -1148,7 +1148,7 @@ npx next lint --file "src/app/(dashboard)/patients/page.tsx"
 ```
 Expected: pas de nouvelle erreur.
 
-- [ ] **Step 3 : commit**
+- [x] **Step 3 : commit**
 
 ```bash
 git add "frontend/src/app/(dashboard)/patients/page.tsx"
@@ -1167,7 +1167,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 **Cause** (à ne pas re-chercher) : `useQuery({ …, onSuccess } as any)` lignes ~48-55. React Query v5 n'appelle plus `onSuccess` dans `useQuery` ; le `as any` masquait l'erreur. Le patient est chargé mais jamais mis dans `selectedPatient`.
 
-- [ ] **Step 1 : écrire le test**
+- [x] **Step 1 : écrire le test**
 
 ```tsx
 // frontend/src/app/(dashboard)/consultations/nouvelle/page.test.tsx
@@ -1238,12 +1238,12 @@ describe('Nouvelle consultation : patient passé dans l adresse', () => {
 });
 ```
 
-- [ ] **Step 2 : vérifier qu'il échoue**
+- [x] **Step 2 : vérifier qu'il échoue**
 
 Run: `cd frontend && PATH="/Users/Mehdi/.nvm/versions/node/v20.19.5/bin:$PATH" npx jest "src/app/\(dashboard\)/consultations/nouvelle"`
 Expected: FAIL (le patient n'apparaît jamais ; pas de « Chargement du patient… »).
 
-- [ ] **Step 3 : corriger le chargement**
+- [x] **Step 3 : corriger le chargement**
 
 Dans `page.tsx`, remplacer le bloc :
 
@@ -1291,7 +1291,7 @@ par :
   };
 ```
 
-- [ ] **Step 4 : affichage du chargement et du message**
+- [x] **Step 4 : affichage du chargement et du message**
 
 Remplacer `{selectedPatient ? (` (début du sélecteur patient, sous `<h2 …>Patient *</h2>`) par :
 
@@ -1322,7 +1322,7 @@ Changer le placeholder du champ, qui annonçait à tort le CIN (colonne supprim�
                 placeholder="Rechercher par nom ou téléphone..."
 ```
 
-- [ ] **Step 5 : « ← Retour » et « Annuler »**
+- [x] **Step 5 : « ← Retour » et « Annuler »**
 
 Remplacer le lien d'en-tête :
 
@@ -1357,7 +1357,7 @@ et le lien « Annuler » du bas du formulaire par :
 
 Si `Link` n'est plus utilisé nulle part dans le fichier, garder l'import uniquement s'il sert encore (le lien « Créer un patient » du menu déroulant l'utilise : il reste).
 
-- [ ] **Step 6 : vérifier**
+- [x] **Step 6 : vérifier**
 
 Run:
 ```bash
@@ -1367,7 +1367,7 @@ npx tsc --noEmit
 ```
 Expected: tous les tests jest PASS ; seulement les 4 erreurs de type déjà présentes.
 
-- [ ] **Step 7 : commit**
+- [x] **Step 7 : commit**
 
 ```bash
 git add "frontend/src/app/(dashboard)/consultations/nouvelle"
@@ -1386,7 +1386,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Modify: `CLAUDE.md`
 - Modify: `docs/superpowers/plans/2026-11-11-recherche-patient-accueil.md` (cocher les cases)
 
-- [ ] **Step 1 : `CLAUDE.md`**
+- [x] **Step 1 : `CLAUDE.md`**
 
 Dans la section « Architecture API », remplacer la ligne :
 
@@ -1407,7 +1407,7 @@ Dans « Pièges connus », ajouter la ligne :
 | Filtre par jour et fuseau horaire | Le serveur tourne en UTC : calculer les bornes d'un jour avec `journeeEnUtc()` (`common/dates/journee.ts`, fuseau `Africa/Casablanca`), jamais `setHours(0,0,0,0)`. Le filtre `?date=` de `/consultations` utilise encore l'heure du serveur (à corriger avec l'agenda) |
 ```
 
-- [ ] **Step 2 : vérification complète**
+- [x] **Step 2 : vérification complète**
 
 ```bash
 export PATH="/Users/Mehdi/.nvm/versions/node/v20.19.5/bin:$PATH"
@@ -1422,7 +1422,7 @@ npx next build
 ```
 Expected: tout passe ; `tsc` frontend : seulement les 4 erreurs déjà présentes ; build OK.
 
-- [ ] **Step 3 : commit**
+- [x] **Step 3 : commit**
 
 ```bash
 git add CLAUDE.md docs/superpowers/plans/2026-11-11-recherche-patient-accueil.md
