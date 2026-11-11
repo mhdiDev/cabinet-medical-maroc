@@ -109,7 +109,11 @@ export function NotificationBell() {
                       </p>
                       {n.patientId && (
                         <Link
-                          href={`/paiements?patientId=${n.patientId}`}
+                          href={
+                            n.type === 'CONSTANTES_ANORMALES'
+                              ? `/patients/${n.patientId}?onglet=constantes`
+                              : `/paiements?patientId=${n.patientId}`
+                          }
                           className="mt-1 text-xs text-blue-600 hover:underline"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -117,7 +121,7 @@ export function NotificationBell() {
                             setOpen(false);
                           }}
                         >
-                          Aller à la caisse →
+                          {n.type === 'CONSTANTES_ANORMALES' ? 'Voir les constantes →' : 'Aller à la caisse →'}
                         </Link>
                       )}
                     </div>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { apiClient } from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import { MedicamentAutocomplete } from '@/components/ordonnances/MedicamentAutocomplete';
+import { ResumeConstantes } from '@/components/constantes/ResumeConstantes';
 import toast from 'react-hot-toast';
 
 export default function ConsultationDetailPage({ params }: { params: { id: string } }) {
@@ -45,6 +46,9 @@ export default function ConsultationDetailPage({ params }: { params: { id: strin
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 divide-y divide-gray-50">
+        {consultation.constantes && (
+          <ResumeConstantes constantes={consultation.constantes} dateNaissance={consultation.patient.dateNaissance} />
+        )}
         {[
           { label: 'Motif', value: consultation.motif },
           { label: 'Anamnèse', value: consultation.anamnese },
