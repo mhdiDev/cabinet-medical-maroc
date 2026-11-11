@@ -79,6 +79,8 @@ export function RecherchePatient({ peutCreerConsultation }: { peutCreerConsultat
   const patients = criteres && data ? data.data : [];
   const total = criteres && data ? data.meta.total : 0;
   const visible = ouvert && recherche.type !== 'vide';
+  const listeAffichee = !!criteres && !isError && patients.length > 0;
+  const actifValide = visible && listeAffichee && actif >= 0 && actif < patients.length ? actif : -1;
 
   const lienTous = criteres
     ? `/patients?${new URLSearchParams({
@@ -95,24 +97,31 @@ export function RecherchePatient({ peutCreerConsultation }: { peutCreerConsultat
   const auClavier = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
       setOuvert(false);
+      setActif(-1);
       return;
     }
     if (patients.length === 0) return;
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setOuvert(true);
-      setActif((i) => (i + 1) % patients.length);
+      setActif((i) => (i >= patients.length - 1 ? 0 : i + 1));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setActif((i) => (i <= 0 ? patients.length - 1 : i - 1));
-    } else if (e.key === 'Enter' && actif >= 0) {
+      setOuvert(true);
+      setActif((i) => (i <= 0 || i >= patients.length ? patients.length - 1 : i - 1));
+    } else if (e.key === 'Enter' && actifValide >= 0) {
       e.preventDefault();
-      ouvrirFiche(patients[actif]);
+      ouvrirFiche(patients[actifValide]);
     }
   };
 
+  let annonce = '';
+  if (recherche.type === 'aide' || recherche.type === 'erreur') annonce = recherche.message;
+  else if (criteres && isError) annonce = 'Recherche impossible, réessayez';
+  else if (criteres && data) annonce = patients.length === 0 ? 'Aucun patient trouvé' : `${total} patient${total > 1 ? 's' : ''} trouvé${total > 1 ? 's' : ''}`;
+
   const message = (texteMessage: string, classe = 'text-gray-500') => (
-    <p className={`px-4 py-3 text-sm ${classe}`}>{texteMessage}</p>
+    <p aria-hidden className={`px-4 py-3 text-sm ${classe}`}>{texteMessage}</p>
   );
 
   return (
@@ -124,8 +133,8 @@ export function RecherchePatient({ peutCreerConsultation }: { peutCreerConsultat
           role="combobox"
           aria-label="Rechercher un patient"
           aria-expanded={visible}
-          aria-controls={idListe}
-          aria-activedescendant={actif >= 0 ? `${idListe}-${actif}` : undefined}
+          aria-controls={visible && listeAffichee ? idListe : undefined}
+          aria-activedescendant={actifValide >= 0 ? `${idListe}-${actifValide}` : undefined}
           value={texte}
           onChange={(e) => {
             setTexte(e.target.value);
@@ -134,7 +143,7 @@ export function RecherchePatient({ peutCreerConsultation }: { peutCreerConsultat
           onFocus={() => setOuvert(true)}
           onKeyDown={auClavier}
           placeholder="Nom, prénom, téléphone ou date (JJ/MM/AAAA)"
-          className="w-full pl-10 pr-10 py-3 bg-white border border-gray-300 rounded-xl shadow-sm text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+          className="w-full pl-10 pr-10 py-3 bg-white border border-gray-300 rounded-xl shadow-sm text-base sm:text-sm focus:ring-2 focus:ring-blue-500 outline-none"
         />
         {isFetching && (
           <span className="absolute right-3 top-1/2 -translate-y-1/2" aria-label="Recherche en cours">
@@ -143,6 +152,8 @@ export function RecherchePatient({ peutCreerConsultation }: { peutCreerConsultat
         )}
       </div>
 
+      <div role="status" aria-live="polite" className="sr-only">{visible ? annonce : ''}</div>
+
       {visible && (
         <div className="absolute z-20 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
           {recherche.type === 'aide' && message(recherche.message)}
@@ -150,7 +161,7 @@ export function RecherchePatient({ peutCreerConsultation }: { peutCreerConsultat
           {criteres && isError && message('Recherche impossible, réessayez', 'text-red-600')}
           {criteres && !isError && data && patients.length === 0 && (
             <div className="px-4 py-3 text-sm text-gray-500 flex items-center justify-between gap-3">
-              <span>Aucun patient trouvé</span>
+              <span aria-hidden>Aucun patient trouvé</span>
               <Link href="/patients/nouveau" className="text-blue-600 hover:underline">Créer un patient</Link>
             </div>
           )}
@@ -163,16 +174,15 @@ export function RecherchePatient({ peutCreerConsultation }: { peutCreerConsultat
               )}
               <ul id={idListe} role="listbox" aria-label="Patients trouvés" className="divide-y divide-gray-50">
                 {patients.map((p, i) => (
-                  <li
-                    key={p.id}
-                    id={`${idListe}-${i}`}
-                    role="option"
-                    aria-selected={i === actif}
-                    onClick={() => ouvrirFiche(p)}
-                    onMouseEnter={() => setActif(i)}
-                    className={`flex items-center gap-3 px-4 py-3 cursor-pointer ${i === actif ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
-                  >
-                    <div className="flex-1 min-w-0">
+                  <li key={p.id} role="presentation" className="flex items-center gap-3 pr-4">
+                    <div
+                      id={`${idListe}-${i}`}
+                      role="option"
+                      aria-selected={i === actifValide}
+                      onClick={() => ouvrirFiche(p)}
+                      onMouseEnter={() => setActif(i)}
+                      className={`flex-1 min-w-0 cursor-pointer px-4 py-3 ${i === actifValide ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                    >
                       <p className="font-medium text-gray-900 truncate">{p.prenom} {p.nom}</p>
                       <p className="text-xs text-gray-500">
                         {age(p.dateNaissance)} ans · {p.telephone}
@@ -186,7 +196,6 @@ export function RecherchePatient({ peutCreerConsultation }: { peutCreerConsultat
                     {peutCreerConsultation && (
                       <Link
                         href={`/consultations/nouvelle?patientId=${p.id}`}
-                        onClick={(e) => e.stopPropagation()}
                         aria-label={`+ Consultation pour ${p.prenom} ${p.nom}`}
                         className="shrink-0 px-3 py-1.5 text-xs font-medium text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-50"
                       >
