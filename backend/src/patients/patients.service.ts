@@ -39,7 +39,12 @@ export class PatientsService {
 
     const conditions = q ? conditionsRecherche(q) : [];
     const journee = date ? journeeEnUtc(date) : undefined;
-    const duJour = journee && { dateConsultation: { gte: journee.debut, lt: journee.fin } };
+    // Le client filtré ne cloisonne que le premier niveau : le cabinet est donné explicitement
+    // pour la relation (filtre et sélection des consultations).
+    const duJour = journee && {
+      cabinetId: cabinetCourant(),
+      dateConsultation: { gte: journee.debut, lt: journee.fin },
+    };
 
     const where: Prisma.PatientWhereInput = {
       actif: true,
@@ -69,7 +74,11 @@ export class PatientsService {
             consultations: {
               where: duJour,
               orderBy: { dateConsultation: 'asc' as const },
-              select: { id: true, dateConsultation: true, medecin: { select: { nom: true, prenom: true } } },
+              select: {
+                id: true,
+                dateConsultation: true,
+                medecin: { select: { nom: true, prenom: true } },
+              },
             },
           }),
         },
@@ -78,7 +87,12 @@ export class PatientsService {
     ]);
 
     const data = duJour
-      ? patients.map(({ consultations, ...p }: any) => ({ ...p, consultationsDuJour: consultations }))
+      ? patients.map((patient) => {
+          const { consultations, ...p } = patient as typeof patient & {
+            consultations: unknown[];
+          };
+          return { ...p, consultationsDuJour: consultations };
+        })
       : patients;
 
     return {

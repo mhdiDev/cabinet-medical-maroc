@@ -44,8 +44,9 @@ maximale de 100.
   Sans date, le champ est absent (réponse inchangée pour la page Patients).
 - `q` et `date` se combinent (ET).
 
-L'isolation par cabinet est assurée par le client filtré (la relation `consultations` est
-elle aussi filtrée) ; un test le vérifie.
+Le client filtré n'ajoute le cabinet qu'aux opérations de premier niveau : le filtre et la
+sélection des consultations du jour portent donc explicitement `cabinetId: cabinetCourant()` ;
+un test e2e le vérifie avec une consultation d'un autre cabinet rattachée à un patient du cabinet.
 
 Le filtre `?date=` existant de `/consultations` (bornes à l'heure du serveur) n'est pas
 modifié ici : il relève du point 2.

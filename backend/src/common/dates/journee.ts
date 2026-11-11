@@ -28,7 +28,8 @@ function decalage(instant: number, fuseau: string): number {
   return commeUtc - Math.floor(instant / 1000) * 1000;
 }
 
-// Instant UTC de minuit, heure locale du fuseau, pour une date (a, m, j)
+// Instant UTC de minuit, heure locale du fuseau, pour une date (a, m, j).
+// Suppose qu'aucun changement d'heure ne tombe à minuit (vrai pour Africa/Casablanca) : à revoir quand le fuseau deviendra un réglage par cabinet.
 function minuitLocal(a: number, m: number, j: number, fuseau: string): Date {
   const naif = Date.UTC(a, m - 1, j);
   // Deux passes : le décalage peut différer entre minuit UTC et minuit local

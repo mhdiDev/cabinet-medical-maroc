@@ -54,6 +54,9 @@ describe('Recherche de patients (e2e)', () => {
     });
     await patient('p-autre', 'Tazi', 'Ahmed', '0612345678', autre);
     await consultation('c-autre', 'p-autre', '2026-11-10T10:00:00Z', autre, 'autre-medecin');
+    // Consultations d'un autre cabinet rattachées à un patient de ce cabinet
+    await consultation('c-intrus-10', 'p-tazi', '2026-11-10T12:00:00Z', autre, 'autre-medecin');
+    await consultation('c-intrus-12', 'p-tazi', '2026-11-12T12:00:00Z', autre, 'autre-medecin');
   });
 
   afterAll(async () => {
@@ -103,6 +106,13 @@ describe('Recherche de patients (e2e)', () => {
     expect(ids(res)).not.toContain('p-autre');
     expect(res.body.meta.total).toBe(2);
     expect(ids(await chercher({ q: 'tazi' }))).toEqual(['p-tazi']);
+  });
+
+  it("les consultations d'un autre cabinet rattachées à un patient du cabinet sont ignorées", async () => {
+    const res = await chercher({ date: '2026-11-10' });
+    const tazi = res.body.data.find((p: { id: string }) => p.id === 'p-tazi');
+    expect(tazi.consultationsDuJour.map((c: { id: string }) => c.id)).toEqual(['c-0030']);
+    expect(ids(await chercher({ date: '2026-11-12' }))).toEqual([]);
   });
 
   it('sans date, pas de consultationsDuJour', async () => {
