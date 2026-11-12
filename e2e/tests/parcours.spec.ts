@@ -117,6 +117,27 @@ test('3. Patients : création et fiche', async ({ page }, testInfo) => {
     await controlerEcran(page, testInfo, 'Fiche patient');
   });
 
+  await etape(page, testInfo, 'Constantes — prise', async () => {
+    await page.getByRole('button', { name: 'Prendre les constantes' }).click();
+    const modale = page.getByRole('dialog', { name: 'Prendre les constantes' });
+    await expect(modale).toBeVisible();
+    await modale.locator('[name="tensionSystolique"]').fill('125');
+    await modale.locator('[name="tensionDiastolique"]').fill('80');
+    await modale.locator('[name="temperature"]').fill('37,2');
+    await modale.locator('[name="poids"]').fill('72');
+    await modale.locator('[name="taille"]').fill('170');
+    await expect(modale.getByTestId('imc')).toHaveText('24,9');
+    await controlerEcran(page, testInfo, 'Constantes — prise');
+    await modale.getByRole('button', { name: 'Enregistrer' }).click();
+    await expect(page.getByText('Constantes enregistrées')).toBeVisible();
+  });
+
+  await etape(page, testInfo, 'Constantes — onglet', async () => {
+    await page.getByRole('button', { name: 'Constantes', exact: true }).click();
+    await expect(page.getByText('Dernières valeurs')).toBeVisible();
+    await controlerEcran(page, testInfo, 'Constantes — onglet');
+  });
+
   await etape(page, testInfo, 'Modifier le patient', async () => {
     await page.locator('main a[href$="/modifier"]').first().click();
     await page.waitForURL(/\/patients\/[0-9a-f-]{36}\/modifier$/);
@@ -173,6 +194,8 @@ test('5. Consultation depuis la fiche patient', async ({ page }, testInfo) => {
     await page.locator('[name="motif"]').fill('Motif fictif E2E');
     await page.locator('[name="examenClinique"]').fill('TA 120/80, examen fictif');
     await page.locator('[name="diagnostic"]').fill('Diagnostic fictif');
+    await page.locator('[name="pouls"]').fill('76');
+    await page.locator('[name="spo2"]').fill('98');
     await controlerEcran(page, testInfo, 'Nouvelle consultation');
     await enregistrer.click();
     // Après l'enregistrement, l'application ouvre l'encaissement de la consultation

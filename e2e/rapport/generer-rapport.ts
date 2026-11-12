@@ -27,6 +27,8 @@ const FICHIERS: Record<string, string> = {
   'Liste des patients': 'frontend/src/app/(dashboard)/patients/page.tsx',
   'Nouveau patient': 'frontend/src/app/(dashboard)/patients/nouveau/page.tsx',
   'Fiche patient': 'frontend/src/app/(dashboard)/patients/[id]/page.tsx',
+  'Constantes — prise': 'frontend/src/components/constantes/PriseConstantesModal.tsx',
+  'Constantes — onglet': 'frontend/src/components/constantes/OngletConstantes.tsx',
   'Modifier le patient': 'frontend/src/app/(dashboard)/patients/[id]/modifier/page.tsx',
   Agenda: 'frontend/src/app/(dashboard)/agenda/page.tsx',
   'Agenda — nouveau rendez-vous': 'frontend/src/components/agenda/NouveauRdvModal.tsx',
